@@ -10,7 +10,7 @@
 - Loading: skeletons, not spinners, on first load; background refetches are silent.
 - Offline: a thin banner "Offline — showing info from 14:32" and disabled mutation buttons.
 - Booth name from `NEXT_PUBLIC_BOOTH_NAME` in headers.
-- The design reference is the Claude Design canvas "BoothQ" (light and dark rows for every screen). Match it.
+- The design reference is the Claude Design canvas "BoothQ" (light and dark rows for every screen): <https://claude.ai/artifact/F1etBuSDFs6pshetBxHvti>. Match it.
 
 ## Visual style: iOS 27 look (MVP)
 
