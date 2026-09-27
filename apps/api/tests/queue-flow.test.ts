@@ -377,6 +377,7 @@ describe("public ticket view", () => {
       phone: "081234560001",
       notes: "very secret note",
     });
+    await createTicketViaApi(app, adminCookie, { name: "Budi Santoso", phone: "081234560002" });
     const token = tokenFromCustomerUrl(t1.body.ticket.customerUrl);
 
     const res = await request(app).get(`/api/public/tickets/${token}`);
@@ -386,7 +387,26 @@ describe("public ticket view", () => {
     expect(raw).not.toContain("081234560001");
     expect(raw).not.toContain("secret note");
     expect(raw).not.toMatch(/"phone"|"notes"/);
+    expect(raw).not.toContain("Budi");
+    expect(raw).not.toContain("Santoso");
     expect(res.body.firstName).toBe("Amara");
+  });
+
+  it("has Cache-Control: no-store", async () => {
+    const { adminCookie } = await openDayViaApi(app);
+    const t1 = await createTicketViaApi(app, adminCookie, { name: "A", phone: "081234560001" });
+    const token = tokenFromCustomerUrl(t1.body.ticket.customerUrl);
+    const res = await request(app).get(`/api/public/tickets/${token}`);
+    expect(res.headers["cache-control"]).toBe("no-store");
+  });
+});
+
+describe("GET /api/queue", () => {
+  it("has Cache-Control: no-store", async () => {
+    const { illustratorCookie } = await openDayViaApi(app);
+    const res = await request(app).get("/api/queue").set("Cookie", illustratorCookie);
+    expect(res.status).toBe(200);
+    expect(res.headers["cache-control"]).toBe("no-store");
   });
 });
 

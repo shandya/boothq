@@ -58,3 +58,43 @@ describe("POST /api/auth/login", () => {
     expect(res.body.error.code).toBe("FORBIDDEN");
   });
 });
+
+describe("POST /api/auth/logout", () => {
+  it("clears the session so /me is unauthenticated again", async () => {
+    const cookie = await loginCookie(app, "ADMIN");
+    const logout = await request(app).post("/api/auth/logout").set("Cookie", cookie).set("Content-Type", "application/json");
+    expect(logout.status).toBe(200);
+    expect(logout.body).toEqual({ ok: true });
+
+    const clearedCookie = logout.headers["set-cookie"][0].split(";")[0];
+    const me = await request(app).get("/api/auth/me").set("Cookie", clearedCookie);
+    expect(me.status).toBe(401);
+  });
+});
+
+describe("CSRF protection", () => {
+  it("rejects a mutation without a JSON Content-Type", async () => {
+    const res = await request(app).post("/api/auth/login").send("role=ADMIN&pin=111111");
+    expect(res.status).toBe(403);
+    expect(res.body.error.code).toBe("FORBIDDEN");
+  });
+
+  it("rejects a mutation from a mismatched Origin", async () => {
+    const res = await request(app)
+      .post("/api/auth/login")
+      .set("Content-Type", "application/json")
+      .set("Origin", "https://evil.example.com")
+      .send({ role: "ADMIN", pin: TEST_PINS.ADMIN });
+    expect(res.status).toBe(403);
+    expect(res.body.error.code).toBe("FORBIDDEN");
+  });
+
+  it("allows a mutation from the configured PUBLIC_WEB_URL origin", async () => {
+    const res = await request(app)
+      .post("/api/auth/login")
+      .set("Content-Type", "application/json")
+      .set("Origin", process.env.PUBLIC_WEB_URL ?? "")
+      .send({ role: "ADMIN", pin: TEST_PINS.ADMIN });
+    expect(res.status).toBe(200);
+  });
+});
