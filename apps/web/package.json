@@ -10,6 +10,7 @@
     "test": "echo \"no web tests yet\""
   },
   "dependencies": {
+    "@boothq/shared": "workspace:*",
     "@tanstack/react-query": "^5.104.0",
     "clsx": "^2.1.1",
     "libphonenumber-js": "^1.13.14",
