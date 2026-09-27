@@ -1,6 +1,6 @@
 "use client";
 
-import { formatClockDuration } from "@boothq/shared";
+import { formatClockDuration } from "@boothq/shared/format";
 import { useEffect, useState } from "react";
 import { getServerNow } from "../../lib/server-time";
 

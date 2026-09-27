@@ -1,4 +1,4 @@
-import { buildTicketLinkMessage, buildWhatsAppUrl } from "@boothq/shared";
+import { buildTicketLinkMessage, buildWhatsAppUrl } from "@boothq/shared/messages";
 import type { ReactNode } from "react";
 
 type WhatsAppButtonProps = {
