@@ -32,9 +32,9 @@ Docs: `DATA_MODEL.md`, `BUSINESS_LOGIC.md` §5
 - [x] Prisma client singleton (`src/lib/prisma.ts`) safe for serverless hot reloads
 - [x] `seed.ts`: an open Day with 3 DONE tickets (varied durations), 1 SERVING, 4 WAITING
 - [x] `shared/enums.ts`, `shared/schemas.ts` (all request bodies in `API.md`), `shared/dto.ts`
-- [ ] `shared/eta.ts` + all 10 test cases from `BUSINESS_LOGIC.md`
-- [ ] `shared/format.ts` (duration and ETA display rules) + tests
-- [ ] `shared/messages.ts` (WhatsApp templates) + `buildWhatsAppUrl(phoneE164, text)` + tests
+- [x] `shared/eta.ts` + all 10 test cases from `BUSINESS_LOGIC.md`
+- [x] `shared/format.ts` (duration and ETA display rules) + tests
+- [x] `shared/messages.ts` (WhatsApp templates) + `buildWhatsAppUrl(phoneE164, text)` + tests
 - [ ] `api/src/lib/phone.ts`: normalize with libphonenumber-js and `DEFAULT_COUNTRY`, return E.164 + national display + tests (local format, with country code, with spaces/dashes, invalid)
 - [ ] `api/scripts/hash-pin.ts`
 
