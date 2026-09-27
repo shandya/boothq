@@ -35,8 +35,8 @@ Docs: `DATA_MODEL.md`, `BUSINESS_LOGIC.md` §5
 - [x] `shared/eta.ts` + all 10 test cases from `BUSINESS_LOGIC.md`
 - [x] `shared/format.ts` (duration and ETA display rules) + tests
 - [x] `shared/messages.ts` (WhatsApp templates) + `buildWhatsAppUrl(phoneE164, text)` + tests
-- [ ] `api/src/lib/phone.ts`: normalize with libphonenumber-js and `DEFAULT_COUNTRY`, return E.164 + national display + tests (local format, with country code, with spaces/dashes, invalid)
-- [ ] `api/scripts/hash-pin.ts`
+- [x] `api/src/lib/phone.ts`: normalize with libphonenumber-js and `DEFAULT_COUNTRY`, return E.164 + national display + tests (local format, with country code, with spaces/dashes, invalid)
+- [x] `api/scripts/hash-pin.ts`
 
 **Acceptance**
 - `pnpm --filter api db:migrate && pnpm --filter api db:seed` succeeds.
