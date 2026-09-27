@@ -1,6 +1,17 @@
 import { computeEta, type DayDTO, type PublicTicketView, type QueueSnapshot, type StatsDTO, type TicketDTO } from "@boothq/shared";
 import type { Day, Ticket } from "@prisma/client";
 import { AppError } from "../lib/errors.js";
+
+// For 409 errors on staff queue actions, details.snapshot carries a fresh
+// QueueSnapshot so the UI can resync without another request
+// (docs/API.md → Conventions).
+export async function attachSnapshotOn409(err: unknown): Promise<unknown> {
+  if (err instanceof AppError && err.status === 409) {
+    const snapshot = await buildQueueSnapshot();
+    return new AppError(err.status, err.code, err.message, { ...err.details, snapshot });
+  }
+  return err;
+}
 import { nationalDisplay } from "../lib/phone.js";
 import { prisma } from "../lib/prisma.js";
 
@@ -163,6 +174,37 @@ export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueS
     waiting: waitingDTOs,
     recent: recent.map((t) => toTicketDTO(t, { etaSec: null })),
     stats: await buildStats(day.id, now),
+  };
+}
+
+export type NowServingView = {
+  serverTime: string;
+  boothOpen: boolean;
+  paused: boolean;
+  nowServing: number | null;
+  next: number[]; // up to 3
+  waitingCount: number;
+};
+
+export async function buildNowServingView(now: Date = new Date()): Promise<NowServingView> {
+  const day = await prisma.day.findFirst({ where: { status: "OPEN" } });
+  if (!day) {
+    return { serverTime: now.toISOString(), boothOpen: false, paused: false, nowServing: null, next: [], waitingCount: 0 };
+  }
+
+  const tickets = await prisma.ticket.findMany({ where: { dayId: day.id } });
+  const current = tickets.find((t) => t.status === "CALLED" || t.status === "SERVING") ?? null;
+  const waiting = tickets
+    .filter((t) => t.status === "WAITING")
+    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+
+  return {
+    serverTime: now.toISOString(),
+    boothOpen: true,
+    paused: day.pausedAt != null,
+    nowServing: current?.number ?? null,
+    next: waiting.slice(0, 3).map((t) => t.number),
+    waitingCount: waiting.length,
   };
 }
 
