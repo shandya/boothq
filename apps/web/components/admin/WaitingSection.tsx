@@ -67,11 +67,12 @@ export function WaitingSection({
   const [dragOffset, setDragOffset] = useState(0);
   const dragState = useRef<{ startY: number; id: string } | null>(null);
 
-  // Only resync the working order when (re)entering reorder mode, not on
-  // every poll while it's open (that would fight the in-progress drag).
+  // Track the canonical order continuously in list mode (every poll,
+  // including the initial load); freeze it during an active drag so
+  // polling can't fight the in-progress reorder.
   useEffect(() => {
-    if (reordering) setOrder(tickets.map((t) => t.id));
-  }, [reordering]);
+    if (!reordering) setOrder(tickets.map((t) => t.id));
+  }, [tickets, reordering]);
 
   useEffect(() => {
     if (!draggingId) return;

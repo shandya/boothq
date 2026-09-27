@@ -21,7 +21,13 @@ type GroupedRowButtonProps = CommonRowProps &
 type GroupedRowAnchorProps = CommonRowProps &
   AnchorHTMLAttributes<HTMLAnchorElement> & { href: string };
 
-export function GroupedRow(props: GroupedRowButtonProps | GroupedRowAnchorProps) {
+type GroupedRowDivProps = CommonRowProps & { href?: undefined; onClick?: undefined };
+
+// Renders a <div> when it's just a layout row around its own interactive
+// children (a Switch, a Stepper, an input) — only <button> or <a> when the
+// whole row itself is the tap target, so we never nest interactive elements
+// (invalid HTML: a <button> can't contain a <button>).
+export function GroupedRow(props: GroupedRowButtonProps | GroupedRowAnchorProps | GroupedRowDivProps) {
   const { children, minHeight = 52, className, ...rest } = props;
   const rowClass = clsx(
     "flex w-full items-center gap-3 px-4 text-left text-[17px] font-normal text-label",
@@ -37,15 +43,23 @@ export function GroupedRow(props: GroupedRowButtonProps | GroupedRowAnchorProps)
     );
   }
 
-  const buttonProps = rest as ButtonHTMLAttributes<HTMLButtonElement>;
+  if ("onClick" in rest && rest.onClick !== undefined) {
+    const buttonProps = rest as ButtonHTMLAttributes<HTMLButtonElement>;
+    return (
+      <button
+        type="button"
+        className={clsx(rowClass, "cursor-pointer bg-transparent disabled:cursor-default disabled:opacity-50")}
+        style={{ minHeight }}
+        {...buttonProps}
+      >
+        {children}
+      </button>
+    );
+  }
+
   return (
-    <button
-      type="button"
-      className={clsx(rowClass, "cursor-pointer bg-transparent disabled:cursor-default disabled:opacity-50")}
-      style={{ minHeight }}
-      {...buttonProps}
-    >
+    <div className={rowClass} style={{ minHeight }}>
       {children}
-    </button>
+    </div>
   );
 }

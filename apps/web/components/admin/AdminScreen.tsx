@@ -84,6 +84,13 @@ export function AdminScreen() {
   }
 
   if (!snapshot.day) {
+    // The summary must win even though the day is already closed by the
+    // time this renders: buildQueueSnapshot() returns day: null the instant
+    // closeDay succeeds, which is before the user has seen the numbers.
+    if (overlay.type === "closeSummary") {
+      return <CloseSummary summary={overlay.summary} onDone={() => setOverlay({ type: "none" })} />;
+    }
+
     return (
       <>
         <ClosedState onOpenBooth={() => setOverlay({ type: "openBooth" })} />
@@ -230,10 +237,8 @@ export function AdminScreen() {
           }
         />
       ) : null}
-
-      {overlay.type === "closeSummary" ? (
-        <CloseSummary summary={overlay.summary} onDone={() => setOverlay({ type: "none" })} />
-      ) : null}
+      {/* closeSummary is handled above, in the !snapshot.day branch — the
+          day is already closed by the time this state is set. */}
 
       {overlay.type === "newTicket" ? (
         <NewTicketSheet
