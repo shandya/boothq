@@ -121,7 +121,7 @@ CREATE UNIQUE INDEX "one_open_day" ON "Day" ("status") WHERE "status" = 'OPEN';
      │  ▲               NO_SHOW
      │  └──── requeue ─────┘
      │
-     └──▶ CANCELLED   (from WAITING or CALLED: customer cancel, admin remove, day close)
+     └──▶ CANCELLED   (from WAITING or CALLED: customer cancel; from any non-SERVING, non-DONE status: admin remove; from WAITING or CALLED: day close)
 ```
 
 | From | To | Action | Who |
@@ -133,9 +133,11 @@ CREATE UNIQUE INDEX "one_open_day" ON "Day" ("status") WHERE "status" = 'OPEN';
 | CALLED | NO_SHOW | `no-show` | Illustrator, Admin |
 | NO_SHOW | WAITING | `requeue { afterCount }` (they showed up later) | Illustrator, Admin |
 | SERVING | DONE | `finish` | Illustrator, Admin |
-| WAITING, CALLED | CANCELLED | customer `cancel` (CUSTOMER), `DELETE` (ADMIN_REMOVED), `close day` (DAY_CLOSED) | Customer, Admin |
+| WAITING, CALLED | CANCELLED | customer `cancel` (CUSTOMER) | Customer |
+| WAITING, CALLED, NO_SHOW, CANCELLED | CANCELLED | admin `DELETE` (ADMIN_REMOVED); a no-op re-write if already CANCELLED | Admin |
+| WAITING, CALLED | CANCELLED | `close day` (DAY_CLOSED) | Admin |
 
-Any other transition returns `409 INVALID_TRANSITION`. A SERVING ticket can't be removed or cancelled; finish it first. (P1 Undo can reverse the last action using `ActionLog.before`.)
+Any other transition returns `409 INVALID_TRANSITION`. A SERVING or DONE ticket can't be removed; a SERVING ticket can't be cancelled by its customer either — finish it first. (P1 Undo can reverse the last action using `ActionLog.before`.)
 
 ## Invariants (enforce in the service layer, test them)
 

@@ -23,3 +23,9 @@ export function getDefaultCountry(): CountryCode {
   }
   return country as CountryCode;
 }
+
+// For display only: recovers the national format from a stored E.164 number.
+export function nationalDisplay(e164: string): string | null {
+  const phoneNumber = parsePhoneNumberFromString(e164);
+  return phoneNumber?.isValid() ? phoneNumber.formatNational() : null;
+}

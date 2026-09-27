@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizePhone } from "./phone.js";
+import { nationalDisplay, normalizePhone } from "./phone.js";
 
 describe("normalizePhone", () => {
   it("normalizes a local-format number", () => {
@@ -25,5 +25,15 @@ describe("normalizePhone", () => {
   it("rejects an empty string", () => {
     const result = normalizePhone("", "ID");
     expect(result).toEqual({ valid: false });
+  });
+});
+
+describe("nationalDisplay", () => {
+  it("formats a stored E.164 number for display", () => {
+    expect(nationalDisplay("+6281234567890")).toBe("0812-3456-7890");
+  });
+
+  it("returns null for an unparseable string", () => {
+    expect(nationalDisplay("not-a-phone")).toBeNull();
   });
 });

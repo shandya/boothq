@@ -48,31 +48,31 @@ Docs: `DATA_MODEL.md`, `BUSINESS_LOGIC.md` §5
 
 Docs: `API.md`, `BUSINESS_LOGIC.md`, `ARCHITECTURE.md` (auth, rate limiting)
 
-- [ ] Auth: login/logout/me, JWT cookie, `requireRole`, Origin + JSON content-type check on mutations, login rate limit
-- [ ] `withOpenDayLock`, `renumberWaiting`, `AppError`
-- [ ] `queue.service.ts`: every operation in `BUSINESS_LOGIC.md` §4, each writing an `ActionLog`
-- [ ] `snapshot.service.ts`: builds `QueueSnapshot` (including per-ticket ETA and stats with projected finish) and `PublicTicketView`
-- [ ] Routes: auth, public, queue, tickets, day
-- [ ] Public token rate limit (per token), `Cache-Control: no-store` on public and queue responses
-- [ ] Integration tests (supertest against the test DB, reset between tests) covering:
-  - [ ] login success / wrong PIN / illustrator blocked from admin routes
-  - [ ] open day twice → `DAY_ALREADY_OPEN`
-  - [ ] ticket numbers 1, 2, 3; numbers not reused after cancel; restart at 1 on a new day
-  - [ ] duplicate phone → 409 with existing ticket; `force` bypasses
-  - [ ] `NOT_ACCEPTING` and `force`
-  - [ ] full happy path: create → call-next → start → finish → DONE with `durationSec`
-  - [ ] finish with `callNext` calls the next ticket in the same request
-  - [ ] call-next while someone is current → `CURRENT_ACTIVE`; empty queue → `QUEUE_EMPTY`; wrong `expectedNextId` → `STALE_STATE`
-  - [ ] 10 concurrent call-next requests → exactly one succeeds
-  - [ ] requeue puts the ticket after N people; positions stay 1..n
-  - [ ] reorder writes positions 1..n in the given order; rejects a list that adds, drops, or duplicates a ticket; rejects a list taken before a concurrent change (e.g. a cancel) invalidated it
-  - [ ] no-show then requeue
-  - [ ] customer cancel from WAITING and CALLED; cancel from SERVING → 409; cancel twice → 200
-  - [ ] rotate-token → old token 404, new token works
-  - [ ] public view never contains `phone`, `notes`, `id`, or other customers' names (assert on the JSON keys)
-  - [ ] `almostUp` flips at the threshold (see heads-up tests in `BUSINESS_LOGIC.md`); `headsUpAhead` settable on open/PATCH
-  - [ ] pause blocked while SERVING; call-next blocked while paused; ETA includes timed break
-  - [ ] close day cancels WAITING/CALLED with `DAY_CLOSED`; blocked while SERVING
+- [x] Auth: login/logout/me, JWT cookie, `requireRole`, Origin + JSON content-type check on mutations, login rate limit
+- [x] `withOpenDayLock`, `renumberWaiting`, `AppError`
+- [x] `queue.service.ts`: every operation in `BUSINESS_LOGIC.md` §4, each writing an `ActionLog`
+- [x] `snapshot.service.ts`: builds `QueueSnapshot` (including per-ticket ETA and stats with projected finish) and `PublicTicketView`
+- [x] Routes: auth, public, queue, tickets, day
+- [x] Public token rate limit (per token), `Cache-Control: no-store` on public and queue responses
+- [x] Integration tests (supertest against the test DB, reset between tests) covering:
+  - [x] login success / wrong PIN / illustrator blocked from admin routes
+  - [x] open day twice → `DAY_ALREADY_OPEN`
+  - [x] ticket numbers 1, 2, 3; numbers not reused after cancel; restart at 1 on a new day
+  - [x] duplicate phone → 409 with existing ticket; `force` bypasses
+  - [x] `NOT_ACCEPTING` and `force`
+  - [x] full happy path: create → call-next → start → finish → DONE with `durationSec`
+  - [x] finish with `callNext` calls the next ticket in the same request
+  - [x] call-next while someone is current → `CURRENT_ACTIVE`; empty queue → `QUEUE_EMPTY`; wrong `expectedNextId` → `STALE_STATE`
+  - [x] 10 concurrent call-next requests → exactly one succeeds
+  - [x] requeue puts the ticket after N people; positions stay 1..n
+  - [x] reorder writes positions 1..n in the given order; rejects a list that adds, drops, or duplicates a ticket; rejects a list taken before a concurrent change (e.g. a cancel) invalidated it
+  - [x] no-show then requeue
+  - [x] customer cancel from WAITING and CALLED; cancel from SERVING → 409; cancel twice → 200
+  - [x] rotate-token → old token 404, new token works
+  - [x] public view never contains `phone`, `notes`, `id`, or other customers' names (assert on the JSON keys)
+  - [x] `almostUp` flips at the threshold (see heads-up tests in `BUSINESS_LOGIC.md`); `headsUpAhead` settable on open/PATCH
+  - [x] pause blocked while SERVING; call-next blocked while paused; ETA includes timed break
+  - [x] close day cancels WAITING/CALLED with `DAY_CLOSED`; blocked while SERVING
 
 **Acceptance**
 - All tests pass. Invariants in `DATA_MODEL.md` hold after every test (add an `assertInvariants(dayId)` helper and call it in `afterEach`).
