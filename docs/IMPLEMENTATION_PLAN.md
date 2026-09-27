@@ -31,7 +31,7 @@ Docs: `DATA_MODEL.md`, `BUSINESS_LOGIC.md` §5
 - [x] Prisma schema exactly as in `DATA_MODEL.md`, first migration including the `one_open_day` partial unique index
 - [x] Prisma client singleton (`src/lib/prisma.ts`) safe for serverless hot reloads
 - [x] `seed.ts`: an open Day with 3 DONE tickets (varied durations), 1 SERVING, 4 WAITING
-- [ ] `shared/enums.ts`, `shared/schemas.ts` (all request bodies in `API.md`), `shared/dto.ts`
+- [x] `shared/enums.ts`, `shared/schemas.ts` (all request bodies in `API.md`), `shared/dto.ts`
 - [ ] `shared/eta.ts` + all 10 test cases from `BUSINESS_LOGIC.md`
 - [ ] `shared/format.ts` (duration and ETA display rules) + tests
 - [ ] `shared/messages.ts` (WhatsApp templates) + `buildWhatsAppUrl(phoneE164, text)` + tests
