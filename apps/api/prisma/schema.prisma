@@ -1,4 +1,3 @@
-// Models are added in Phase 1 (see docs/DATA_MODEL.md).
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,4 +6,90 @@ datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+}
+
+enum DayStatus {
+  OPEN
+  CLOSED
+}
+
+enum TicketStatus {
+  WAITING // in line
+  CALLED // illustrator called them, not seated yet
+  SERVING // being drawn
+  DONE // finished
+  NO_SHOW // called but didn't come
+  CANCELLED // by customer, admin, or day close
+}
+
+enum CancelReason {
+  CUSTOMER
+  ADMIN_REMOVED
+  DAY_CLOSED
+}
+
+enum Role {
+  ADMIN
+  ILLUSTRATOR
+  CUSTOMER
+  SYSTEM
+}
+
+model Day {
+  id                 String      @id @default(cuid())
+  status             DayStatus   @default(OPEN)
+  openedAt           DateTime    @default(now())
+  closedAt           DateTime?
+  nextNumber         Int         @default(1)
+  acceptingTickets   Boolean     @default(true)
+  defaultDurationSec Int         @default(600) // prior for ETA before real data exists
+  changeoverSec      Int         @default(60) // gap between customers (payment, seating)
+  headsUpAhead       Int         @default(3) // show "head back to the booth" when this many or fewer are ahead
+  pausedAt           DateTime? // non-null = on break
+  pauseUntil         DateTime? // null while paused = untimed break
+  pauseReason        String?
+  tickets            Ticket[]
+  actions            ActionLog[]
+
+  @@index([status])
+}
+
+model Ticket {
+  id           String        @id @default(cuid())
+  dayId        String
+  day          Day           @relation(fields: [dayId], references: [id])
+  number       Int // 1, 2, 3... per Day, never reused
+  name         String // max 60 chars
+  phone        String? // E.164; nulled by the retention job (P1)
+  notes        String? // max 280 chars, staff only
+  token        String        @unique // nanoid(16), customer credential
+  status       TicketStatus  @default(WAITING)
+  position     Int? // order among WAITING tickets (1 = next); null when not WAITING
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  calledAt     DateTime? // last time called (recall updates it)
+  callCount    Int           @default(0)
+  startedAt    DateTime?
+  endedAt      DateTime?
+  durationSec  Int? // endedAt - startedAt, set on finish
+  cancelledAt  DateTime?
+  cancelReason CancelReason?
+
+  @@unique([dayId, number])
+  @@index([dayId, status, position])
+  @@index([phone])
+}
+
+model ActionLog {
+  id        String   @id @default(cuid())
+  dayId     String
+  day       Day      @relation(fields: [dayId], references: [id])
+  ticketId  String?
+  action    String // e.g. "CALL_NEXT", "START", "FINISH", "NO_SHOW", "REQUEUE", "CANCEL", "PAUSE"
+  actorRole Role
+  before    Json? // ticket/day fields before the change (enables Undo in P1)
+  after     Json?
+  createdAt DateTime @default(now())
+
+  @@index([dayId, createdAt])
 }
