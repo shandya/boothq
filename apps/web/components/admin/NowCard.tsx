@@ -1,0 +1,60 @@
+import type { TicketDTO } from "@boothq/shared";
+import clsx from "clsx";
+import { ElapsedTimer } from "../ui/ElapsedTimer";
+import { GroupedList, GroupedRow } from "../ui/GroupedList";
+import { formatClockTime } from "../../lib/format";
+
+type NowCardProps = {
+  ticket: TicketDTO | null;
+  onOpen: (ticketId: string) => void;
+};
+
+export function NowCard({ ticket, onOpen }: NowCardProps) {
+  const serving = ticket?.status === "SERVING";
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <h2 className="m-0 mt-1.5 px-4 text-[13px] font-semibold uppercase tracking-[0.02em] text-label-2">Now</h2>
+      <GroupedList>
+        {ticket ? (
+          <GroupedRow minHeight={64} onClick={() => onOpen(ticket.id)}>
+            <span
+              className={clsx(
+                "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[17px] font-bold tabular-nums",
+                serving ? "bg-status-blue-bg text-status-blue-fg" : "bg-status-orange-bg text-status-orange-fg",
+              )}
+            >
+              {ticket.number}
+            </span>
+            <span className="flex min-w-0 flex-grow flex-col gap-0.5">
+              <span className="truncate text-[17px] font-semibold">{ticket.name}</span>
+              <span className="truncate text-[13px] text-label-2">
+                {serving && ticket.startedAt
+                  ? `Started ${formatClockTime(ticket.startedAt)}`
+                  : ticket.calledAt
+                    ? `Called ${formatClockTime(ticket.calledAt)}${ticket.callCount > 1 ? ` (×${ticket.callCount})` : ""}`
+                    : null}
+              </span>
+            </span>
+            <span
+              className={clsx(
+                "shrink-0 rounded-full px-2.5 py-[5px] text-[13px] font-semibold tabular-nums",
+                serving ? "bg-status-blue-bg text-status-blue-fg" : "bg-status-orange-bg text-status-orange-fg",
+              )}
+            >
+              {serving && ticket.startedAt ? (
+                <>
+                  Drawing <ElapsedTimer since={ticket.startedAt} />
+                </>
+              ) : (
+                "Called"
+              )}
+            </span>
+          </GroupedRow>
+        ) : (
+          <div className="flex min-h-[64px] items-center px-4 text-[15px] text-label-2">No one called yet</div>
+        )}
+      </GroupedList>
+    </div>
+  );
+}
