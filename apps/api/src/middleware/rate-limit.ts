@@ -7,6 +7,13 @@ function sendRateLimited(_req: Request, res: Response): void {
   });
 }
 
+// Integration tests log in and hit public endpoints far more than 5 or 30
+// times a minute against the same address; the limiters themselves are
+// exercised directly where needed instead.
+function skipInTests(): boolean {
+  return process.env.DISABLE_RATE_LIMIT === "true";
+}
+
 // docs/ARCHITECTURE.md → Rate limiting. The default in-memory store is
 // per-instance on serverless, so limits are best-effort there; acceptable
 // for v1.
@@ -15,6 +22,7 @@ export const loginRateLimit = rateLimit({
   limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipInTests,
   handler: sendRateLimited,
 });
 
@@ -25,6 +33,7 @@ export const publicTicketRateLimit = rateLimit({
   limit: 30,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipInTests,
   keyGenerator: (req: Request) => String(req.params.token ?? "unknown"),
   handler: sendRateLimited,
 });

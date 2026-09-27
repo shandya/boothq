@@ -58,11 +58,41 @@ export async function assertInvariants(dayId: string): Promise<void> {
 }
 
 export async function loginCookie(app: Express, role: keyof typeof TEST_PINS): Promise<string> {
-  const res = await request(app).post("/api/auth/login").send({ role, pin: TEST_PINS[role] });
+  const res = await request(app)
+    .post("/api/auth/login")
+    .set("Content-Type", "application/json")
+    .send({ role, pin: TEST_PINS[role] });
   const setCookie = res.headers["set-cookie"];
   if (res.status !== 200 || !setCookie) {
     throw new Error(`login as ${role} failed: ${res.status} ${JSON.stringify(res.body)}`);
   }
   const cookie = Array.isArray(setCookie) ? setCookie[0] : setCookie;
   return cookie.split(";")[0];
+}
+
+// Every mutating request needs this per csrfProtection; a plain
+// supertest .send(body) only sets it automatically when a body is given.
+export function json(req: request.Test): request.Test {
+  return req.set("Content-Type", "application/json");
+}
+
+export async function openDayViaApi(
+  app: Express,
+  body: { defaultDurationSec?: number; changeoverSec?: number; headsUpAhead?: number } = {},
+): Promise<{ adminCookie: string; illustratorCookie: string }> {
+  const adminCookie = await loginCookie(app, "ADMIN");
+  const illustratorCookie = await loginCookie(app, "ILLUSTRATOR");
+  const res = await json(request(app).post("/api/day/open").set("Cookie", adminCookie)).send(body);
+  if (res.status !== 200) {
+    throw new Error(`open day failed: ${res.status} ${JSON.stringify(res.body)}`);
+  }
+  return { adminCookie, illustratorCookie };
+}
+
+export async function createTicketViaApi(
+  app: Express,
+  cookie: string,
+  input: { name: string; phone: string; notes?: string; force?: boolean },
+): Promise<request.Response> {
+  return json(request(app).post("/api/tickets").set("Cookie", cookie)).send(input);
 }

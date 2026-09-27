@@ -2,7 +2,7 @@ import type { Express } from "express";
 import request from "supertest";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createApp } from "../src/app.js";
-import { resetDb, TEST_PINS } from "./helpers.js";
+import { json, loginCookie, resetDb, TEST_PINS } from "./helpers.js";
 
 let app: Express;
 
@@ -49,5 +49,12 @@ describe("POST /api/auth/login", () => {
     const res = await request(app).get("/api/auth/me");
     expect(res.status).toBe(401);
     expect(res.body.error.code).toBe("UNAUTHENTICATED");
+  });
+
+  it("blocks an illustrator from an admin-only route", async () => {
+    const illustratorCookie = await loginCookie(app, "ILLUSTRATOR");
+    const res = await json(request(app).post("/api/day/open").set("Cookie", illustratorCookie)).send({});
+    expect(res.status).toBe(403);
+    expect(res.body.error.code).toBe("FORBIDDEN");
   });
 });
