@@ -28,9 +28,9 @@ Docs: `ARCHITECTURE.md`
 
 Docs: `DATA_MODEL.md`, `BUSINESS_LOGIC.md` §5
 
-- [ ] Prisma schema exactly as in `DATA_MODEL.md`, first migration including the `one_open_day` partial unique index
-- [ ] Prisma client singleton (`src/lib/prisma.ts`) safe for serverless hot reloads
-- [ ] `seed.ts`: an open Day with 3 DONE tickets (varied durations), 1 SERVING, 4 WAITING
+- [x] Prisma schema exactly as in `DATA_MODEL.md`, first migration including the `one_open_day` partial unique index
+- [x] Prisma client singleton (`src/lib/prisma.ts`) safe for serverless hot reloads
+- [x] `seed.ts`: an open Day with 3 DONE tickets (varied durations), 1 SERVING, 4 WAITING
 - [ ] `shared/enums.ts`, `shared/schemas.ts` (all request bodies in `API.md`), `shared/dto.ts`
 - [ ] `shared/eta.ts` + all 10 test cases from `BUSINESS_LOGIC.md`
 - [ ] `shared/format.ts` (duration and ETA display rules) + tests
