@@ -40,3 +40,12 @@ export function createApp(): Express {
 
   return app;
 }
+
+// Vercel's Express/Node builder invokes this file's default export directly
+// as the per-request handler (it never calls `server.ts`'s `.listen()`,
+// which doesn't apply to serverless invocation). It requires that default
+// export to be a callable Express app, so build one warm instance here for
+// it — see docs/ARCHITECTURE.md -> "Hosting the API". `createApp` stays
+// available as a named export so `server.ts` and tests keep getting a
+// fresh app instance.
+export default createApp();
