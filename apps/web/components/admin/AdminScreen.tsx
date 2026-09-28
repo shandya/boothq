@@ -27,6 +27,7 @@ import { SettingsSheet } from "./SettingsSheet";
 import { ordinal, TicketSheet } from "./TicketSheet";
 import { WaitingSection } from "./WaitingSection";
 import { formatClockTime } from "../../lib/format";
+import { useStaffTitle } from "../../lib/useStaffTitle";
 
 type Overlay =
   | { type: "none" }
@@ -43,6 +44,7 @@ type Overlay =
 type ReorderState = { mode: "list" } | { mode: "reorder" } | { mode: "confirm"; order: string[]; summary: string };
 
 export function AdminScreen() {
+  useStaffTitle();
   const router = useRouter();
   const { data: snapshot, dataUpdatedAt } = useQueue();
   const openDay = useOpenDay();

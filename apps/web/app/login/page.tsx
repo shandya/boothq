@@ -8,6 +8,7 @@ import { Suspense, useEffect, useState } from "react";
 import { LargeTitle } from "../../components/ui/LargeTitle";
 import { SegmentedControl } from "../../components/ui/SegmentedControl";
 import { ApiError, login } from "../../lib/api";
+import { useStaffTitle } from "../../lib/useStaffTitle";
 
 type Role = "ILLUSTRATOR" | "ADMIN";
 
@@ -23,6 +24,7 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
+  useStaffTitle();
   const router = useRouter();
   const searchParams = useSearchParams();
   const boothName = process.env.NEXT_PUBLIC_BOOTH_NAME ?? "the booth";

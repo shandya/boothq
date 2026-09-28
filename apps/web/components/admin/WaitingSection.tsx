@@ -152,6 +152,9 @@ export function WaitingSection({
       </div>
 
       <GroupedList>
+        {displayTickets.length === 0 ? (
+          <div className="flex min-h-16 items-center px-4 text-[15px] text-label-2">No one waiting</div>
+        ) : null}
         {displayTickets.map((ticket, index) => {
           const isDragged = ticket.id === draggingId;
           const prevDragged = index > 0 && displayTickets[index - 1]?.id === draggingId;

@@ -10,9 +10,23 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+// Customer-facing screens never mention BoothQ (CLAUDE.md → Naming), so the
+// shared default falls back to the booth's own name; staff pages set their
+// own "BoothQ · {booth}" title client-side (see lib/useStaffTitle.ts) and
+// the customer page sets its own live title (components/customer/CustomerScreen.tsx).
+const boothName = process.env.NEXT_PUBLIC_BOOTH_NAME ?? "the booth";
+
 export const metadata: Metadata = {
-  title: "BoothQ",
+  title: boothName,
   description: "Queue management for a live illustration booth.",
+  manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/icons/favicon-16.png", sizes: "16x16", type: "image/png" },
+      { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export const viewport: Viewport = {
