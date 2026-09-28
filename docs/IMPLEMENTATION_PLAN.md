@@ -106,14 +106,14 @@ Docs: `UI.md` (shared, login, admin)
 
 Docs: `UI.md` (illustrator), `PRD.md` I1–I13
 
-- [ ] Header stats strip including projected finish time
-- [ ] Now card with every state from the table in `UI.md`
-- [ ] Session timer with pace colors
-- [ ] Up next list (number, name, notes, waited time; no message buttons)
-- [ ] Not-here sheet (requeue / no-show), Recall
-- [ ] Break sheet + Resume; accepting toggle
-- [ ] Wake Lock hook with fallback indicator
-- [ ] Pending/disabled buttons, haptics, 409 toast + resync
+- [x] Header stats strip including projected finish time
+- [x] Now card with every state from the table in `UI.md`
+- [x] Session timer with pace colors
+- [x] Up next list (number, name, notes, waited time; no message buttons)
+- [x] Not-here sheet (requeue / no-show), Recall
+- [x] Break sheet + Resume; accepting toggle
+- [x] Wake Lock hook with fallback indicator
+- [x] Pending/disabled buttons, haptics, 409 toast + resync
 
 **Acceptance**
 - With two browsers (admin + illustrator): run 5 customers through call → start → finish, including one no-show and one requeue. Both screens agree within 5 s. Double-tapping any button never causes a wrong state.
