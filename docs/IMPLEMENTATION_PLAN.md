@@ -114,6 +114,7 @@ Docs: `UI.md` (illustrator), `PRD.md` I1–I13
 - [x] Break sheet + Resume; accepting toggle
 - [x] Wake Lock hook with fallback indicator
 - [x] Pending/disabled buttons, haptics, 409 toast + resync
+- [x] Loosen ticket creation to Illustrator-or-above: floating **+ New Ticket** button reusing Admin's `NewTicketSheet` + `QrFullscreen`; Waiting list expanded from "next 3" to the full read-only queue (no reorder, which stays Admin-only)
 
 **Acceptance**
 - With two browsers (admin + illustrator): run 5 customers through call → start → finish, including one no-show and one requeue. Both screens agree within 5 s. Double-tapping any button never causes a wrong state.

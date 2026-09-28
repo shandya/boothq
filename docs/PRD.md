@@ -25,13 +25,13 @@ At a live illustration booth each portrait takes several minutes, so a line form
 | Role | Access | Login |
 |---|---|---|
 | Customer | Own ticket page only | None, unguessable link |
-| Illustrator | Illustrator console, read-only queue | PIN |
+| Illustrator | Illustrator console; can register walk-up tickets (same New Ticket flow as Admin) but can't open/close the booth, edit/remove tickets, reorder the queue, or change settings | PIN |
 | Admin | Everything, including illustrator console | PIN |
 
 ## Core flow
 
 1. Admin taps **Open booth**, which starts a Day.
-2. A customer walks up. Admin taps **New ticket**, enters name and phone, taps Create. A full-screen QR appears.
+2. A customer walks up. Admin or Illustrator taps **New ticket**, enters name and phone, taps Create. A full-screen QR appears.
 3. Customer scans the QR with their camera and lands on `/t/{token}`: their number, now serving, people ahead, estimated wait.
 4. Illustrator taps **Call next**. The customer's page switches to "It's your turn".
 5. Customer sits down. Illustrator taps **Start drawing**, which starts the session timer.
@@ -87,7 +87,8 @@ The illustrator uses this between drawings, often with one hand and paint on the
 | I2 | **Call next** button showing who's next ("Call #10 Budi"). Disabled while someone is current | MVP |
 | I3 | **Start drawing / Finish** with a large plain session timer ("Drawing for 6:12") and one line comparing it to today's average ("Usually takes 8 min today"). No charts. Timer text turns orange past the average and red past 1.5× | MVP |
 | I4 | **Finish & call next** in one tap | MVP |
-| I5 | **Up next** list: next 3 people with name, notes, and how long they've waited | MVP |
+| I5 | **Waiting list**: every waiting ticket in queue order, with name, notes, and how long they've waited. Read-only — no drag-to-reorder (see A8, Admin only) | MVP |
+| I5a | **New ticket** (same flow as A2–A4): a floating **+ New Ticket** button opens the same form, duplicate check, and full-screen QR as Admin's | MVP |
 | I6 | **Not here** menu on a called customer: mark no-show, or put them back 2 places | MVP |
 | I7 | **Recall**: re-alerts the customer page ("It's your turn" takeover shows again) | MVP |
 | I9 | **Break**: pause for 5 / 10 / 15 / custom minutes or untimed. Customers see a break banner and ETAs include the break. Resume button | MVP |

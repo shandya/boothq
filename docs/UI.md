@@ -204,14 +204,17 @@ Polls `GET /api/queue` every 5 s. Requests a Screen Wake Lock on mount and re-re
 │ [        Finish        ]     │
 │ [  Finish & call next  ]     │
 ├─────────────────────────────┤
-│ UP NEXT                      │
+│ WAITING · 5                  │
 │  #10 Budi   waited 22m       │
 │  #11 Ana    waited 18m       │
 │  #12 Rio    waited 10m       │
+│  #13 ...    waited ...       │
 ├─────────────────────────────┤
 │ [☕ Break]  [Accepting: ON]  │
-└─────────────────────────────┘
+└──────────────────────────(+)┘
 ```
+
+A floating **+ New Ticket** button (bottom-right, above the break bar) opens the same `NewTicketSheet` → `QrFullscreen` flow as Admin's New ticket (docs/UI.md → Admin: `/admin`, New ticket sheet). It's the one ticket-write action an Illustrator can take; editing, removing, and reordering stay Admin-only (docs/PRD.md → Roles).
 
 **Now card by state**
 
@@ -223,7 +226,7 @@ Polls `GET /api/queue` every 5 s. Requests a Screen Wake Lock on mount and re-re
 | SERVING | "Drawing for" + big plain timer (72px, tabular numbers) + "Usually takes 8 min today". No ring or chart. Timer text turns orange past the average and `--danger` past 1.5× | **Finish & call next** | **Finish** |
 | On break | "On break until 15:10" / "On break" + elapsed | **Resume** | — |
 
-**Up next**: next 3 WAITING tickets (number, name, notes, waited time). No message buttons; customers are nudged by the heads-up banner on their own page. Tap a row for notes.
+**Waiting list**: every WAITING ticket, in queue order (number, name, notes, waited time). No message buttons; customers are nudged by the heads-up banner on their own page. Tap a row for notes. Read-only: no drag handle and no Reorder action — reordering stays on the Admin's Waiting section (docs/UI.md → Admin: `/admin`).
 
 **Break sheet**: 5 / 10 / 15 / 30 min / Custom / Until I'm back, optional reason. Disabled while SERVING with hint "Finish the current drawing first".
 

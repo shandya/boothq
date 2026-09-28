@@ -13,19 +13,21 @@ function waitedLabel(ticket: TicketDTO): string {
   return `Waited ${formatDuration(sec)}`;
 }
 
-// Next 3 WAITING tickets; no message buttons — customers are nudged by
-// their own heads-up banner instead (docs/UI.md → Illustrator: /illustrator).
-export function UpNextList({ tickets }: { tickets: TicketDTO[] }) {
+// Every WAITING ticket, in queue order; read-only (no drag handle, no
+// Reorder action — reordering stays on the Admin's Waiting section)
+// (docs/UI.md → Illustrator: /illustrator, Waiting list).
+export function WaitingList({ tickets }: { tickets: TicketDTO[] }) {
   const [noteTicket, setNoteTicket] = useState<TicketDTO | null>(null);
-  const upNext = tickets.slice(0, 3);
 
-  if (upNext.length === 0) return null;
+  if (tickets.length === 0) return null;
 
   return (
     <div className="flex flex-col gap-1.5">
-      <h2 className="m-0 mt-1.5 px-4 text-[13px] font-semibold uppercase tracking-[0.02em] text-label-2">Up Next</h2>
+      <h2 className="m-0 mt-1.5 px-4 text-[13px] font-semibold uppercase tracking-[0.02em] text-label-2">
+        Waiting &middot; {tickets.length}
+      </h2>
       <GroupedList>
-        {upNext.map((ticket, index) => (
+        {tickets.map((ticket, index) => (
           <div key={ticket.id}>
             {index > 0 ? <GroupedSeparator inset={70} /> : null}
             <GroupedRow minHeight={62} onClick={() => setNoteTicket(ticket)}>
