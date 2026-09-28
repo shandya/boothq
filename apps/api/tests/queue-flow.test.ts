@@ -104,6 +104,26 @@ describe("createTicket", () => {
     expect(forced.status).toBe(200);
   });
 
+  it("allows an illustrator to register a walk-up, but not edit, remove, or list tickets", async () => {
+    const { illustratorCookie } = await openDayViaApi(app);
+    const created = await createTicketViaApi(app, illustratorCookie, { name: "Amara", phone: "081234560001" });
+    expect(created.status).toBe(200);
+    expect(created.body.ticket.number).toBe(1);
+
+    const id = created.body.ticket.id;
+    const patch = await json(request(app).patch(`/api/tickets/${id}`).set("Cookie", illustratorCookie)).send({
+      name: "Someone Else",
+    });
+    expect(patch.status).toBe(403);
+    expect(patch.body.error.code).toBe("FORBIDDEN");
+
+    const remove = await request(app).delete(`/api/tickets/${id}`).set("Cookie", illustratorCookie);
+    expect(remove.status).toBe(403);
+
+    const list = await request(app).get("/api/tickets").set("Cookie", illustratorCookie);
+    expect(list.status).toBe(403);
+  });
+
   it("assigns sequential numbers, never reused after cancel", async () => {
     const { adminCookie } = await openDayViaApi(app);
     const t1 = await createTicketViaApi(app, adminCookie, { name: "A", phone: "081234560001" });

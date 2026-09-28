@@ -135,6 +135,7 @@ All return `QueueSnapshot` unless stated.
 | POST | `/api/day/resume` | — | |
 | PATCH | `/api/day` | `{ acceptingTickets?: boolean }` | Illustrator may only toggle `acceptingTickets` |
 | POST | `/api/queue/undo` | — | **P1**. Reverts the most recent ActionLog entry of the Day if under 10 min old |
+| POST | `/api/tickets` | `{ name: string /*1–60*/, phone: string, notes?: string /*≤280*/, force?: boolean }` | Illustrator or Admin (the one ticket-write route either role can call). Returns `{ ticket: TicketDTO, snapshot: QueueSnapshot }`, not bare `QueueSnapshot`. `DUPLICATE_ACTIVE_TICKET` returns `details.existing: TicketDTO` |
 
 ## Tickets and day (admin)
 
@@ -144,7 +145,6 @@ All return `QueueSnapshot` unless stated.
 | POST | `/api/day/close` | — | `{ summary: StatsDTO, snapshot: QueueSnapshot }` |
 | PATCH | `/api/day` | `{ acceptingTickets?, defaultDurationSec?, changeoverSec?, headsUpAhead? }` | `QueueSnapshot` |
 | GET | `/api/tickets` | query `search?`, `status?` (comma list) | `{ tickets: TicketDTO[] }` for the open Day, search matches name (case-insensitive contains), phone digits, or exact number |
-| POST | `/api/tickets` | `{ name: string /*1–60*/, phone: string, notes?: string /*≤280*/, force?: boolean }` | `{ ticket: TicketDTO, snapshot: QueueSnapshot }`. `DUPLICATE_ACTIVE_TICKET` returns `details.existing: TicketDTO` |
 | PATCH | `/api/tickets/:id` | `{ name?, phone?, notes? }` | `{ ticket, snapshot }` |
 | DELETE | `/api/tickets/:id` | — | `QueueSnapshot`. Soft remove (CANCELLED/ADMIN_REMOVED) |
 | POST | `/api/queue/reorder` | `{ order: string[] }` (every WAITING ticket id, in the new order) | `QueueSnapshot`. `409 VALIDATION_ERROR` if the set of ids doesn't exactly match the current WAITING tickets (covers a stale drag against a concurrent change) |
