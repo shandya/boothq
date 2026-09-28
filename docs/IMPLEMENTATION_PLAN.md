@@ -141,11 +141,11 @@ Docs: `UI.md` (customer), `PRD.md` C1–C8
 
 ## Phase 6 — Polish and deploy
 
-- [ ] Empty, loading, error states on every screen
-- [ ] Contrast check in both schemes, font scaling check, Reduce Transparency / Increase Contrast check
-- [ ] Favicon and `manifest.json` (`name`/`short_name`: "BoothQ", the app's own name) so staff can "Add to Home Screen"; browser tab `<title>` combines both, e.g. "BoothQ · {NEXT_PUBLIC_BOOTH_NAME}"
-- [ ] Deploy per `ARCHITECTURE.md` → Deployment checklist
-- [ ] README: local setup, env vars, deploy steps, how to change PINs
+- [x] Empty, loading, error states on every screen
+- [x] Contrast check in both schemes, font scaling check, Reduce Transparency / Increase Contrast check
+- [x] Favicon and `manifest.json` (`name`/`short_name`: "BoothQ", the app's own name) so staff can "Add to Home Screen"; browser tab `<title>` combines both, e.g. "BoothQ · {NEXT_PUBLIC_BOOTH_NAME}"
+- [ ] Deploy per `ARCHITECTURE.md` → Deployment checklist — **needs a human**: requires a Vercel/Neon account, see README.md → Deploying for the exact steps
+- [x] README: local setup, env vars, deploy steps, how to change PINs
 
 **Acceptance: real-phone rehearsal**
 1. Staff phone A logs in as Admin, phone B as Illustrator, on mobile data (not Wi-Fi).
