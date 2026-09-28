@@ -14,6 +14,7 @@ export async function attachSnapshotOn409(err: unknown): Promise<unknown> {
 }
 import { nationalDisplay } from "../lib/phone.js";
 import { prisma } from "../lib/prisma.js";
+import { publicWebOrigin } from "../lib/public-web-url.js";
 
 type CurrentInput = { status: "CALLED" | "SERVING"; startedAt: Date | null } | null;
 
@@ -58,7 +59,7 @@ export function toDayDTO(day: Day): DayDTO {
 }
 
 export function toTicketDTO(ticket: Ticket, opts: { etaSec: number | null }): TicketDTO {
-  const publicWebUrl = process.env.PUBLIC_WEB_URL ?? "";
+  const publicWebUrl = publicWebOrigin();
   return {
     id: ticket.id,
     number: ticket.number,
