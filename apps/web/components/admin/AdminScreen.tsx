@@ -4,7 +4,8 @@ import type { StatsDTO, TicketDTO } from "@boothq/shared";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { logout } from "../../lib/api";
-import { useCloseDay, useOpenDay, useQueue, useReorderQueue } from "../../lib/queries";
+import { ApiError } from "../../lib/api";
+import { useCloseDay, useOpenDay, useQueue, useReorderQueue, useTicketSearch } from "../../lib/queries";
 import { CapsuleButton } from "../ui/CapsuleButton";
 import { ConfirmSheet } from "../ui/ConfirmSheet";
 import { GlassBar } from "../ui/GlassBar";
@@ -56,23 +57,33 @@ export function AdminScreen() {
   const [reorderState, setReorderState] = useState<ReorderState>({ mode: "list" });
   const [search, setSearch] = useState("");
 
+  const trimmedSearch = search.trim();
+  // The snapshot only carries the 10 most recent finished tickets, so search
+  // goes to the server to reach everyone from today.
+  const serverSearch = useTicketSearch(trimmedSearch);
+
   const allTickets = useMemo(() => {
     if (!snapshot) return [] as TicketDTO[];
     return [...(snapshot.current ? [snapshot.current] : []), ...snapshot.waiting, ...snapshot.recent];
   }, [snapshot]);
 
-  const findTicket = (id: string): TicketDTO | undefined => allTickets.find((t) => t.id === id);
+  const findTicket = (id: string): TicketDTO | undefined =>
+    allTickets.find((t) => t.id === id) ?? serverSearch.data?.tickets.find((t) => t.id === id);
 
   const searchResults = useMemo(() => {
-    const query = search.trim().toLowerCase();
+    const query = trimmedSearch.toLowerCase();
     if (!query) return null;
+    if (serverSearch.data) {
+      const fresh = new Map(allTickets.map((t) => [t.id, t]));
+      return serverSearch.data.tickets.map((t) => fresh.get(t.id) ?? t);
+    }
     const digits = query.replace(/\D/g, "");
     return allTickets.filter((t) => {
       if (String(t.number) === query) return true;
       if (t.name.toLowerCase().includes(query)) return true;
       return digits.length > 0 && Boolean(t.phone?.replace(/\D/g, "").includes(digits));
     });
-  }, [allTickets, search]);
+  }, [allTickets, trimmedSearch, serverSearch.data]);
 
   if (!snapshot) {
     return (
@@ -221,7 +232,12 @@ export function AdminScreen() {
           onConfirm={() =>
             closeDay.mutate(undefined, {
               onSuccess: (result) => setOverlay({ type: "closeSummary", summary: result.summary }),
-              onError: () => showToast("Finish the current drawing first"),
+              onError: (err) =>
+                showToast(
+                  err instanceof ApiError && err.code === "CURRENT_ACTIVE"
+                    ? "Finish the current drawing first"
+                    : "Couldn't close the booth. Try again.",
+                ),
             })
           }
         />
