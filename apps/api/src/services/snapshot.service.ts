@@ -221,10 +221,14 @@ export async function buildPublicTicketView(token: string, now: Date = new Date(
   const pauseInput = day.pausedAt ? { until: day.pauseUntil } : null;
 
   const isWaiting = ticket.status === "WAITING";
-  const waitingAhead = isWaiting
-    ? dayTickets.filter((t) => t.status === "WAITING" && (t.position ?? 0) < (ticket.position ?? 0)).length
-    : 0;
+  const ticketsAhead = isWaiting
+    ? dayTickets
+        .filter((t) => t.status === "WAITING" && (t.position ?? 0) < (ticket.position ?? 0))
+        .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+    : [];
+  const waitingAhead = ticketsAhead.length;
   const peopleAhead = isWaiting ? waitingAhead + (current ? 1 : 0) : null;
+  const aheadNumbers = ticketsAhead.slice(0, 2).map((t) => t.number);
 
   const eta = isWaiting
     ? computeEta({
@@ -246,9 +250,11 @@ export async function buildPublicTicketView(token: string, now: Date = new Date(
     number: ticket.number,
     firstName: ticket.name.split(/\s+/)[0] ?? ticket.name,
     status: ticket.status,
+    cancelReason: ticket.cancelReason,
     calledAt: ticket.calledAt?.toISOString() ?? null,
     nowServing: current ? { number: current.number, status: current.status as "CALLED" | "SERVING" } : null,
     peopleAhead,
+    aheadNumbers,
     almostUp,
     eta: eta
       ? {
