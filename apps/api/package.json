@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "prisma generate && prisma migrate deploy && tsc -p tsconfig.json",
+    "build": "pnpm --filter @boothq/shared build && prisma generate && prisma migrate deploy && tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",

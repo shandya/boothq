@@ -9,6 +9,25 @@ Frontend and backend live in one repository using pnpm workspaces. Reasons:
 - Claude Code sees both sides in one session, so it can change an endpoint and its caller together.
 - Vercel deploys several projects from one repo by setting each project's Root Directory.
 
+### `packages/shared` builds to `dist/`, not consumed as raw source
+
+`packages/shared/package.json`'s `main`/`types`/`exports` point at `./dist/*`
+(compiled JS + `.d.ts`), not `./src/*.ts`. A plain `import ... from "@boothq/shared"`
+resolved by bare Node (no TypeScript loader) — exactly what a Vercel serverless
+function runs — cannot load a `.ts` file directly, so pointing the package at
+raw source works for local dev (`tsx`, Next's bundler) but breaks in production
+with `ERR_MODULE_NOT_FOUND`. Consequences:
+
+- `pnpm install` runs a root `postinstall` hook (`pnpm --filter @boothq/shared build`)
+  so `dist/` always exists right after install, before `pnpm dev` ever runs.
+- `pnpm dev` also runs `packages/shared`'s own `tsc --watch`, so editing shared
+  source recompiles `dist/` live for both dev servers to pick up.
+- `apps/api` and `apps/web`'s own `build` scripts each rebuild `@boothq/shared`
+  first (`pnpm --filter @boothq/shared build && ...`) — Vercel invokes each
+  project's build script directly, scoped to that project's Root Directory, so
+  the root's own orchestrated `build` script (and its `postinstall`) can't be
+  relied on alone.
+
 ```
 booth-queue/
 ├─ CLAUDE.md
