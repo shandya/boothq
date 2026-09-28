@@ -67,13 +67,13 @@ export const getQueue = () => get<QueueSnapshot>("/queue");
 export const callNext = (expectedNextId?: string) => post<QueueSnapshot>("/queue/call-next", { expectedNextId });
 export const reorderQueue = (input: ReorderQueueInput) => post<QueueSnapshot>("/queue/reorder", input);
 
-export const startTicket = (id: string) => post<QueueSnapshot>(`/tickets/${id}/start`);
+export const startTicket = (id: string) => post<QueueSnapshot>(`/tickets/${encodeURIComponent(id)}/start`);
 export const finishTicket = (id: string, input: FinishTicketInput = {}) =>
-  post<QueueSnapshot>(`/tickets/${id}/finish`, input);
-export const recallTicket = (id: string) => post<QueueSnapshot>(`/tickets/${id}/recall`);
-export const noShowTicket = (id: string) => post<QueueSnapshot>(`/tickets/${id}/no-show`);
+  post<QueueSnapshot>(`/tickets/${encodeURIComponent(id)}/finish`, input);
+export const recallTicket = (id: string) => post<QueueSnapshot>(`/tickets/${encodeURIComponent(id)}/recall`);
+export const noShowTicket = (id: string) => post<QueueSnapshot>(`/tickets/${encodeURIComponent(id)}/no-show`);
 export const requeueTicket = (id: string, input: RequeueTicketInput = {}) =>
-  post<QueueSnapshot>(`/tickets/${id}/requeue`, input);
+  post<QueueSnapshot>(`/tickets/${encodeURIComponent(id)}/requeue`, input);
 
 export const pauseDay = (input: PauseDayInput = {}) => post<QueueSnapshot>("/day/pause", input);
 export const resumeDay = () => post<QueueSnapshot>("/day/resume");
@@ -93,11 +93,11 @@ export const listTickets = (params: { search?: string; status?: string } = {}) =
 export const createTicket = (input: CreateTicketInput) =>
   post<{ ticket: TicketDTO; snapshot: QueueSnapshot }>("/tickets", input);
 export const updateTicket = (id: string, input: { name?: string; phone?: string; notes?: string }) =>
-  patch<{ ticket: TicketDTO; snapshot: QueueSnapshot }>(`/tickets/${id}`, input);
-export const removeTicket = (id: string) => del<QueueSnapshot>(`/tickets/${id}`);
+  patch<{ ticket: TicketDTO; snapshot: QueueSnapshot }>(`/tickets/${encodeURIComponent(id)}`, input);
+export const removeTicket = (id: string) => del<QueueSnapshot>(`/tickets/${encodeURIComponent(id)}`);
 export const rotateTicketToken = (id: string) =>
-  post<{ ticket: TicketDTO; snapshot: QueueSnapshot }>(`/tickets/${id}/rotate-token`);
+  post<{ ticket: TicketDTO; snapshot: QueueSnapshot }>(`/tickets/${encodeURIComponent(id)}/rotate-token`);
 
 // Public
-export const getPublicTicket = (token: string) => get<PublicTicketView>(`/public/tickets/${token}`);
-export const cancelPublicTicket = (token: string) => post<PublicTicketView>(`/public/tickets/${token}/cancel`);
+export const getPublicTicket = (token: string) => get<PublicTicketView>(`/public/tickets/${encodeURIComponent(token)}`);
+export const cancelPublicTicket = (token: string) => post<PublicTicketView>(`/public/tickets/${encodeURIComponent(token)}/cancel`);

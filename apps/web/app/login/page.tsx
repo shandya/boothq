@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { Delete } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -15,6 +15,13 @@ type Role = "ILLUSTRATOR" | "ADMIN";
 const PIN_LENGTH = 6;
 const DIGIT_KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
+// Only same-site paths: `?next=https://evil.example` or `//evil.example`
+// would otherwise turn the login page into an open redirect.
+function safeNextPath(next: string | null): string | null {
+  if (!next || !next.startsWith("/") || next.startsWith("//") || next.startsWith("/\\")) return null;
+  return next;
+}
+
 export default function LoginPage() {
   return (
     <Suspense fallback={null}>
@@ -26,6 +33,7 @@ export default function LoginPage() {
 function LoginForm() {
   useStaffTitle();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const boothName = process.env.NEXT_PUBLIC_BOOTH_NAME ?? "the booth";
 
@@ -37,8 +45,10 @@ function LoginForm() {
   const mutation = useMutation({
     mutationFn: (input: { role: Role; pin: string }) => login(input),
     onSuccess: (data) => {
-      const next = searchParams.get("next");
-      router.replace(next ?? (data.role === "ADMIN" ? "/admin" : "/illustrator"));
+      // Drop the previous session's cached role and queue so the guard
+      // doesn't briefly render the old role's screen.
+      queryClient.clear();
+      router.replace(safeNextPath(searchParams.get("next")) ?? (data.role === "ADMIN" ? "/admin" : "/illustrator"));
     },
     onError: (err: unknown) => {
       setError(err instanceof ApiError && err.status === 429 ? "Too many tries, wait a minute." : "Wrong PIN");

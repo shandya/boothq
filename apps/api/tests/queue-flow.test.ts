@@ -392,6 +392,20 @@ describe("public view cancelReason", () => {
     expect(view.body.cancelReason).toBe("ADMIN_REMOVED");
   });
 
+  it("keeps CUSTOMER when an admin tries to remove an already-cancelled ticket", async () => {
+    const { adminCookie } = await openDayViaApi(app);
+    const t1 = await createTicketViaApi(app, adminCookie, { name: "A", phone: "081234560001" });
+    const token = tokenFromCustomerUrl(t1.body.ticket.customerUrl);
+    await json(request(app).post(`/api/public/tickets/${token}/cancel`)).send({});
+
+    const remove = await json(request(app).delete(`/api/tickets/${t1.body.ticket.id}`).set("Cookie", adminCookie)).send();
+    expect(remove.status).toBe(409);
+    expect(remove.body.error.code).toBe("INVALID_TRANSITION");
+
+    const view = await request(app).get(`/api/public/tickets/${token}`);
+    expect(view.body.cancelReason).toBe("CUSTOMER");
+  });
+
   it("DAY_CLOSED after the booth closes with the ticket still waiting", async () => {
     const { adminCookie } = await openDayViaApi(app);
     const t1 = await createTicketViaApi(app, adminCookie, { name: "A", phone: "081234560001" });

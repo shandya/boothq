@@ -97,4 +97,20 @@ describe("CSRF protection", () => {
       .send({ role: "ADMIN", pin: TEST_PINS.ADMIN });
     expect(res.status).toBe(200);
   });
+
+  it("tolerates a trailing slash in PUBLIC_WEB_URL", async () => {
+    const original = process.env.PUBLIC_WEB_URL ?? "";
+    const origin = new URL(original).origin;
+    process.env.PUBLIC_WEB_URL = `${origin}/`;
+    try {
+      const res = await request(app)
+        .post("/api/auth/login")
+        .set("Content-Type", "application/json")
+        .set("Origin", origin)
+        .send({ role: "ADMIN", pin: TEST_PINS.ADMIN });
+      expect(res.status).toBe(200);
+    } finally {
+      process.env.PUBLIC_WEB_URL = original;
+    }
+  });
 });

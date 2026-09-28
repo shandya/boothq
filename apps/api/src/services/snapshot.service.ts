@@ -14,6 +14,7 @@ export async function attachSnapshotOn409(err: unknown): Promise<unknown> {
 }
 import { nationalDisplay } from "../lib/phone.js";
 import { prisma } from "../lib/prisma.js";
+import { publicWebOrigin } from "../lib/public-web-url.js";
 
 type CurrentInput = { status: "CALLED" | "SERVING"; startedAt: Date | null } | null;
 
@@ -58,7 +59,7 @@ export function toDayDTO(day: Day): DayDTO {
 }
 
 export function toTicketDTO(ticket: Ticket, opts: { etaSec: number | null }): TicketDTO {
-  const publicWebUrl = process.env.PUBLIC_WEB_URL ?? "";
+  const publicWebUrl = publicWebOrigin();
   return {
     id: ticket.id,
     number: ticket.number,
@@ -87,7 +88,10 @@ export async function findCurrentTicket(dayId: string): Promise<Ticket | null> {
 export async function buildStats(dayId: string, now: Date = new Date()): Promise<StatsDTO> {
   const day = await prisma.day.findUniqueOrThrow({ where: { id: dayId } });
   const tickets = await prisma.ticket.findMany({ where: { dayId } });
+  return statsFor(day, tickets, now);
+}
 
+function statsFor(day: Day, tickets: Ticket[], now: Date): StatsDTO {
   const servedCount = tickets.filter((t) => t.status === "DONE").length;
   const noShowCount = tickets.filter((t) => t.status === "NO_SHOW").length;
   const cancelledCount = tickets.filter((t) => t.status === "CANCELLED").length;
@@ -174,7 +178,7 @@ export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueS
     current: current ? toTicketDTO(current, { etaSec: null }) : null,
     waiting: waitingDTOs,
     recent: recent.map((t) => toTicketDTO(t, { etaSec: null })),
-    stats: await buildStats(day.id, now),
+    stats: statsFor(day, tickets, now),
   };
 }
 

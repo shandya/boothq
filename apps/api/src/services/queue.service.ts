@@ -382,7 +382,7 @@ export async function removeTicket(actorRole: Role, ticketId: string): Promise<{
   return withOpenDayLock(async (tx, day) => {
     const ticket = await tx.ticket.findFirst({ where: { id: ticketId, dayId: day.id } });
     if (!ticket) throw new AppError(404, "NOT_FOUND", "Ticket not found.");
-    if (ticket.status === "SERVING" || ticket.status === "DONE") {
+    if (ticket.status === "SERVING" || ticket.status === "DONE" || ticket.status === "CANCELLED") {
       throw new AppError(409, "INVALID_TRANSITION", "This ticket can't be removed right now.");
     }
 

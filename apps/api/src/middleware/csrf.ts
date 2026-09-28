@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { AppError } from "../lib/errors.js";
+import { publicWebOrigin } from "../lib/public-web-url.js";
 
 const MUTATING_METHODS = new Set(["POST", "PATCH", "PUT", "DELETE"]);
 
@@ -20,7 +21,7 @@ export function csrfProtection(req: Request, _res: Response, next: NextFunction)
   }
 
   const origin = req.headers.origin;
-  if (origin && origin !== process.env.PUBLIC_WEB_URL) {
+  if (origin && origin !== publicWebOrigin()) {
     next(new AppError(403, "FORBIDDEN", "Origin not allowed."));
     return;
   }

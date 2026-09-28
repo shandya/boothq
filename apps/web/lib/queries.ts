@@ -1,7 +1,7 @@
 "use client";
 
 import type { QueueSnapshot } from "@boothq/shared";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as api from "./api";
 import { ApiError } from "./api";
 
@@ -13,6 +13,17 @@ export function useQueue() {
     queryFn: api.getQueue,
     refetchInterval: 5000,
     refetchIntervalInBackground: false,
+  });
+}
+
+const ticketSearchKey = ["tickets-search"] as const;
+
+export function useTicketSearch(search: string) {
+  return useQuery({
+    queryKey: [...ticketSearchKey, search],
+    queryFn: () => api.listTickets({ search }),
+    enabled: search.length > 0,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -51,6 +62,7 @@ function useQueueMutation<TVariables>(mutationFn: (variables: TVariables) => Pro
     mutationFn,
     onSuccess: (snapshot) => {
       queryClient.setQueryData(queueKey, snapshot);
+      void queryClient.invalidateQueries({ queryKey: ticketSearchKey });
     },
     onError: (error) => {
       const snapshot = snapshotFromError(error);
@@ -67,6 +79,7 @@ function useTicketMutation<TVariables, TResult extends { snapshot: QueueSnapshot
     mutationFn,
     onSuccess: (result) => {
       queryClient.setQueryData(queueKey, result.snapshot);
+      void queryClient.invalidateQueries({ queryKey: ticketSearchKey });
     },
     onError: (error) => {
       const snapshot = snapshotFromError(error);
@@ -85,6 +98,7 @@ export function useCloseDay() {
     mutationFn: api.closeDay,
     onSuccess: (result) => {
       queryClient.setQueryData(queueKey, result.snapshot);
+      void queryClient.invalidateQueries({ queryKey: ticketSearchKey });
     },
     onError: (error) => {
       const snapshot = snapshotFromError(error);

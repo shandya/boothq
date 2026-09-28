@@ -54,7 +54,7 @@ Always renumber the whole WAITING list in the transaction (a helper `renumberWai
 | `noShow` | Ticket must be CALLED. Status NO_SHOW. |
 | `requeue` | Ticket must be CALLED or NO_SHOW. Status WAITING, clears `calledAt`, inserted per section 3. |
 | `cancel` (customer) | Ticket must be WAITING or CALLED. Status CANCELLED/CUSTOMER. Idempotent: cancelling an already-cancelled ticket returns 200 with the current view. |
-| `remove` (admin) | Ticket must not be SERVING or DONE. Status CANCELLED/ADMIN_REMOVED. |
+| `remove` (admin) | Ticket must be WAITING, CALLED or NO_SHOW (not SERVING, DONE, or already CANCELLED, so the original cancel reason is kept). Status CANCELLED/ADMIN_REMOVED. |
 | `rotateToken` | Any status. New nanoid(16). The old link returns 404 from then on. |
 | `pause` | No ticket may be SERVING. `pausedAt = now`, `pauseUntil = now + minutes` or null for untimed, optional reason (max 80 chars). |
 | `resume` | Clears `pausedAt`, `pauseUntil`, `pauseReason`. A timed break does **not** auto-resume: once `pauseUntil` passes, customers see "Back any moment" and ETAs stop adding break time until the illustrator taps Resume. |
