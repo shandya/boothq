@@ -1,6 +1,6 @@
 import cookieParser from "cookie-parser";
-import express, { type Express } from "express";
-import helmet from "helmet";
+import express, { type Express, type RequestHandler } from "express";
+import { createRequire } from "node:module";
 import { csrfProtection } from "./middleware/csrf.js";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
 import { authRouter } from "./routes/auth.js";
@@ -9,6 +9,15 @@ import { healthRouter } from "./routes/health.js";
 import { publicRouter } from "./routes/public.js";
 import { queueRouter } from "./routes/queue.js";
 import { ticketsRouter } from "./routes/tickets.js";
+
+// helmet's package.json `exports` map has no explicit "types" condition, so
+// under `moduleResolution: NodeNext` a plain `import helmet from "helmet"`
+// resolves to a callable in some environments and a non-callable namespace
+// in others (confirmed: this repo's own sandbox vs. Vercel's build disagree
+// — see https://github.com/helmetjs/helmet/issues/414). Loading it via
+// require() and casting by hand sidesteps that resolution ambiguity.
+const require = createRequire(import.meta.url);
+const helmet = require("helmet") as () => RequestHandler;
 
 export function createApp(): Express {
   const app = express();
