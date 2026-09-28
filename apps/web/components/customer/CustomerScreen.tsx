@@ -152,7 +152,11 @@ export function CustomerScreen({ token }: { token: string }) {
               <span className="font-bold tabular-nums">{view.nowServing ? `#${view.nowServing.number}` : "—"}</span>
             </span>
             <span className="text-[15px] text-label-2">
-              {(view.peopleAhead ?? 0) === 0 ? "You're next in line" : `${view.peopleAhead} people ahead of you`}
+              {(view.peopleAhead ?? 0) === 0
+                ? "You're next in line"
+                : view.peopleAhead === 1
+                  ? "1 person ahead of you"
+                  : `${view.peopleAhead} people ahead of you`}
             </span>
           </div>
 
@@ -261,7 +265,20 @@ export function CustomerScreen({ token }: { token: string }) {
           confirmLabel="Give Up My Place"
           pending={cancel.isPending}
           onCancel={() => setConfirmCancel(false)}
-          onConfirm={() => cancel.mutate(undefined, { onSuccess: () => setConfirmCancel(false) })}
+          onConfirm={() =>
+            cancel.mutate(undefined, {
+              onSuccess: () => setConfirmCancel(false),
+              onError: (err) => {
+                setConfirmCancel(false);
+                showToast(
+                  err instanceof ApiError && err.status === 409
+                    ? "Your ticket can't be cancelled anymore"
+                    : "Couldn't cancel. Try again.",
+                );
+                void query.refetch();
+              },
+            })
+          }
         />
       ) : null}
 
