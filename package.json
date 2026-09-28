@@ -7,7 +7,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "concurrently -n api,web -c yellow,cyan \"pnpm --filter @boothq/api dev\" \"pnpm --filter @boothq/web dev\"",
+    "postinstall": "pnpm --filter @boothq/shared build",
+    "dev": "concurrently -n shared,api,web -c magenta,yellow,cyan \"pnpm --filter @boothq/shared dev\" \"pnpm --filter @boothq/api dev\" \"pnpm --filter @boothq/web dev\"",
     "build": "pnpm --filter @boothq/shared build && pnpm --filter @boothq/api build && pnpm --filter @boothq/web build",
     "test": "pnpm -r --filter @boothq/shared --filter @boothq/api test -- --run",
     "lint": "eslint .",
