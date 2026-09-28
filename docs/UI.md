@@ -69,13 +69,7 @@ Exceptions: the customer "It's your turn" takeover is solid `--accent` with whit
 
 ## Shared components
 
-`TicketNumber`, `StatusChip`, `BottomSheet`, `ConfirmSheet`, `QrFullscreen`, `ElapsedTimer` (uses server offset), `OfflineBanner`, `Toast`, `WhatsAppButton` (builds `https://wa.me/<digits>?text=<encoded>` from templates in `packages/shared/src/messages.ts`).
-
-### WhatsApp message templates
-
-```ts
-ticketLink:  "Hi {firstName}! You're #{number} at {booth}. Track your place in line here: {url}"
-```
+`TicketNumber`, `StatusChip`, `BottomSheet`, `ConfirmSheet`, `QrFullscreen`, `ElapsedTimer` (uses server offset), `OfflineBanner`, `Toast`.
 
 ---
 
@@ -176,13 +170,13 @@ Polls `GET /api/queue` every 5 s.
 
 - Page follows the device scheme; the QR itself always sits on a white rounded card with black modules, ~65% of screen width (`QRCodeSVG`, level M, quiet zone included).
 - Above: `#12 · Sarah`. Below: "Scan with your phone camera".
-- Buttons: **Send via WhatsApp** (ticketLink template), **Copy link**, **Done**.
+- Buttons: **Copy link**, **Done**.
 
 **Ticket sheet** (from a row)
 
 - Number, name, phone (tap to call), notes, status, created / called / started times.
 - Actions by status:
-  - Always: **Show QR**, **Send link via WhatsApp**, **Edit**, **Regenerate link** (confirm: "The old link will stop working").
+  - Always: **Show QR**, **Edit**, **Regenerate link** (confirm: "The old link will stop working").
   - WAITING: **Remove**. (Reordering happens from the Waiting list itself, not from this sheet — see below.)
   - CALLED / NO_SHOW: the same staff actions as the illustrator (start, requeue, no-show).
   - CALLED: **Remove**.

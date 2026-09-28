@@ -17,7 +17,7 @@ At a live illustration booth each portrait takes several minutes, so a line form
 - Customers uploading their own photo from the ticket page (possible later extension of `PHOTO_TICKETS.md`).
 - Payments.
 - Several illustrators drawing in parallel (don't block it in the data model, but don't build it).
-- Automatic SMS/WhatsApp sending through paid APIs. v1 uses tap-to-send WhatsApp links that open the staff member's own WhatsApp with a prefilled message.
+- Automatic SMS/WhatsApp sending, or any WhatsApp integration at all. v1 has no messaging feature; the customer link works entirely through the QR code and its URL.
 - Native apps or web push notifications.
 
 ## Roles
@@ -33,7 +33,7 @@ At a live illustration booth each portrait takes several minutes, so a line form
 1. Admin taps **Open booth**, which starts a Day.
 2. A customer walks up. Admin taps **New ticket**, enters name and phone, taps Create. A full-screen QR appears.
 3. Customer scans the QR with their camera and lands on `/t/{token}`: their number, now serving, people ahead, estimated wait.
-4. Illustrator taps **Call next**. The customer's page switches to "It's your turn". The illustrator can also tap the WhatsApp button to message them.
+4. Illustrator taps **Call next**. The customer's page switches to "It's your turn".
 5. Customer sits down. Illustrator taps **Start drawing**, which starts the session timer.
 6. Illustrator taps **Finish** (or **Finish & call next**). The session duration feeds the day's average, which updates everyone's ETA.
 7. At the end, admin taps **Close booth** and sees a day summary.
@@ -65,7 +65,7 @@ Priority: **MVP** = build first. **P1** = right after MVP. **P2** = later.
 | A1 | Open booth (set default session length, changeover time, and heads-up threshold) and Close booth (remaining waiting tickets are cancelled, with confirmation) | MVP |
 | A2 | New ticket form: name, phone, optional notes (e.g. "couple portrait", "cat ears"). Phone validated and normalized to E.164 | MVP |
 | A3 | Duplicate check: if that phone already has an active ticket today, offer "Show their existing QR" or "Create anyway" | MVP |
-| A4 | Full-screen QR after creating, with number and name, plus **Send via WhatsApp** and **Copy link** | MVP |
+| A4 | Full-screen QR after creating, with number and name, plus **Copy link** | MVP |
 | A5 | Queue list grouped by Now / Waiting / Finished / Cancelled, with search by name, phone or number | MVP |
 | A6 | Edit name, phone, notes | MVP |
 | A7 | Remove ticket (soft delete, kept for stats) | MVP |
@@ -89,7 +89,7 @@ The illustrator uses this between drawings, often with one hand and paint on the
 | I4 | **Finish & call next** in one tap | MVP |
 | I5 | **Up next** list: next 3 people with name, notes, and how long they've waited | MVP |
 | I6 | **Not here** menu on a called customer: mark no-show, or put them back 2 places | MVP |
-| I7 | **Recall**: re-alerts the customer page ("It's your turn" takeover shows again). No WhatsApp message | MVP |
+| I7 | **Recall**: re-alerts the customer page ("It's your turn" takeover shows again) | MVP |
 | I9 | **Break**: pause for 5 / 10 / 15 / custom minutes or untimed. Customers see a break banner and ETAs include the break. Resume button | MVP |
 | I10 | Stats strip: served today, average session, waiting count, **projected finish time for everyone in line** (helps decide when to stop taking tickets) | MVP |
 | I11 | Stop-accepting-tickets toggle (same as A11) | MVP |
