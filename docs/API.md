@@ -85,13 +85,16 @@ type PublicTicketView = {       // customer; NO phone, notes, ids, or other name
   number: number;
   firstName: string;            // first word of name
   status: TicketStatus;
+  cancelReason: CancelReason | null; // which of the three CANCELLED copy variants to show (docs/UI.md)
   calledAt: string | null;
   nowServing: { number: number; status: 'CALLED' | 'SERVING' } | null;
   peopleAhead: number | null;   // WAITING only: waitingAhead + (current ? 1 : 0)
+  aheadNumbers: number[];       // WAITING only: first 2 WAITING ticket numbers ahead, for the line strip
   almostUp: boolean;            // WAITING and peopleAhead <= day.headsUpAhead (see BUSINESS_LOGIC.md)
   eta: {
     sec: number; lowSec: number; highSec: number;
     estimatedAt: string; confidence: 'low' | 'medium' | 'high';
+    pausedUntimed: boolean;     // true = untimed break; etaSec excludes it
   } | null;                     // WAITING only
   avgSessionSec: number;
   pause: { active: boolean; until: string | null; reason: string | null };

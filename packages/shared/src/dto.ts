@@ -62,9 +62,11 @@ export type PublicTicketView = {
   number: number;
   firstName: string; // first word of name
   status: TicketStatus;
+  cancelReason: CancelReason | null;
   calledAt: string | null;
   nowServing: { number: number; status: "CALLED" | "SERVING" } | null;
   peopleAhead: number | null; // WAITING only: waitingAhead + (current ? 1 : 0)
+  aheadNumbers: number[]; // WAITING only: first 2 WAITING ticket numbers ahead, for the line strip
   almostUp: boolean; // WAITING and peopleAhead <= day.headsUpAhead (see BUSINESS_LOGIC.md)
   eta: {
     sec: number;
@@ -72,6 +74,7 @@ export type PublicTicketView = {
     highSec: number;
     estimatedAt: string;
     confidence: "low" | "medium" | "high";
+    pausedUntimed: boolean;
   } | null; // WAITING only
   avgSessionSec: number;
   pause: { active: boolean; until: string | null; reason: string | null };

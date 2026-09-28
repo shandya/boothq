@@ -125,14 +125,14 @@ Docs: `UI.md` (illustrator), `PRD.md` I1–I13
 
 Docs: `UI.md` (customer), `PRD.md` C1–C8
 
-- [ ] `/t/[token]` with every state and banner from `UI.md`
-- [ ] ETA display rules, "based on average" note, confidence note
-- [ ] Heads-up banner + "Almost up" chip driven by `almostUp`
-- [ ] CALLED takeover that re-appears when `calledAt` changes
-- [ ] Cancel flow
-- [ ] Dynamic tab title, Copy link, Updated-X-ago, offline banner
-- [ ] `robots: noindex` on customer pages; no analytics
-- [ ] Not-found state
+- [x] `/t/[token]` with every state and banner from `UI.md`
+- [x] ETA display rules, "based on average" note, confidence note
+- [x] Heads-up banner + "Almost up" chip driven by `almostUp`
+- [x] CALLED takeover that re-appears when `calledAt` changes
+- [x] Cancel flow
+- [x] Dynamic tab title, Copy link, Updated-X-ago, offline banner
+- [x] `robots: noindex` on customer pages; no analytics
+- [x] Not-found state
 
 **Acceptance**
 - With the illustrator console on one phone and a customer page on another: the customer page updates within 10 s of every illustrator action, the heads-up banner appears once 3 or fewer people are ahead, ETA shrinks as sessions finish, break banner appears and disappears, cancel works and the ticket disappears from the illustrator's up-next list.

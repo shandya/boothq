@@ -369,6 +369,56 @@ describe("customer cancel", () => {
   });
 });
 
+describe("public view cancelReason", () => {
+  it("CUSTOMER after a self-cancel", async () => {
+    const { adminCookie } = await openDayViaApi(app);
+    const t1 = await createTicketViaApi(app, adminCookie, { name: "A", phone: "081234560001" });
+    const token = tokenFromCustomerUrl(t1.body.ticket.customerUrl);
+    await json(request(app).post(`/api/public/tickets/${token}/cancel`)).send({});
+
+    const view = await request(app).get(`/api/public/tickets/${token}`);
+    expect(view.body.status).toBe("CANCELLED");
+    expect(view.body.cancelReason).toBe("CUSTOMER");
+  });
+
+  it("ADMIN_REMOVED after an admin removes it", async () => {
+    const { adminCookie } = await openDayViaApi(app);
+    const t1 = await createTicketViaApi(app, adminCookie, { name: "A", phone: "081234560001" });
+    const token = tokenFromCustomerUrl(t1.body.ticket.customerUrl);
+    await json(request(app).delete(`/api/tickets/${t1.body.ticket.id}`).set("Cookie", adminCookie)).send();
+
+    const view = await request(app).get(`/api/public/tickets/${token}`);
+    expect(view.body.status).toBe("CANCELLED");
+    expect(view.body.cancelReason).toBe("ADMIN_REMOVED");
+  });
+
+  it("DAY_CLOSED after the booth closes with the ticket still waiting", async () => {
+    const { adminCookie } = await openDayViaApi(app);
+    const t1 = await createTicketViaApi(app, adminCookie, { name: "A", phone: "081234560001" });
+    const token = tokenFromCustomerUrl(t1.body.ticket.customerUrl);
+    await json(request(app).post("/api/day/close").set("Cookie", adminCookie)).send();
+
+    const view = await request(app).get(`/api/public/tickets/${token}`);
+    expect(view.body.status).toBe("CANCELLED");
+    expect(view.body.cancelReason).toBe("DAY_CLOSED");
+  });
+});
+
+describe("public view aheadNumbers", () => {
+  it("lists the first 2 WAITING ticket numbers ahead, in position order", async () => {
+    const { adminCookie } = await openDayViaApi(app);
+    const t1 = await createTicketViaApi(app, adminCookie, { name: "A", phone: "081234560001" });
+    const t2 = await createTicketViaApi(app, adminCookie, { name: "B", phone: "081234560002" });
+    await createTicketViaApi(app, adminCookie, { name: "C", phone: "081234560003" });
+    const t4 = await createTicketViaApi(app, adminCookie, { name: "D", phone: "081234560004" });
+    const token = tokenFromCustomerUrl(t4.body.ticket.customerUrl);
+
+    const view = await request(app).get(`/api/public/tickets/${token}`);
+    expect(view.body.peopleAhead).toBe(3);
+    expect(view.body.aheadNumbers).toEqual([t1.body.ticket.number, t2.body.ticket.number]);
+  });
+});
+
 describe("rotate-token", () => {
   it("old token 404s, new token works", async () => {
     const { adminCookie } = await openDayViaApi(app);
