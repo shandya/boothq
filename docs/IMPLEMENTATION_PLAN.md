@@ -83,18 +83,18 @@ Docs: `API.md`, `BUSINESS_LOGIC.md`, `ARCHITECTURE.md` (auth, rate limiting)
 
 Docs: `UI.md` (shared, login, admin)
 
-- [ ] Theme foundation (PRD L1, L2): color tokens from `UI.md` as CSS variables with a `prefers-color-scheme: dark` override, `color-scheme: light dark`, per-scheme `theme-color` meta tags, Tailwind wired to the variables (`darkMode: 'media'`), font stack with Inter via `next/font/google`, glass utility class with solid fallbacks
-- [ ] Base components in the iOS style: `LargeTitle`, `GroupedList` + `GroupedRow`, `CapsuleButton` (primary / secondary / destructive), `GlassIconButton`, `GlassBar`, `SegmentedControl`, `Switch`, `SearchField`, `Sheet` (inset, 38px radius), `StatusChip`
-- [ ] API client (`lib/api.ts`) with typed functions, error parsing, and 409-snapshot handling
-- [ ] Query hooks: `useQueue()` (5 s), `usePublicTicket(token)` (10 s), mutations that write the returned snapshot into the cache
-- [ ] Server-time offset store + `ElapsedTimer`
-- [ ] Shared components from `UI.md`
-- [ ] `/login`
-- [ ] Route guard for `/admin` and `/illustrator` via `/api/auth/me`
-- [ ] `/admin`: closed state + Open booth, header, search, sections, rows
-- [ ] New ticket sheet with shared zod validation, duplicate flow, `QrFullscreen`
-- [ ] Ticket sheet with all actions, confirm sheets
-- [ ] Settings sheet, Close booth flow + summary
+- [x] Theme foundation (PRD L1, L2): color tokens from `UI.md` as CSS variables with a `prefers-color-scheme: dark` override, `color-scheme: light dark`, per-scheme `theme-color` meta tags, Tailwind wired to the variables (`darkMode: 'media'`), font stack with Inter via `next/font/google`, glass utility class with solid fallbacks
+- [x] Base components in the iOS style: `LargeTitle`, `GroupedList` + `GroupedRow`, `CapsuleButton` (primary / secondary / destructive), `GlassIconButton`, `GlassBar`, `SegmentedControl`, `Switch`, `SearchField`, `Sheet` (inset, 38px radius), `StatusChip`
+- [x] API client (`lib/api.ts`) with typed functions, error parsing, and 409-snapshot handling
+- [x] Query hooks: `useQueue()` (5 s), `usePublicTicket(token)` (10 s), mutations that write the returned snapshot into the cache
+- [x] Server-time offset store + `ElapsedTimer`
+- [x] Shared components from `UI.md`
+- [x] `/login`
+- [x] Route guard for `/admin` and `/illustrator` via `/api/auth/me`
+- [x] `/admin`: closed state + Open booth, header, search, sections, rows
+- [x] New ticket sheet with shared zod validation, duplicate flow, `QrFullscreen`
+- [x] Ticket sheet with all actions, confirm sheets
+- [x] Settings sheet, Close booth flow + summary
 
 **Acceptance**
 - Toggling the OS appearance (or DevTools "prefers-color-scheme") switches every screen between light and dark instantly, without reload, and all text passes AA in both.
