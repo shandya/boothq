@@ -54,7 +54,7 @@ ticketsRouter.get(
 
 ticketsRouter.post(
   "/tickets",
-  requireRole("ADMIN"),
+  requireRole("ILLUSTRATOR"),
   staffHandler(async (req, res) => {
     const input = createTicketSchema.parse(req.body);
     const { ticket } = await queueService.createTicket(req.role!, input);
