@@ -8,6 +8,7 @@ import { useState } from "react";
 import { logout, me } from "../../lib/api";
 import { onStale, vibrate } from "../../lib/feedback";
 import { usePatchDay, usePauseDay, useQueue } from "../../lib/queries";
+import { useStaffTitle } from "../../lib/useStaffTitle";
 import { useWakeLock } from "../../lib/useWakeLock";
 import { GlassBar } from "../ui/GlassBar";
 import { NewTicketSheet } from "../admin/NewTicketSheet";
@@ -29,6 +30,7 @@ type Overlay =
   | { type: "qr"; ticket: TicketDTO };
 
 export function IllustratorScreen() {
+  useStaffTitle();
   const router = useRouter();
   const { data: snapshot, dataUpdatedAt } = useQueue();
   const roleQuery = useQuery({ queryKey: ["auth-me"], queryFn: me, retry: false });
