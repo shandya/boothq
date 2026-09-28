@@ -16,7 +16,6 @@ import { ConfirmSheet } from "../ui/ConfirmSheet";
 import { GlassIconButton } from "../ui/GlassIconButton";
 import { GroupedList, GroupedSeparator } from "../ui/GroupedList";
 import { StatusChip } from "../ui/StatusChip";
-import { WhatsAppButton } from "../ui/WhatsAppButton";
 
 type TicketSheetProps = {
   ticket: TicketDTO;
@@ -44,7 +43,6 @@ export function TicketSheet({ ticket, positionLabel, onClose, onEdit, onShowQr, 
   const remove = useRemoveTicket();
   const rotateToken = useRotateTicketToken();
 
-  const boothName = process.env.NEXT_PUBLIC_BOOTH_NAME ?? "the booth";
   const canRemove = ticket.status === "WAITING" || ticket.status === "CALLED" || ticket.status === "NO_SHOW";
 
   return (
@@ -133,17 +131,6 @@ export function TicketSheet({ ticket, positionLabel, onClose, onEdit, onShowQr, 
               </>
             ) : null}
             <ActionRow icon={<QrCode className="h-5 w-5" strokeWidth={2} aria-hidden="true" />} label="Show QR Code" onClick={onShowQr} />
-            <GroupedSeparator inset={48} />
-            <WhatsAppButton
-              phone={ticket.phone ?? ""}
-              firstName={ticket.name.split(/\s+/)[0] ?? ticket.name}
-              number={ticket.number}
-              boothName={boothName}
-              url={ticket.customerUrl}
-              className="flex h-[50px] w-full cursor-pointer items-center gap-3 px-4 text-[17px] text-link no-underline"
-            >
-              <MessageIcon /> Send Link on WhatsApp
-            </WhatsAppButton>
             <GroupedSeparator inset={48} />
             <ActionRow
               icon={<RefreshCw className="h-5 w-5" strokeWidth={2} aria-hidden="true" />}
@@ -262,14 +249,6 @@ function CloseIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
       <path d="M18 6 6 18M6 6l12 12" />
-    </svg>
-  );
-}
-
-function MessageIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.4L3 21l2.1-5.6A8.5 8.5 0 1 1 21 11.5z" />
     </svg>
   );
 }
