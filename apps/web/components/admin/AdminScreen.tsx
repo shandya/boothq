@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { logout } from "../../lib/api";
 import { useCloseDay, useOpenDay, useQueue, useReorderQueue } from "../../lib/queries";
-import { buildTicketLinkMessage, buildWhatsAppUrl } from "@boothq/shared/messages";
 import { CapsuleButton } from "../ui/CapsuleButton";
 import { ConfirmSheet } from "../ui/ConfirmSheet";
 import { GlassBar } from "../ui/GlassBar";
@@ -54,8 +53,6 @@ export function AdminScreen() {
   const [overlay, setOverlay] = useState<Overlay>({ type: "none" });
   const [reorderState, setReorderState] = useState<ReorderState>({ mode: "list" });
   const [search, setSearch] = useState("");
-
-  const boothName = process.env.NEXT_PUBLIC_BOOTH_NAME ?? "the booth";
 
   const allTickets = useMemo(() => {
     if (!snapshot) return [] as TicketDTO[];
@@ -109,16 +106,6 @@ export function AdminScreen() {
   const { stats } = snapshot;
   const totalTicketsCreated =
     stats.servedCount + stats.noShowCount + stats.cancelledCount + stats.waitingCount + (snapshot.current ? 1 : 0);
-
-  function handleWhatsApp(ticket: TicketDTO) {
-    const text = buildTicketLinkMessage({
-      firstName: ticket.name.split(/\s+/)[0] ?? ticket.name,
-      number: ticket.number,
-      boothName,
-      url: ticket.customerUrl,
-    });
-    window.open(buildWhatsAppUrl(ticket.phone ?? "", text), "_blank", "noopener,noreferrer");
-  }
 
   async function handleCopyLink(url: string) {
     try {
@@ -254,7 +241,6 @@ export function AdminScreen() {
           number={overlay.ticket.number}
           name={overlay.ticket.name}
           url={overlay.ticket.customerUrl}
-          onWhatsApp={() => handleWhatsApp(overlay.ticket)}
           onCopyLink={() => handleCopyLink(overlay.ticket.customerUrl)}
           onDone={() => setOverlay({ type: "none" })}
         />

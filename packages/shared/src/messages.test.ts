@@ -1,19 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildTicketLinkMessage, buildWhatsAppUrl } from "./messages.js";
-
-describe("buildTicketLinkMessage", () => {
-  it("fills in the ticketLink template", () => {
-    const text = buildTicketLinkMessage({
-      firstName: "Amara",
-      number: 5,
-      boothName: "Sunset Fair",
-      url: "https://boothq.example.com/t/abc123",
-    });
-    expect(text).toBe(
-      "Hi Amara! You're #5 at Sunset Fair. Track your place in line here: https://boothq.example.com/t/abc123",
-    );
-  });
-});
+import { buildWhatsAppUrl } from "./messages.js";
 
 describe("buildWhatsAppUrl", () => {
   it("strips non-digits and URL-encodes the text", () => {

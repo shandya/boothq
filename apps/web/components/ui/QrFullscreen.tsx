@@ -1,4 +1,4 @@
-import { Check, Copy, MessageCircle } from "lucide-react";
+import { Check, Copy } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { TicketNumber } from "./TicketNumber";
 
@@ -6,7 +6,6 @@ type QrFullscreenProps = {
   number: number;
   name: string;
   url: string;
-  onWhatsApp: () => void;
   onCopyLink: () => void;
   onDone: () => void;
 };
@@ -18,7 +17,7 @@ function displayUrl(url: string): string {
 
 // The QR always sits on a white card with black modules, even in dark mode
 // (scanners need dark-on-light) — docs/UI.md → Color exceptions.
-export function QrFullscreen({ number, name, url, onWhatsApp, onCopyLink, onDone }: QrFullscreenProps) {
+export function QrFullscreen({ number, name, url, onCopyLink, onDone }: QrFullscreenProps) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col gap-4 bg-bg px-4 pb-[110px] pt-3 text-label">
       <header className="flex h-11 items-center justify-between px-1">
@@ -51,19 +50,11 @@ export function QrFullscreen({ number, name, url, onWhatsApp, onCopyLink, onDone
       </p>
       <p className="m-0 text-center font-mono text-[13px] text-label-2">{displayUrl(url)}</p>
 
-      <div className="fixed inset-x-3 bottom-6 glass grid grid-cols-2 gap-1.5 rounded-full p-1.5">
-        <button
-          type="button"
-          onClick={onWhatsApp}
-          className="flex h-[52px] cursor-pointer items-center justify-center gap-2 rounded-full bg-fill text-[15px] font-semibold text-link"
-        >
-          <MessageCircle className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden="true" />
-          WhatsApp
-        </button>
+      <div className="fixed inset-x-3 bottom-6 glass rounded-full p-1.5">
         <button
           type="button"
           onClick={onCopyLink}
-          className="flex h-[52px] cursor-pointer items-center justify-center gap-2 rounded-full bg-fill text-[15px] font-semibold text-link"
+          className="flex h-[52px] w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-fill text-[15px] font-semibold text-link"
         >
           <Copy className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden="true" />
           Copy Link

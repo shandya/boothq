@@ -110,7 +110,7 @@ Docs: `UI.md` (illustrator), `PRD.md` I1–I13
 - [ ] Now card with every state from the table in `UI.md`
 - [ ] Session timer with pace colors
 - [ ] Up next list (number, name, notes, waited time; no message buttons)
-- [ ] Not-here sheet (requeue / no-show), Recall with WhatsApp
+- [ ] Not-here sheet (requeue / no-show), Recall
 - [ ] Break sheet + Resume; accepting toggle
 - [ ] Wake Lock hook with fallback indicator
 - [ ] Pending/disabled buttons, haptics, 409 toast + resync
@@ -149,7 +149,7 @@ Docs: `UI.md` (customer), `PRD.md` C1–C8
 **Acceptance: real-phone rehearsal**
 1. Staff phone A logs in as Admin, phone B as Illustrator, on mobile data (not Wi-Fi).
 2. Create 4 tickets; scan 2 of them with a third phone.
-3. Run a full cycle including break, recall, no-show, requeue, customer cancel, regenerate link, WhatsApp link sending.
+3. Run a full cycle including break, recall, no-show, requeue, customer cancel, regenerate link.
 4. Leave the illustrator console open 10 minutes: the screen stays on.
 5. Close the booth; summary numbers are correct.
 
