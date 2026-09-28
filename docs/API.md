@@ -35,6 +35,7 @@ type DayDTO = {
   changeoverSec: number;
   headsUpAhead: number;
   paused: boolean;
+  pausedAt: string | null;    // when the break began; null unless paused
   pauseUntil: string | null;
   pauseReason: string | null;
 };

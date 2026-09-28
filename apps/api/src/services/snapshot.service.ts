@@ -51,6 +51,7 @@ export function toDayDTO(day: Day): DayDTO {
     changeoverSec: day.changeoverSec,
     headsUpAhead: day.headsUpAhead,
     paused: day.pausedAt != null,
+    pausedAt: day.pausedAt?.toISOString() ?? null,
     pauseUntil: day.pauseUntil?.toISOString() ?? null,
     pauseReason: day.pauseReason,
   };

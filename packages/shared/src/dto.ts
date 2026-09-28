@@ -10,6 +10,7 @@ export type DayDTO = {
   changeoverSec: number;
   headsUpAhead: number;
   paused: boolean;
+  pausedAt: string | null;
   pauseUntil: string | null;
   pauseReason: string | null;
 };
