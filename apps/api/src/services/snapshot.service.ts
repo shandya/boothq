@@ -263,6 +263,7 @@ export async function buildPublicTicketView(token: string, now: Date = new Date(
           highSec: eta.highSec,
           estimatedAt: eta.estimatedAt.toISOString(),
           confidence: eta.confidence,
+          pausedUntimed: eta.pausedUntimed,
         }
       : null,
     avgSessionSec: averageSessionSecFor(day, completedDurationsSec, now),

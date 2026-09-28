@@ -94,6 +94,7 @@ type PublicTicketView = {       // customer; NO phone, notes, ids, or other name
   eta: {
     sec: number; lowSec: number; highSec: number;
     estimatedAt: string; confidence: 'low' | 'medium' | 'high';
+    pausedUntimed: boolean;     // true = untimed break; etaSec excludes it
   } | null;                     // WAITING only
   avgSessionSec: number;
   pause: { active: boolean; until: string | null; reason: string | null };

@@ -25,6 +25,16 @@ export function usePublicTicket(token: string) {
   });
 }
 
+export function useCancelTicket(token: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.cancelPublicTicket(token),
+    onSuccess: (view) => {
+      queryClient.setQueryData(["public-ticket", token], view);
+    },
+  });
+}
+
 function snapshotFromError(error: unknown): QueueSnapshot | null {
   if (error instanceof ApiError && error.details && "snapshot" in error.details) {
     return error.details.snapshot as QueueSnapshot;

@@ -74,6 +74,7 @@ export type PublicTicketView = {
     highSec: number;
     estimatedAt: string;
     confidence: "low" | "medium" | "high";
+    pausedUntimed: boolean;
   } | null; // WAITING only
   avgSessionSec: number;
   pause: { active: boolean; until: string | null; reason: string | null };
