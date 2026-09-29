@@ -7,6 +7,7 @@ import type {
   ReorderQueueInput,
   RequeueTicketInput,
   Role,
+  UndoInput,
 } from "@boothq/shared";
 import type { CallNextInput } from "@boothq/shared";
 import { Prisma, type Day, type Ticket } from "@prisma/client";
@@ -17,6 +18,7 @@ import { prisma } from "../lib/prisma.js";
 import { logAction } from "./action-log.js";
 import { lockEvents, renumberWaiting, withOpenDayLock } from "./day-lock.js";
 import { toTicketDTO } from "./snapshot.service.js";
+import { loadUndoable } from "./undo.js";
 
 async function renumberRemainingWaiting(tx: Prisma.TransactionClient, dayId: string): Promise<void> {
   const remaining = await tx.ticket.findMany({
@@ -243,7 +245,17 @@ export async function finishTicket(
       where: { id: ticket.id },
       data: { status: "DONE", endedAt, durationSec },
     });
-    await logAction(tx, { dayId: day.id, ticketId: ticket.id, action: "FINISH", actorRole, before: ticket, after: updated });
+    // Finish & call next is two log rows; Undo reverses them together.
+    const batchId = input.callNext ? nanoid(12) : undefined;
+    await logAction(tx, {
+      dayId: day.id,
+      ticketId: ticket.id,
+      batchId,
+      action: "FINISH",
+      actorRole,
+      before: ticket,
+      after: updated,
+    });
 
     let calledNext: Ticket | null = null;
     if (input.callNext) {
@@ -256,6 +268,7 @@ export async function finishTicket(
         await logAction(tx, {
           dayId: day.id,
           ticketId: next.id,
+          batchId,
           action: "CALL_NEXT",
           actorRole,
           before: next,
@@ -463,5 +476,95 @@ export async function reorderQueue(actorRole: Role, input: ReorderQueueInput): P
       after: givenIds,
     });
     return { day };
+  });
+}
+
+type TicketJson = {
+  status: Ticket["status"];
+  position: number | null;
+  calledAt: string | null;
+  callCount: number;
+  startedAt: string | null;
+  endedAt: string | null;
+  durationSec: number | null;
+  cancelledAt: string | null;
+  cancelReason: Ticket["cancelReason"];
+};
+
+function asTicketJson(value: Prisma.JsonValue | null): TicketJson {
+  if (value === null || typeof value !== "object" || Array.isArray(value) || typeof value.status !== "string") {
+    throw new Error("ActionLog row has no ticket snapshot to restore");
+  }
+  return value as unknown as TicketJson;
+}
+
+const toDate = (iso: string | null): Date | null => (iso ? new Date(iso) : null);
+
+// Puts one ticket back into the state its log row recorded in `before`.
+async function revertTicketAction(
+  tx: Prisma.TransactionClient,
+  dayId: string,
+  row: { ticketId: string | null; before: Prisma.JsonValue | null; after: Prisma.JsonValue | null },
+): Promise<void> {
+  const before = asTicketJson(row.before);
+  const after = asTicketJson(row.after);
+
+  const ticket = await tx.ticket.findFirst({ where: { id: row.ticketId ?? "", dayId } });
+  if (!ticket || ticket.status !== after.status) {
+    throw new AppError(409, "STALE_STATE", "The queue changed; please refresh.");
+  }
+
+  if (before.status === "CALLED" || before.status === "SERVING") {
+    const other = await tx.ticket.findFirst({
+      where: { dayId, status: { in: ["CALLED", "SERVING"] }, NOT: { id: ticket.id } },
+    });
+    if (other) throw new AppError(409, "CURRENT_ACTIVE", "Someone else is already current.");
+  }
+
+  await tx.ticket.update({
+    where: { id: ticket.id },
+    data: {
+      status: before.status,
+      position: before.position,
+      calledAt: toDate(before.calledAt),
+      callCount: before.callCount,
+      startedAt: toDate(before.startedAt),
+      endedAt: toDate(before.endedAt),
+      durationSec: before.durationSec,
+      cancelledAt: toDate(before.cancelledAt),
+      cancelReason: before.cancelReason,
+    },
+  });
+
+  if (before.status === "WAITING") {
+    const others = await tx.ticket.findMany({
+      where: { dayId, status: "WAITING", NOT: { id: ticket.id } },
+      orderBy: { position: "asc" },
+    });
+    const index = Math.min(Math.max((before.position ?? 1) - 1, 0), others.length);
+    const orderedIds = [...others.slice(0, index).map((t) => t.id), ticket.id, ...others.slice(index).map((t) => t.id)];
+    await renumberWaiting(tx, dayId, orderedIds);
+  }
+}
+
+// docs/BUSINESS_LOGIC.md → Undo.
+export async function undoLastAction(actorRole: Role, input: UndoInput): Promise<{ undone: string }> {
+  return withOpenDayLock(async (tx, day) => {
+    const found = await loadUndoable(tx, day.id, new Date());
+    if (!found) throw new AppError(409, "NOTHING_TO_UNDO", "There's nothing to undo.");
+    if (input.expectedActionId && input.expectedActionId !== found.primary.id) {
+      throw new AppError(409, "STALE_STATE", "The queue changed; please refresh.");
+    }
+
+    for (const row of [...found.rows].reverse()) await revertTicketAction(tx, day.id, row);
+
+    await logAction(tx, {
+      dayId: day.id,
+      ticketId: found.primary.ticketId ?? undefined,
+      action: "UNDO",
+      actorRole,
+      before: { actionId: found.primary.id, actions: found.rows.map((r) => r.action) },
+    });
+    return { undone: found.primary.action };
   });
 }

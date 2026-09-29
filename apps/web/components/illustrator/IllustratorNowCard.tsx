@@ -104,10 +104,7 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
           pending={callNext.isPending}
           onClick={() =>
             callNext.mutate(nextWaiting.id, {
-              onSuccess: () => {
-                vibrate();
-                onToast(`Called #${nextWaiting.number}`);
-              },
+              onSuccess: () => vibrate(),
               onError: onStale(onToast),
             })
           }
@@ -189,10 +186,7 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
             onNoShow={() => {
               setNotHere(false);
               noShow.mutate(current.id, {
-                onSuccess: () => {
-                  vibrate();
-                  onToast("Marked no-show");
-                },
+                onSuccess: () => vibrate(),
                 onError: onStale(onToast),
               });
             }}
@@ -221,10 +215,7 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
           finish.mutate(
             { id: current.id, callNext: true },
             {
-              onSuccess: () => {
-                vibrate();
-                onToast("Finished");
-              },
+              onSuccess: () => vibrate(),
               onError: onStale(onToast),
             },
           )
@@ -240,10 +231,7 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
           finish.mutate(
             { id: current.id, callNext: false },
             {
-              onSuccess: () => {
-                vibrate();
-                onToast("Finished");
-              },
+              onSuccess: () => vibrate(),
               onError: onStale(onToast),
             },
           )

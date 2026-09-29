@@ -15,6 +15,7 @@ import { QrFullscreen } from "../ui/QrFullscreen";
 import { SearchField } from "../ui/SearchField";
 import { StatusChip } from "../ui/StatusChip";
 import { Toast, useToast } from "../ui/Toast";
+import { UndoToast } from "../ui/UndoToast";
 import { AdminHeader } from "./AdminHeader";
 import { AdminMenu } from "./AdminMenu";
 import { ClosedState } from "./ClosedState";
@@ -334,6 +335,7 @@ export function AdminScreen() {
           })()
         : null}
 
+      <UndoToast currentUndoId={snapshot.undo?.actionId} onToast={showToast} />
       <Toast message={toast} />
     </div>
   );

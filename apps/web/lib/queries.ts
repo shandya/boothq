@@ -4,6 +4,7 @@ import type { QueueSnapshot } from "@boothq/shared";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as api from "./api";
 import { ApiError } from "./api";
+import { offerUndo } from "./undo-store";
 
 export const queueKey = ["queue"] as const;
 
@@ -56,13 +57,17 @@ function snapshotFromError(error: unknown): QueueSnapshot | null {
 // Every staff mutation writes its returned snapshot into the query cache so
 // the acting phone updates instantly; a 409's details.snapshot does the same
 // so the UI can resync without another request (docs/API.md → Conventions).
-function useQueueMutation<TVariables>(mutationFn: (variables: TVariables) => Promise<QueueSnapshot>) {
+function useQueueMutation<TVariables>(
+  mutationFn: (variables: TVariables) => Promise<QueueSnapshot>,
+  options: { offersUndo?: boolean } = {},
+) {
   const queryClient = useQueryClient();
   return useMutation<QueueSnapshot, unknown, TVariables>({
     mutationFn,
     onSuccess: (snapshot) => {
       queryClient.setQueryData(queueKey, snapshot);
       void queryClient.invalidateQueries({ queryKey: ticketSearchKey });
+      if (options.offersUndo) offerUndo(snapshot.undo);
     },
     onError: (error) => {
       const snapshot = snapshotFromError(error);
@@ -107,18 +112,25 @@ export function useCloseDay() {
   });
 }
 
+// Call next, Start, Finish and No-show offer a 10 s Undo on the phone that
+// tapped (docs/UI.md → Feedback).
 export function useCallNext() {
-  return useQueueMutation((expectedNextId?: string) => api.callNext(expectedNextId));
+  return useQueueMutation((expectedNextId?: string) => api.callNext(expectedNextId), { offersUndo: true });
 }
 
 export function useStartTicket() {
-  return useQueueMutation((id: string) => api.startTicket(id));
+  return useQueueMutation((id: string) => api.startTicket(id), { offersUndo: true });
 }
 
 export function useFinishTicket() {
-  return useQueueMutation(({ id, callNext }: { id: string; callNext?: boolean }) =>
-    api.finishTicket(id, { callNext }),
+  return useQueueMutation(
+    ({ id, callNext }: { id: string; callNext?: boolean }) => api.finishTicket(id, { callNext }),
+    { offersUndo: true },
   );
+}
+
+export function useUndo() {
+  return useQueueMutation((expectedActionId?: string) => api.undoLastAction(expectedActionId));
 }
 
 export function useRecallTicket() {
@@ -126,7 +138,7 @@ export function useRecallTicket() {
 }
 
 export function useNoShowTicket() {
-  return useQueueMutation((id: string) => api.noShowTicket(id));
+  return useQueueMutation((id: string) => api.noShowTicket(id), { offersUndo: true });
 }
 
 export function useRequeueTicket() {
