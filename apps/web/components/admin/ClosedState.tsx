@@ -1,4 +1,5 @@
 import type { EventDTO } from "@boothq/shared";
+import Link from "next/link";
 import { CapsuleButton } from "../ui/CapsuleButton";
 
 type ClosedStateProps = {
@@ -40,6 +41,9 @@ export function ClosedState({ event, onOpenBooth, onStartEvent, onChangeEvent }:
           Start Event
         </CapsuleButton>
       )}
+      <Link href="/admin/history" className="flex h-11 items-center text-[17px] text-link no-underline">
+        Day History
+      </Link>
     </div>
   );
 }

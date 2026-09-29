@@ -1,5 +1,6 @@
 import type {
   CreateTicketInput,
+  DayHistoryItemDTO,
   EventDTO,
   EventSummaryDTO,
   FinishTicketInput,
@@ -103,6 +104,9 @@ export const updateTicket = (id: string, input: { name?: string; phone?: string;
 export const removeTicket = (id: string) => del<QueueSnapshot>(`/tickets/${encodeURIComponent(id)}`);
 export const rotateTicketToken = (id: string) =>
   post<{ ticket: TicketDTO; snapshot: QueueSnapshot }>(`/tickets/${encodeURIComponent(id)}/rotate-token`);
+
+// Day history (admin). The CSV export is a plain link: /api/days/:id/export.csv
+export const listDayHistory = () => get<{ days: DayHistoryItemDTO[] }>("/days");
 
 // Events (admin)
 export type EventWithSummary = EventDTO & { summary: EventSummaryDTO };

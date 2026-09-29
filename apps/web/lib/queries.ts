@@ -186,6 +186,10 @@ export function useRotateTicketToken() {
   return useTicketMutation((id: string) => api.rotateTicketToken(id));
 }
 
+export function useDayHistory() {
+  return useQuery({ queryKey: ["day-history"], queryFn: api.listDayHistory });
+}
+
 const eventsKey = ["events"] as const;
 
 export function useEvents(enabled = true) {
