@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeEta, type HistoryTicket, recentHistory } from "./eta.js";
+import { averageValidSessionSec, computeEta, type HistoryTicket, recentHistory } from "./eta.js";
 
 const NOW = new Date("2024-01-01T12:00:00Z");
 const NO_HISTORY = { recentSessionsSec: [], recentChangeoversSec: [] };
@@ -253,5 +253,21 @@ describe("recentHistory", () => {
     });
     expect(result.sessionsSec).toEqual([600, 600]);
     expect(result.changeoversSec).toEqual([]);
+  });
+});
+
+describe("averageValidSessionSec", () => {
+  it("averages every valid drawing, with no window and no prior", () => {
+    expect(averageValidSessionSec([300, 600, 900])).toBe(600);
+    expect(averageValidSessionSec(Array.from({ length: 25 }, () => 420))).toBe(420);
+  });
+
+  it("ignores accidental (<60s) and forgotten (>2h) sessions", () => {
+    expect(averageValidSessionSec([10, 600, 7201])).toBe(600);
+  });
+
+  it("is 0 when there is nothing valid", () => {
+    expect(averageValidSessionSec([])).toBe(0);
+    expect(averageValidSessionSec([5, 30])).toBe(0);
   });
 });

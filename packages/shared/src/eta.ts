@@ -39,6 +39,14 @@ function validChangeovers(values: number[]): number[] {
   return values.filter((g) => g >= 0 && g <= MAX_VALID_CHANGEOVER_SEC).slice(0, HISTORY_WINDOW);
 }
 
+// Plain average over every valid drawing (no window, no prior); 0 when there
+// are none. Used for Event summaries, not for wait-time estimates.
+export function averageValidSessionSec(durationsSec: number[]): number {
+  const valid = durationsSec.filter((d) => d >= MIN_VALID_SESSION_SEC && d <= MAX_VALID_SESSION_SEC);
+  if (valid.length === 0) return 0;
+  return Math.round(valid.reduce((a, b) => a + b, 0) / valid.length);
+}
+
 // Blends the built-in default in until PRIOR_WEIGHT samples exist, so the
 // first one or two measurements don't swing the estimate.
 function blendedAverage(valid: number[], prior: number): number {
