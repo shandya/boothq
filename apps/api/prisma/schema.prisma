@@ -13,6 +13,11 @@ enum DayStatus {
   CLOSED
 }
 
+enum EventStatus {
+  ACTIVE // the venue the booth is currently at; at most one
+  ENDED
+}
+
 enum TicketStatus {
   WAITING // in line
   CALLED // illustrator called them, not seated yet
@@ -35,8 +40,22 @@ enum Role {
   SYSTEM
 }
 
+model Event {
+  id        String      @id @default(cuid())
+  name      String // 1-60 chars
+  status    EventStatus @default(ACTIVE)
+  startedAt DateTime    @default(now())
+  endedAt   DateTime?
+  days      Day[]
+  actions   ActionLog[]
+
+  @@index([status])
+}
+
 model Day {
   id                 String      @id @default(cuid())
+  eventId            String
+  event              Event       @relation(fields: [eventId], references: [id])
   status             DayStatus   @default(OPEN)
   openedAt           DateTime    @default(now())
   closedAt           DateTime?
@@ -50,6 +69,7 @@ model Day {
   actions            ActionLog[]
 
   @@index([status])
+  @@index([eventId])
 }
 
 model Ticket {
@@ -81,8 +101,10 @@ model Ticket {
 
 model ActionLog {
   id        String   @id @default(cuid())
-  dayId     String
-  day       Day      @relation(fields: [dayId], references: [id])
+  dayId     String? // null for Event operations
+  day       Day?     @relation(fields: [dayId], references: [id], onDelete: Restrict)
+  eventId   String? // set for Event operations
+  event     Event?   @relation(fields: [eventId], references: [id], onDelete: Restrict)
   ticketId  String?
   action    String // e.g. "CALL_NEXT", "START", "FINISH", "NO_SHOW", "REQUEUE", "CANCEL", "PAUSE"
   actorRole Role
@@ -91,4 +113,5 @@ model ActionLog {
   createdAt DateTime @default(now())
 
   @@index([dayId, createdAt])
+  @@index([eventId, createdAt])
 }

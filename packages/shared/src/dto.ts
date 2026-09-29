@@ -1,5 +1,23 @@
 import type { CancelReason, TicketStatus } from "./enums.js";
 
+export type EventDTO = {
+  // staff only; customers never see the Event (CLAUDE.md → Naming)
+  id: string;
+  name: string;
+  status: "ACTIVE" | "ENDED";
+  startedAt: string;
+  endedAt: string | null;
+  dayCount: number; // Days opened so far, including one that is open now
+};
+
+export type EventSummaryDTO = {
+  dayCount: number;
+  servedCount: number;
+  noShowCount: number;
+  cancelledCount: number;
+  avgSessionSec: number; // plain average over the Event's valid drawings; 0 when none
+};
+
 export type DayDTO = {
   id: string;
   status: "OPEN" | "CLOSED";
@@ -47,6 +65,7 @@ export type StatsDTO = {
 
 export type QueueSnapshot = {
   serverTime: string;
+  event: EventDTO | null; // the ACTIVE Event; null = none running (staff only)
   day: DayDTO | null; // null = booth closed, no open day
   current: TicketDTO | null; // CALLED or SERVING
   waiting: TicketDTO[]; // ordered by position

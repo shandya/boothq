@@ -73,3 +73,9 @@ export const reorderQueueSchema = z.object({
   order: z.array(z.string().min(1)),
 });
 export type ReorderQueueInput = z.infer<typeof reorderQueueSchema>;
+
+export const startEventSchema = z.object({ name: nameSchema });
+export type StartEventInput = z.infer<typeof startEventSchema>;
+
+export const renameEventSchema = z.object({ name: nameSchema });
+export type RenameEventInput = z.infer<typeof renameEventSchema>;

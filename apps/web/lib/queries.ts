@@ -173,3 +173,41 @@ export function useRemoveTicket() {
 export function useRotateTicketToken() {
   return useTicketMutation((id: string) => api.rotateTicketToken(id));
 }
+
+const eventsKey = ["events"] as const;
+
+export function useEvents(enabled = true) {
+  return useQuery({ queryKey: eventsKey, queryFn: api.listEvents, enabled });
+}
+
+// Event changes rewrite what the closed card and the Events sheet show, so
+// they refresh the list alongside the queue snapshot.
+function useEventMutation<TVariables, TResult>(
+  mutationFn: (variables: TVariables) => Promise<TResult>,
+  toSnapshot: (result: TResult) => QueueSnapshot,
+) {
+  const queryClient = useQueryClient();
+  return useMutation<TResult, unknown, TVariables>({
+    mutationFn,
+    onSuccess: (result) => {
+      queryClient.setQueryData(queueKey, toSnapshot(result));
+      void queryClient.invalidateQueries({ queryKey: eventsKey });
+    },
+    onError: (error) => {
+      const snapshot = snapshotFromError(error);
+      if (snapshot) queryClient.setQueryData(queueKey, snapshot);
+    },
+  });
+}
+
+export function useStartEvent() {
+  return useEventMutation(api.startEvent, (snapshot) => snapshot);
+}
+
+export function useRenameEvent() {
+  return useEventMutation(api.renameEvent, (snapshot) => snapshot);
+}
+
+export function useEndEvent() {
+  return useEventMutation(api.endEvent, (result) => result.snapshot);
+}

@@ -147,7 +147,9 @@ Polls `GET /api/public/tickets/:token` every 10 s.
 
 Polls `GET /api/queue` every 5 s.
 
-**No open day**: centered card "Booth is closed" + **Open booth** button → sheet with "Tell customers to head back when ___ people are ahead" (stepper, default 3, 0 = off). No timing inputs: drawing time and time between customers are measured automatically (`BUSINESS_LOGIC.md` §5). Once Events exist, this card also shows the current event (`EVENTS.md` → UI).
+**No open day**: centered card "Booth is closed" + **Open booth** button → sheet with "Tell customers to head back when ___ people are ahead" (stepper, default 3, 0 = off). No timing inputs: drawing time and time between customers are measured automatically (`BUSINESS_LOGIC.md` §5). The card also shows the ACTIVE Event: "{name} · Day {n}" with a small **Change** button that opens the Events sheet. With no ACTIVE Event it reads "No event running" and its button is **Start Event** (`EVENTS.md` → UI).
+
+**Events**: **Admin menu → Events** (and **Change** on the closed card) opens the Events sheet: the ACTIVE Event on top (name, start date, Days, served, **Rename**, **End Event**), then past Events (name, date range, Days, served), and **Start New Event** at the bottom. While a Day is open, Start/End are disabled with the hint "Close the booth first." The **Start Event** sheet has a Name field (autofocus, 1–60 chars) and the footer "Wait-time estimates will start fresh for this event." plus "This ends {current name}." when one is running, in which case Start asks for confirmation first.
 
 **Open day layout**
 
@@ -181,7 +183,7 @@ Polls `GET /api/queue` every 5 s.
   - CALLED / NO_SHOW: the same staff actions as the illustrator (start, requeue, no-show).
   - CALLED: **Remove**.
 
-**Settings sheet**: accepting tickets toggle; read-only "Typical drawing time" and "Time between customers" rows (measured values from `stats`) with the footnote "Measured automatically from the last 10 customers. Used for wait-time estimates."; heads-up threshold.
+**Settings sheet**: accepting tickets toggle; read-only "Typical drawing time" and "Time between customers" rows (measured values from `stats`) with the footnote "Measured from the last 10 customers at this event. Used for wait-time estimates."; heads-up threshold.
 
 **Close booth**: confirm sheet listing how many waiting tickets will be cancelled → Day summary screen (served, no-shows, cancelled, average session, longest wait) → "Booth is closed".
 

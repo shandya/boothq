@@ -43,7 +43,7 @@ export function SettingsSheet({ day, stats, onClose }: SettingsSheetProps) {
           </GroupedRow>
         </GroupedList>
         <p className="px-4 text-[13px] text-label-2">
-          Measured automatically from the last {HISTORY_WINDOW} customers. Used for wait-time estimates.
+          Measured from the last {HISTORY_WINDOW} customers at this event. Used for wait-time estimates.
         </p>
       </div>
 

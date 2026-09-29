@@ -70,7 +70,7 @@ CREATE UNIQUE INDEX "Event_one_active" ON "Event" ("status") WHERE "status" = 'A
 
 ## Business logic
 
-All Event operations run in the service layer inside a transaction that locks the ACTIVE Event row (`SELECT ... FOR UPDATE`), and check for an OPEN Day inside the same transaction. Each writes an ActionLog row.
+All Event operations run in the service layer inside a transaction that first takes a transaction-scoped Postgres advisory lock (`pg_advisory_xact_lock`, see `lockEvents()` in `day-lock.ts`), and check for an OPEN Day inside the same transaction. `openDay` takes the same lock, so opening a Day can't slip in between an Event operation's `DAY_OPEN` check and its commit. An advisory lock is used instead of locking the ACTIVE Event row because with no ACTIVE Event there is no row to lock, and two concurrent "start event" calls would race. Each operation writes an ActionLog row (a start that ends the previous Event logs one `START_EVENT` row whose `before` is the ended Event).
 
 | Operation | Rules |
 |---|---|
@@ -99,6 +99,7 @@ type EventDTO = {
   status: 'ACTIVE' | 'ENDED';
   startedAt: string;
   endedAt: string | null;
+  dayCount: number; // Days opened so far, including one open now; drives "Day 3" on the closed card
 };
 
 type EventSummaryDTO = {

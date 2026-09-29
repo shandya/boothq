@@ -19,6 +19,15 @@ export async function withOpenDayLock<T>(
   );
 }
 
+// Serializes everything that decides which Event is ACTIVE or that attaches a
+// Day to it: start/end Event and open Day. (docs/EVENTS.md says to lock the
+// ACTIVE Event row, but with no ACTIVE Event there is no row to lock, and two
+// concurrent "start event" calls would race. A transaction-scoped advisory
+// lock covers both cases and works behind a pooled connection.)
+export async function lockEvents(tx: Prisma.TransactionClient): Promise<void> {
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext('boothq:events'))`;
+}
+
 // Renumbers the given WAITING tickets to positions 1..n, in the given
 // order (docs/BUSINESS_LOGIC.md §3). Callers pass every WAITING ticket id
 // for the Day, in the order they should end up in.

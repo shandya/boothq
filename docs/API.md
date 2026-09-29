@@ -19,12 +19,29 @@ Base path `/api`. JSON in, JSON out. All request schemas are zod schemas exporte
 | 401 | `UNAUTHENTICATED` | no or expired session; wrong PIN returns `INVALID_PIN` |
 | 403 | `FORBIDDEN` | illustrator calling an admin endpoint; bad Origin |
 | 404 | `NOT_FOUND` | unknown ticket id or token (including rotated tokens) |
-| 409 | `DAY_NOT_OPEN`, `DAY_ALREADY_OPEN`, `DAY_PAUSED`, `NOT_ACCEPTING`, `DUPLICATE_ACTIVE_TICKET`, `INVALID_TRANSITION`, `CURRENT_ACTIVE`, `QUEUE_EMPTY`, `STALE_STATE` | see `BUSINESS_LOGIC.md` |
+| 409 | `DAY_NOT_OPEN`, `DAY_ALREADY_OPEN`, `DAY_PAUSED`, `NOT_ACCEPTING`, `DUPLICATE_ACTIVE_TICKET`, `INVALID_TRANSITION`, `CURRENT_ACTIVE`, `QUEUE_EMPTY`, `STALE_STATE`, `NO_ACTIVE_EVENT`, `DAY_OPEN` | see `BUSINESS_LOGIC.md` |
 | 429 | `RATE_LIMITED` | too many requests |
 
 ## Shared types
 
 ```ts
+type EventDTO = {             // staff only; customers never see the Event
+  id: string;
+  name: string;
+  status: 'ACTIVE' | 'ENDED';
+  startedAt: string;
+  endedAt: string | null;
+  dayCount: number;           // Days opened so far, including one open now
+};
+
+type EventSummaryDTO = {
+  dayCount: number;
+  servedCount: number;
+  noShowCount: number;
+  cancelledCount: number;
+  avgSessionSec: number;      // plain average over the Event's valid drawings; 0 when none
+};
+
 type DayDTO = {
   id: string;
   status: 'OPEN' | 'CLOSED';
@@ -71,6 +88,7 @@ type StatsDTO = {
 
 type QueueSnapshot = {
   serverTime: string;
+  event: EventDTO | null;      // the ACTIVE Event; null = none running (staff only)
   day: DayDTO | null;          // null = booth closed, no open day
   current: TicketDTO | null;   // CALLED or SERVING
   waiting: TicketDTO[];        // ordered by position
@@ -143,7 +161,7 @@ All return `QueueSnapshot` unless stated.
 
 | Method | Path | Body | Response |
 |---|---|---|---|
-| POST | `/api/day/open` | `{ headsUpAhead?: number /*0–10*/ }` | `QueueSnapshot`. `DAY_ALREADY_OPEN` |
+| POST | `/api/day/open` | `{ headsUpAhead?: number /*0–10*/ }` | `QueueSnapshot`. `DAY_ALREADY_OPEN`, `NO_ACTIVE_EVENT` |
 | POST | `/api/day/close` | — | `{ summary: StatsDTO, snapshot: QueueSnapshot }` |
 | PATCH | `/api/day` | `{ acceptingTickets?, headsUpAhead? }` | `QueueSnapshot` |
 | GET | `/api/tickets` | query `search?`, `status?` (comma list) | `{ tickets: TicketDTO[] }` for the open Day, search matches name (case-insensitive contains), phone digits, or exact number |
@@ -151,5 +169,9 @@ All return `QueueSnapshot` unless stated.
 | DELETE | `/api/tickets/:id` | — | `QueueSnapshot`. Soft remove (CANCELLED/ADMIN_REMOVED) |
 | POST | `/api/queue/reorder` | `{ order: string[] }` (every WAITING ticket id, in the new order) | `QueueSnapshot`. `409 VALIDATION_ERROR` if the set of ids doesn't exactly match the current WAITING tickets (covers a stale drag against a concurrent change) |
 | POST | `/api/tickets/:id/rotate-token` | — | `{ ticket, snapshot }` |
+| GET | `/api/events` | — | `{ events: (EventDTO & { summary: EventSummaryDTO })[] }`, newest first |
+| POST | `/api/events` | `{ name: string /*1–60*/ }` | Start a new Event, ending the current ACTIVE one. `QueueSnapshot`. `DAY_OPEN` |
+| PATCH | `/api/events/current` | `{ name: string }` | Rename the ACTIVE Event (allowed while a Day is open). `QueueSnapshot`. `NO_ACTIVE_EVENT` |
+| POST | `/api/events/current/end` | — | `{ summary: EventSummaryDTO, snapshot: QueueSnapshot }`. `DAY_OPEN`, `NO_ACTIVE_EVENT` |
 | GET | `/api/days` | — | **P1** `{ days: (DayDTO & { summary: StatsDTO })[] }` |
 | GET | `/api/days/:id/export.csv` | — | **P1** CSV of tickets |
