@@ -12,7 +12,7 @@
 - Booth name from `NEXT_PUBLIC_BOOTH_NAME` in headers.
 - The design reference is the Claude Design canvas "BoothQ" (light and dark rows for every screen): <https://claude.ai/artifact/F1etBuSDFs6pshetBxHvti>. Match it.
 
-## Visual style: iOS 27 layout, Londrina + mustard palette (MVP)
+## Visual style: iOS 27 layout, Londrina + blue/mustard palette (MVP)
 
 The app should feel like a native iOS 27 app: Apple's system colors, large titles, inset grouped lists, capsule buttons, and translucent "Liquid Glass" toolbars and floating bars.
 
@@ -27,7 +27,7 @@ The app should feel like a native iOS 27 app: Apple's system colors, large title
 
 - **Inset grouped lists**: rounded containers (radius 24px) on the grouped background, 1px separators inset past the leading icon, 50–64px rows.
 - **Cards**: radius 28px; stat tiles radius 20px.
-- **Buttons**: capsules (`border-radius: 999px`). Primary = accent fill, `--on-accent` text, 56–60px tall. Secondary = gray fill with link-colored text, 52px. Destructive = danger-colored text in its own grouped row.
+- **Buttons**: capsules (`border-radius: 999px`). Primary = `--accent` (blue) fill, `--on-accent` text, 56–60px tall. Secondary = gray fill with link-colored text, 52px. Destructive = danger-colored text in its own grouped row.
 - **Glass surfaces**: top-bar icon buttons (44px circles), floating bottom bars and pills use the glass tokens with `backdrop-filter: blur(24px) saturate(180%)`. Provide a solid fallback (`@supports not (backdrop-filter: blur(1px))` → use `--card`) and honor `prefers-reduced-transparency: reduce` and `prefers-contrast: more` by switching glass to solid `--card`.
 - **Sheets**: float 8px in from the screen edges with 38px corner radius, a glass close (✕) button on the left and a confirm action on the right.
 - **Segmented controls, switches, search field**: iOS style (capsule segmented control on a gray fill; 51×31 green switch; capsule search field).
@@ -40,34 +40,36 @@ The app follows the phone's light/dark setting automatically. There is no in-app
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `--bg` | `#EEE8E5` | `#1C211F` | Page (grouped) background |
-| `--card` | `#F8F4F1` | `#262C29` | Cards, grouped lists |
-| `--sheet` / `--cell` | `#EEE8E5` / `#F8F4F1` | `#262C29` / `#323936` | Sheet background / rows inside sheets |
-| `--fill` | `#EFD0AF` | `#3A423E` | Secondary buttons, number circles, search field |
+| `--bg` | `#E9F3F5` | `#1C211F` | Page (grouped) background |
+| `--card` | `#F7FBFC` | `#242C2D` | Cards, grouped lists |
+| `--sheet` / `--cell` | `#E9F3F5` / `#F7FBFC` | `#242C2D` / `#2F393B` | Sheet background / rows inside sheets |
+| `--fill` | `#C9E4EA` | `#33474C` | Secondary buttons, number circles, search field |
 | `--label` | `#1C211F` | `#EEE8E5` | Primary text |
-| `--label-2` | `#565D59` | `#B4AEA8` | Secondary text (AA contrast on both backgrounds) |
-| `--separator` | `#D8CEC6` | `#3A423E` | List separators |
-| `--accent` | `#EBAC1F` | `#EBAC1F` | Primary button fill (mustard) |
-| `--on-accent` | `#1C211F` | `#1C211F` | Text/icons on `--accent` (white fails AA on mustard) |
-| `--link` | `#266372` | `#91C8D3` | Text buttons, links, tinted icons |
+| `--label-2` | `#4C5A5E` | `#B4BFC1` | Secondary text (AA contrast on both backgrounds) |
+| `--separator` | `#CDDFE3` | `#37454A` | List separators |
+| `--accent` | `#2A6F80` | `#91C8D3` | **Primary** (blue): primary button fill, selected states |
+| `--on-accent` | `#FFFFFF` | `#1C211F` | Text/icons on `--accent` |
+| `--pop` | `#EBAC1F` | `#EBAC1F` | **Accent** (mustard): "your turn" takeover, "You" circle, floating action button |
+| `--on-pop` | `#1C211F` | `#1C211F` | Text/icons on `--pop` (white fails AA on mustard) |
+| `--link` | `#1F5F70` | `#91C8D3` | Text buttons, links, tinted icons |
 | `--danger` | `#B3261E` | `#FF8F85` | Destructive text |
 | `--switch-on` | `#4F9FAE` | `#91C8D3` | Switches, live dots |
-| `--glass` | `rgba(238,232,229,.72)` | `rgba(38,44,41,.72)` | Glass surfaces |
+| `--glass` | `rgba(233,243,245,.72)` | `rgba(36,44,45,.72)` | Glass surfaces |
 | `--glass-edge` | `rgba(255,255,255,.9)` | `rgba(238,232,229,.14)` | Glass 1px border |
 | `--dim` | `rgba(28,33,31,.35)` | `rgba(0,0,0,.55)` | Backdrop behind sheets |
 
-Palette source: mustard `#EBAC1F`, sky `#91C8D3`, peach `#EFD0AF`, ink `#1C211F`, paper `#EEE8E5`; the dark scheme swaps ink and paper and lifts card/fill tones from ink.
+Palette source: sky blue `#91C8D3` (primary family, with a deeper blue `#2A6F80` derived for light-mode buttons/links), mustard `#EBAC1F` (accent), peach `#EFD0AF`, ink `#1C211F`, paper `#EEE8E5`. Dark scheme uses ink as the background and the sky blue as primary.
 
 Status chips (background / text):
 
 | Status | Light | Dark |
 |---|---|---|
-| WAITING, NO_SHOW, CANCELLED (gray) | `#DDD3CB` / `#3B423E` | `#3A423E` / `#E0DAD4` |
+| WAITING, NO_SHOW, CANCELLED (gray) | `#D6E3E6` / `#3B4A4D` | `#37454A` / `#DBE6E8` |
 | CALLED (orange) | `#F9E2B0` / `#6E4300` | `#3D2C08` / `#F3BF52` |
-| SERVING (blue) | `#D3E9EE` / `#1D5866` | `#1C3A42` / `#A8D6DF` |
+| SERVING (blue) | `#BFE0E8` / `#174F5E` | `#1F4650` / `#B5DFE8` |
 | DONE, Open (green) | `#DBE9D6` / `#2A6535` | `#1F3421` / `#9FD39B` |
 
-Exceptions: the customer "It's your turn" takeover is solid `--accent` with `--on-accent` text in both schemes, and the QR code always sits on a white card with black modules (scanners need dark-on-light), even in dark mode.
+Exceptions: the customer "It's your turn" takeover is solid `--pop` with `--on-pop` text in both schemes, and the QR code always sits on a white card with black modules (scanners need dark-on-light), even in dark mode.
 
 ## Shared components
 
