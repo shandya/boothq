@@ -1,4 +1,4 @@
-import { callNextSchema, reorderQueueSchema } from "@boothq/shared";
+import { callNextSchema, reorderQueueSchema, undoSchema } from "@boothq/shared";
 import { Router } from "express";
 import { requireRole } from "../middleware/auth.js";
 import * as queueService from "../services/queue.service.js";
@@ -33,6 +33,17 @@ queueRouter.post(
   staffHandler(async (req, res) => {
     const input = reorderQueueSchema.parse(req.body);
     await queueService.reorderQueue(req.role!, input);
+    res.set("Cache-Control", "no-store");
+    res.json(await buildQueueSnapshot());
+  }),
+);
+
+queueRouter.post(
+  "/queue/undo",
+  requireRole("ILLUSTRATOR"),
+  staffHandler(async (req, res) => {
+    const input = undoSchema.parse(req.body);
+    await queueService.undoLastAction(req.role!, input);
     res.set("Cache-Control", "no-store");
     res.json(await buildQueueSnapshot());
   }),

@@ -69,6 +69,11 @@ export const requeueTicketSchema = z.object({
 });
 export type RequeueTicketInput = z.infer<typeof requeueTicketSchema>;
 
+export const undoSchema = z.object({
+  expectedActionId: z.string().min(1).optional(), // UndoDTO.actionId the caller is looking at
+});
+export type UndoInput = z.infer<typeof undoSchema>;
+
 export const reorderQueueSchema = z.object({
   order: z.array(z.string().min(1)),
 });

@@ -106,6 +106,7 @@ model ActionLog {
   eventId   String? // set for Event operations
   event     Event?   @relation(fields: [eventId], references: [id], onDelete: Restrict)
   ticketId  String?
+  batchId   String? // rows written by one request that Undo must reverse together (Finish + Call next)
   action    String // e.g. "CALL_NEXT", "START", "FINISH", "NO_SHOW", "REQUEUE", "CANCEL", "PAUSE"
   actorRole Role
   before    Json? // ticket/day fields before the change (enables Undo in P1)

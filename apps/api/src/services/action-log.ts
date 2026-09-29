@@ -9,6 +9,7 @@ export async function logAction(
     dayId?: string;
     eventId?: string;
     ticketId?: string;
+    batchId?: string;
     action: string;
     actorRole: Role;
     before?: unknown;
@@ -20,6 +21,7 @@ export async function logAction(
       dayId: params.dayId,
       eventId: params.eventId,
       ticketId: params.ticketId,
+      batchId: params.batchId,
       action: params.action,
       actorRole: params.actorRole,
       before: params.before === undefined ? Prisma.JsonNull : (params.before as Prisma.InputJsonValue),

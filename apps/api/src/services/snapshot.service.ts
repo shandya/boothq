@@ -25,6 +25,7 @@ import { nationalDisplay } from "../lib/phone.js";
 import { prisma } from "../lib/prisma.js";
 import { publicWebOrigin } from "../lib/public-web-url.js";
 import { getActiveEventDTO } from "./event.service.js";
+import { loadUndoable, toUndoDTO } from "./undo.js";
 
 type CurrentInput = { status: "CALLED" | "SERVING"; startedAt: Date | null } | null;
 
@@ -175,6 +176,11 @@ export async function buildDaySummary(dayId: string): Promise<StatsDTO> {
   return { ...stats, avgSessionSec };
 }
 
+async function currentUndo(dayId: string, now: Date) {
+  const undoable = await loadUndoable(prisma, dayId, now);
+  return undoable ? toUndoDTO(undoable) : null;
+}
+
 export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueSnapshot> {
   const day = await prisma.day.findFirst({ where: { status: "OPEN" } });
   const event = await getActiveEventDTO();
@@ -196,6 +202,7 @@ export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueS
         longestWaitSec: null,
         projectedFinishAt: null,
       },
+      undo: null,
     };
   }
 
@@ -233,6 +240,7 @@ export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueS
     waiting: waitingDTOs,
     recent: recent.map((t) => toTicketDTO(t, { etaSec: null })),
     stats: statsFor(day, tickets, history, now),
+    undo: await currentUndo(day.id, now),
   };
 }
 

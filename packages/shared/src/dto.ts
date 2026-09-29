@@ -63,6 +63,13 @@ export type StatsDTO = {
   projectedFinishAt: string | null; // null when queue empty
 };
 
+export type UndoDTO = {
+  actionId: string; // send back as `expectedActionId` so a stale tap can't undo someone else's newer action
+  action: "CALL_NEXT" | "START" | "FINISH" | "NO_SHOW";
+  ticketNumber: number;
+  expiresAt: string;
+};
+
 export type QueueSnapshot = {
   serverTime: string;
   event: EventDTO | null; // the ACTIVE Event; null = none running (staff only)
@@ -71,6 +78,7 @@ export type QueueSnapshot = {
   waiting: TicketDTO[]; // ordered by position
   recent: TicketDTO[]; // last 10 DONE / NO_SHOW / CANCELLED, newest first
   stats: StatsDTO;
+  undo: UndoDTO | null; // the last action, if Undo can still reverse it (staff only)
 };
 
 export type PublicTicketView = {
