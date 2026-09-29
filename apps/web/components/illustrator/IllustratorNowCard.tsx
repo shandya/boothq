@@ -120,7 +120,7 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
             })
           }
           disabled={start.isPending}
-          className="w-full cursor-pointer bg-transparent text-center text-[15px] font-medium text-link disabled:cursor-default disabled:opacity-50"
+          className="mt-4 h-11 w-full cursor-pointer bg-transparent px-4 py-2 text-center text-[15px] font-medium text-link disabled:cursor-default disabled:opacity-50"
         >
           Start directly
         </button>
@@ -145,7 +145,7 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
           >
             Start Drawing
           </CapsuleButton>
-          <div className="flex w-full gap-2">
+          <div className="mt-3 flex w-full gap-3">
             <CapsuleButton
               className="flex-1"
               variant="secondary"
