@@ -160,7 +160,7 @@ Polls `GET /api/queue` every 5 s.
 
 **Open day layout**
 
-- **Header**: booth status chip (Open / On break / Not accepting), waiting count, average session, menu (Illustrator view, Settings, Close booth, Log out).
+- **Header**: booth status chip (Open / On break / Not accepting), waiting count, average session, menu (Illustrator view, Day History, Settings, Events, Close booth, Log out).
 - **Search bar**: name, phone, or number.
 - **Sections**: *Now* (current ticket), *Waiting* (ordered), *Finished & cancelled* (collapsed by default).
 - **Row**: number, name, status chip, "waiting 14 min" / ETA, notes icon if notes exist. Tap → Ticket sheet.
@@ -191,6 +191,8 @@ Polls `GET /api/queue` every 5 s.
   - CALLED: **Remove**.
 
 **Settings sheet**: accepting tickets toggle; read-only "Typical drawing time" and "Time between customers" rows (measured values from `stats`) with the footnote "Measured from the last 10 customers at this event. Used for wait-time estimates."; heads-up threshold.
+
+**Day history**: `/admin/history`, reached from **Admin menu → Day History** and from a **Day History** link on the closed-booth card. A back button returns to `/admin`. Days are grouped under their Event's name (with "N days · M served"), newest first. Each row shows "Day {n} · {date}", the open–close times (or "Open now"), "{served} served · {no-show} no-show · {cancelled} cancelled", and "Avg drawing … · Longest wait …" when known. A 44px download button on each row exports that Day as a CSV (`API.md` → CSV format). Empty state: "No days yet". Loading and error ("Couldn't load the history" + Try Again) states as on every screen.
 
 **Close booth**: confirm sheet listing how many waiting tickets will be cancelled → Day summary screen (served, no-shows, cancelled, average session, longest wait) → "Booth is closed".
 

@@ -162,7 +162,7 @@ Docs: `UI.md` (customer), `PRD.md` C1–C8
 - [ ] `/display` screen
 - [ ] Customer alerts (sound/vibration opt-in)
 - [ ] Bilingual customer page (simple dictionary, language toggle, remembers choice in localStorage)
-- [ ] Day history + CSV export
+- [x] Day history + CSV export
 - [ ] Phone retention clean-up (script + scheduled job, e.g. Vercel Cron, nulls `phone` 30 days after `closedAt`)
 - [ ] Playwright e2e happy path on a mobile viewport
 
@@ -198,7 +198,7 @@ Docs: `EVENTS.md`
 - [x] Scope `loadRecentHistory()` to the Day's Event
 - [x] Endpoints: `GET /api/events`, `POST /api/events`, `PATCH /api/events/current`, `POST /api/events/current/end`
 - [x] Web: event name on the closed card, Start event sheet, Events sheet in the admin menu, Settings footnote
-- [ ] Web: Day history grouped by Event — waits for the Day history screen (Phase 7)
+- [x] Web: Day history grouped by Event
 - [x] All tests listed in `EVENTS.md`
 
 **Acceptance (Phase 9)**

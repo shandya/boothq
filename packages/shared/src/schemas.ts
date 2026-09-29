@@ -69,6 +69,11 @@ export const requeueTicketSchema = z.object({
 });
 export type RequeueTicketInput = z.infer<typeof requeueTicketSchema>;
 
+export const daysQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(200).optional(), // newest first; default 100
+});
+export type DaysQueryInput = z.infer<typeof daysQuerySchema>;
+
 export const undoSchema = z.object({
   expectedActionId: z.string().min(1).optional(), // UndoDTO.actionId the caller is looking at
 });

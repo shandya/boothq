@@ -22,6 +22,13 @@ export function AdminMenu({ onClose, onSettings, onEvents, onCloseBooth, onLogou
             Illustrator View
           </Link>
           <GroupedSeparator inset={0} />
+          <Link
+            href="/admin/history"
+            className="flex h-[52px] items-center justify-center text-[17px] text-link no-underline"
+          >
+            Day History
+          </Link>
+          <GroupedSeparator inset={0} />
           <button
             type="button"
             onClick={onSettings}

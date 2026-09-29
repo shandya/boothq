@@ -50,6 +50,21 @@ type UndoDTO = {              // staff only
   expiresAt: string;          // 10 minutes after the action
 };
 
+type DaySummaryDTO = {
+  ticketCount: number;
+  servedCount: number;
+  noShowCount: number;
+  cancelledCount: number;
+  avgSessionSec: number;      // plain average over the Day's valid drawings; 0 when none
+  longestWaitSec: number | null; // created → called, over called tickets
+};
+
+type DayHistoryItemDTO = DayDTO & {   // staff only
+  event: { id: string; name: string };
+  dayNumber: number;          // 1-based position of the Day within its Event
+  summary: DaySummaryDTO;
+};
+
 type DayDTO = {
   id: string;
   status: 'OPEN' | 'CLOSED';
@@ -182,5 +197,9 @@ All return `QueueSnapshot` unless stated.
 | POST | `/api/events` | `{ name: string /*1–60*/ }` | Start a new Event, ending the current ACTIVE one. `QueueSnapshot`. `DAY_OPEN` |
 | PATCH | `/api/events/current` | `{ name: string }` | Rename the ACTIVE Event (allowed while a Day is open). `QueueSnapshot`. `NO_ACTIVE_EVENT` |
 | POST | `/api/events/current/end` | — | `{ summary: EventSummaryDTO, snapshot: QueueSnapshot }`. `DAY_OPEN`, `NO_ACTIVE_EVENT` |
-| GET | `/api/days` | — | **P1** `{ days: (DayDTO & { summary: StatsDTO })[] }` |
-| GET | `/api/days/:id/export.csv` | — | **P1** CSV of tickets |
+| GET | `/api/days` | query `limit?` (1–200, default 100) | `{ days: DayHistoryItemDTO[] }`, newest first, including the Day that is open now |
+| GET | `/api/days/:id/export.csv` | — | CSV download of one Day's tickets, one row per ticket in ticket-number order. `404 NOT_FOUND` for an unknown Day. See below |
+
+Both `/api/days` routes are **admin only** because the history and export contain customers' phone numbers.
+
+**CSV format**: UTF-8 with a leading BOM (so Excel reads accents and emoji correctly), CRLF line endings, RFC 4180 quoting. Columns: `Number, Name, Phone, Status, Notes, Cancel reason, Joined, Called, Started, Finished, Drawing (sec), Times called`. Timestamps are ISO 8601 in UTC. `Phone` is E.164 and is empty once the retention job has erased it. Free-text cells (name, notes) that start with `=`, `+`, `-`, `@`, tab or carriage return get a leading apostrophe so a spreadsheet can't run them as a formula (CSV injection); a real E.164 number is left as is. The filename is `boothq-{event}-day-{n}-{yyyy-mm-dd}.csv`.

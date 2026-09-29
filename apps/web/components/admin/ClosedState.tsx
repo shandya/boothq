@@ -1,4 +1,5 @@
 import type { EventDTO, TicketDTO } from "@boothq/shared";
+import Link from "next/link";
 import { CapsuleButton } from "../ui/CapsuleButton";
 import { ReadyForPickupSection } from "./ReadyForPickupSection";
 
@@ -48,6 +49,9 @@ export function ClosedState({ event, onOpenBooth, onStartEvent, onChangeEvent, r
           <ReadyForPickupSection tickets={readyForPickup} onToast={onToast} />
         </div>
       ) : null}
+      <Link href="/admin/history" className="flex h-11 items-center text-[17px] text-link no-underline">
+        Day History
+      </Link>
     </div>
   );
 }

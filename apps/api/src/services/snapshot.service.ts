@@ -1,4 +1,5 @@
 import {
+  averageValidSessionSec,
   computeEta,
   type DayDTO,
   type PublicTicketView,
@@ -175,11 +176,8 @@ export async function buildDaySummary(dayId: string): Promise<StatsDTO> {
   const stats = await buildStats(dayId);
   const durations = (
     await prisma.ticket.findMany({ where: { dayId, status: { in: ["DONE", "READY"] } }, select: { durationSec: true } })
-  ).flatMap((t) => (t.durationSec != null && t.durationSec >= 60 ? [t.durationSec] : []));
-  const avgSessionSec = durations.length
-    ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
-    : 0;
-  return { ...stats, avgSessionSec };
+  ).flatMap((t) => (t.durationSec != null ? [t.durationSec] : []));
+  return { ...stats, avgSessionSec: averageValidSessionSec(durations) };
 }
 
 async function currentUndo(dayId: string, now: Date) {
