@@ -15,7 +15,7 @@ export function IllustratorMenu({ isAdmin, onClose, onLogout }: IllustratorMenuP
         {isAdmin ? (
           <Link
             href="/admin"
-            className="flex h-[52px] items-center justify-center rounded-[20px] border border-separator bg-card text-[17px] text-link no-underline shadow-(--glass-shadow)"
+            className="flex h-[52px] items-center justify-center shape-tile sticker bg-card text-[17px] text-link no-underline shadow-(--glass-shadow)"
           >
             Admin View
           </Link>
@@ -23,7 +23,7 @@ export function IllustratorMenu({ isAdmin, onClose, onLogout }: IllustratorMenuP
         <button
           type="button"
           onClick={onLogout}
-          className="flex h-[52px] cursor-pointer items-center justify-center rounded-[20px] border border-separator bg-card text-[17px] font-semibold text-link shadow-(--glass-shadow)"
+          className="flex h-[52px] cursor-pointer items-center justify-center shape-tile sticker bg-card text-[17px] font-semibold text-link shadow-(--glass-shadow)"
         >
           Log Out
         </button>

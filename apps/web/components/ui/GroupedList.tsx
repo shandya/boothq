@@ -2,7 +2,7 @@ import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "reac
 import clsx from "clsx";
 
 export function GroupedList({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={clsx("flex flex-col overflow-hidden rounded-[24px] bg-card", className)}>{children}</div>;
+  return <div className={clsx("flex flex-col overflow-hidden shape-card sticker bg-card", className)}>{children}</div>;
 }
 
 export function GroupedSeparator({ inset = 16 }: { inset?: number }) {

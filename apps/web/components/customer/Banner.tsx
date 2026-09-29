@@ -12,7 +12,7 @@ export function Banner({ icon, lines }: BannerProps) {
   return (
     <div
       role="status"
-      className="flex items-start gap-2.5 rounded-[20px] bg-status-orange-bg px-4 py-3 text-status-orange-fg"
+      className="flex items-start gap-2.5 shape-tile bg-status-orange-bg px-4 py-3 text-status-orange-fg"
     >
       {icon}
       <div className="flex flex-col gap-0.5 text-[14px] font-medium leading-[1.35]">

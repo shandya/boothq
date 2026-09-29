@@ -43,7 +43,7 @@ function pauseLabel(day: DayDTO): string {
 
 // Card wrapper: radius 28px (docs/UI.md → Components: Cards).
 function Card({ children }: { children: ReactNode }) {
-  return <div className="flex flex-col items-start gap-1.5 rounded-[28px] bg-card p-5">{children}</div>;
+  return <div className="flex flex-col items-start gap-1.5 shape-card sticker bg-card p-5">{children}</div>;
 }
 
 export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, onToast }: IllustratorNowCardProps) {

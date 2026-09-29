@@ -39,7 +39,7 @@ export function QrFullscreen({ number, name, url, onCopyLink, onDone }: QrFullsc
         <span className="text-[22px] font-semibold">{name}</span>
       </div>
 
-      <div className="self-center rounded-[32px] bg-white p-[18px] shadow-[0_6px_24px_rgba(0,0,0,0.10)]">
+      <div className="self-center shape-card sticker bg-white p-[18px]">
         <QRCodeSVG value={url} size={250} level="M" marginSize={4} title={`QR code for ticket ${number}`} />
       </div>
 

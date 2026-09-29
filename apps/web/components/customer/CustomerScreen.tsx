@@ -161,7 +161,7 @@ export function CustomerScreen({ token }: { token: string }) {
           </div>
 
           {view.eta ? (
-            <div className="flex flex-col items-center gap-3 rounded-[28px] bg-card p-5 text-center">
+            <div className="flex flex-col items-center gap-3 shape-card sticker bg-card p-5 text-center">
               <div className="flex flex-col items-center gap-0.5">
                 <span className="text-[13px] font-semibold uppercase tracking-[0.02em] text-label-2">
                   Estimated wait

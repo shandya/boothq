@@ -16,7 +16,7 @@ export function CloseSummary({ summary, onDone }: { summary: StatsDTO; onDone: (
         <SummaryTile label="Cancelled" value={String(summary.cancelledCount)} />
         <SummaryTile label="Avg drawing" value={formatDuration(summary.avgSessionSec)} />
       </div>
-      <div className="flex flex-col gap-1 rounded-[20px] bg-card px-4 py-3.5">
+      <div className="flex flex-col gap-1 shape-tile sticker bg-card px-4 py-3.5">
         <span className="text-[12px] font-semibold text-label-2">Longest wait</span>
         <span className="text-[22px] font-bold tabular-nums">
           {summary.longestWaitSec != null ? formatDuration(summary.longestWaitSec) : "—"}
@@ -31,7 +31,7 @@ export function CloseSummary({ summary, onDone }: { summary: StatsDTO; onDone: (
 
 function SummaryTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-1 rounded-[20px] bg-card px-4 py-3.5">
+    <div className="flex flex-col gap-1 shape-tile sticker bg-card px-4 py-3.5">
       <span className="text-[12px] font-semibold text-label-2">{label}</span>
       <span className="text-[22px] font-bold tabular-nums">{value}</span>
     </div>

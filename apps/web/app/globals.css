@@ -29,6 +29,7 @@
   --glass-edge: rgba(255, 255, 255, 0.9);
   --glass-shadow: 0 8px 28px rgba(28, 33, 31, 0.14);
   --dim: rgba(28, 33, 31, 0.35);
+  --outline: #1c211f;
 
   --status-gray-bg: #d6e3e6;
   --status-gray-fg: #3b4a4d;
@@ -64,6 +65,7 @@
     --glass-edge: rgba(238, 232, 229, 0.14);
     --glass-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
     --dim: rgba(0, 0, 0, 0.55);
+    --outline: #6d8a91;
 
     --status-gray-bg: #37454a;
     --status-gray-fg: #dbe6e8;
@@ -102,6 +104,8 @@
   --color-danger: var(--danger);
   --color-switch-on: var(--switch-on);
   --color-ring: var(--ring);
+  --color-outline: var(--outline);
+  --color-dim: var(--dim);
   --color-track: var(--track);
 
   --color-status-gray-bg: var(--status-gray-bg);
@@ -186,4 +190,51 @@ body {
 
 .shake {
   animation: shake 0.4s ease-in-out;
+}
+
+/* Organic shapes: asymmetric radii instead of perfect rounded rectangles,
+   with a few variants cycled by position so neighbours are never identical.
+   Pair with .sticker for the hand-printed outline + offset shadow. */
+.shape-card {
+  border-radius: 34px 26px 32px 24px / 26px 34px 24px 32px;
+}
+.shape-card:nth-child(3n + 2) {
+  border-radius: 26px 34px 24px 32px / 32px 24px 34px 26px;
+}
+.shape-card:nth-child(3n) {
+  border-radius: 30px 30px 36px 24px / 34px 26px 30px 32px;
+}
+
+.shape-tile {
+  border-radius: 24px 18px 22px 16px / 18px 24px 16px 22px;
+}
+.shape-tile:nth-child(2n) {
+  border-radius: 18px 24px 16px 22px / 22px 16px 24px 18px;
+}
+
+.shape-btn {
+  border-radius: 34px 26px 32px 28px / 28px 32px 26px 34px;
+}
+.shape-btn:nth-child(2n) {
+  border-radius: 26px 34px 28px 32px / 32px 26px 34px 28px;
+}
+
+.shape-modal {
+  border-radius: 40px 32px 38px 30px / 32px 40px 30px 38px;
+}
+
+.sticker {
+  border: 2px solid var(--outline);
+  box-shadow: 3px 4px 0 var(--outline);
+}
+
+button.sticker:active,
+a.sticker:active {
+  transform: translate(2px, 3px);
+  box-shadow: 1px 1px 0 var(--outline);
+}
+
+/* Faint paper grain (inline SVG noise) so flat backgrounds don't look digital. */
+body {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.11 0 0 0 0 0.13 0 0 0 0 0.12 0 0 0 0.05 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
 }

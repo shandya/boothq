@@ -25,11 +25,12 @@ The app should feel like a native iOS 27 app: Apple's system colors, large title
 
 ### Components
 
-- **Inset grouped lists**: rounded containers (radius 24px) on the grouped background, 1px separators inset past the leading icon, 50–64px rows.
-- **Cards**: radius 28px; stat tiles radius 20px.
-- **Buttons**: capsules (`border-radius: 999px`). Primary = `--accent` (blue) fill, `--on-accent` text, 56–60px tall. Secondary = gray fill with link-colored text, 52px. Destructive = danger-colored text in its own grouped row.
+- **Organic shapes**: cards, lists, tiles, buttons and modals use asymmetric elliptical radii (`.shape-card`, `.shape-tile`, `.shape-btn`, `.shape-modal` in `globals.css`) with 2–3 variants cycled by position so neighbours differ. Add `.sticker` for the 2px `--outline` border and 3px/4px solid offset shadow (pressed state shifts it). A faint SVG paper-grain sits on the page background. The QR code sits on a white `.shape-card`, tap targets stay ≥44px.
+- **Grouped lists**: organic-shaped containers on the page background, 1px separators inset past the leading icon, 50–64px rows.
+- **Cards**: `.shape-card`; stat tiles `.shape-tile`.
+- **Buttons**: capsules (`border-radius: 999px`). Primary = `--accent` (blue) fill, `.shape-btn .sticker`, `--on-accent` text, 56–60px tall. Secondary = gray fill with link-colored text, 52px. Destructive = danger-colored text in its own grouped row.
 - **Glass surfaces**: top-bar icon buttons (44px circles), floating bottom bars and pills use the glass tokens with `backdrop-filter: blur(24px) saturate(180%)`. Provide a solid fallback (`@supports not (backdrop-filter: blur(1px))` → use `--card`) and honor `prefers-reduced-transparency: reduce` and `prefers-contrast: more` by switching glass to solid `--card`.
-- **Sheets**: float 8px in from the screen edges with 38px corner radius, a glass close (✕) button on the left and a confirm action on the right.
+- **Modals**: every dialog is built on `components/ui/Modal.tsx`: centered on screen (never bottom sheets), 24px side margin, max 380px wide, `.shape-modal .sticker` on `--sheet`, 20px title centered, dimmed backdrop (`--dim`). Form dialogs (`Sheet`) add a ✕ on the left and an optional confirm action on the right. Alerts (`ConfirmSheet`, `NotHereSheet`, `TicketNoteSheet`) put their actions as full-width stacked capsule buttons in the footer: primary/destructive first, Cancel last. New dialogs must use `Modal`, not hand-rolled overlays.
 - **Segmented controls, switches, search field**: iOS style (capsule segmented control on a gray fill; 51×31 green switch; capsule search field).
 - **Icons**: SF Symbols look: 2px stroke, rounded caps. Use `lucide-react` in the app.
 - Minimum touch target 44×44px.
