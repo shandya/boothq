@@ -3,7 +3,7 @@ import { Router } from "express";
 import { AppError } from "../lib/errors.js";
 import { requireRole } from "../middleware/auth.js";
 import * as queueService from "../services/queue.service.js";
-import { buildQueueSnapshot, buildStats } from "../services/snapshot.service.js";
+import { buildDaySummary, buildQueueSnapshot } from "../services/snapshot.service.js";
 import { staffHandler } from "./util.js";
 
 export const dayRouter = Router();
@@ -24,7 +24,7 @@ dayRouter.post(
   requireRole("ADMIN"),
   staffHandler(async (req, res) => {
     const { day } = await queueService.closeDay(req.role!);
-    const summary = await buildStats(day.id);
+    const summary = await buildDaySummary(day.id);
     res.set("Cache-Control", "no-store");
     res.json({ summary, snapshot: await buildQueueSnapshot() });
   }),

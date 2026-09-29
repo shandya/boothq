@@ -1,6 +1,6 @@
 "use client";
 
-import type { DayDTO } from "@boothq/shared";
+import { type DayDTO, formatDuration, HISTORY_WINDOW, type StatsDTO } from "@boothq/shared";
 import { useState } from "react";
 import { usePatchDay } from "../../lib/queries";
 import { CapsuleButton } from "../ui/CapsuleButton";
@@ -9,24 +9,16 @@ import { Sheet } from "../ui/Sheet";
 import { Switch } from "../ui/Switch";
 import { Stepper } from "./Stepper";
 
-export function SettingsSheet({ day, onClose }: { day: DayDTO; onClose: () => void }) {
-  const [typicalMin, setTypicalMin] = useState(Math.round(day.defaultDurationSec / 60));
-  const [betweenMin, setBetweenMin] = useState(Math.round(day.changeoverSec / 60));
+type SettingsSheetProps = { day: DayDTO; stats: StatsDTO; onClose: () => void };
+
+export function SettingsSheet({ day, stats, onClose }: SettingsSheetProps) {
   const [headsUpAhead, setHeadsUpAhead] = useState(day.headsUpAhead);
   const [accepting, setAccepting] = useState(day.acceptingTickets);
 
   const mutation = usePatchDay();
 
   function save() {
-    mutation.mutate(
-      {
-        defaultDurationSec: typicalMin * 60,
-        changeoverSec: betweenMin * 60,
-        headsUpAhead,
-        acceptingTickets: accepting,
-      },
-      { onSuccess: onClose },
-    );
+    mutation.mutate({ headsUpAhead, acceptingTickets: accepting }, { onSuccess: onClose });
   }
 
   return (
@@ -38,45 +30,22 @@ export function SettingsSheet({ day, onClose }: { day: DayDTO; onClose: () => vo
         </GroupedRow>
       </GroupedList>
 
-      <GroupedList>
-        <GroupedRow minHeight={52} className="justify-between">
-          <label htmlFor="st-typical" className="text-[17px]">
-            Typical drawing time
-          </label>
-          <div className="flex items-center gap-1">
-            <input
-              id="st-typical"
-              type="number"
-              inputMode="numeric"
-              min={1}
-              max={120}
-              value={typicalMin}
-              onChange={(event) => setTypicalMin(Math.max(1, Number(event.target.value) || 1))}
-              className="w-12 border-none bg-transparent text-right text-[17px] text-label outline-none"
-            />
-            <span className="text-[15px] text-label-2">min</span>
-          </div>
-        </GroupedRow>
-        <GroupedSeparator />
-        <GroupedRow minHeight={52} className="justify-between">
-          <label htmlFor="st-between" className="text-[17px]">
-            Time between customers
-          </label>
-          <div className="flex items-center gap-1">
-            <input
-              id="st-between"
-              type="number"
-              inputMode="numeric"
-              min={0}
-              max={30}
-              value={betweenMin}
-              onChange={(event) => setBetweenMin(Math.max(0, Number(event.target.value) || 0))}
-              className="w-12 border-none bg-transparent text-right text-[17px] text-label outline-none"
-            />
-            <span className="text-[15px] text-label-2">min</span>
-          </div>
-        </GroupedRow>
-      </GroupedList>
+      <div className="flex flex-col gap-2">
+        <GroupedList>
+          <GroupedRow minHeight={52} className="justify-between">
+            <span className="text-[17px]">Typical drawing time</span>
+            <span className="text-[17px] text-label-2 tabular-nums">{formatDuration(stats.avgSessionSec)}</span>
+          </GroupedRow>
+          <GroupedSeparator />
+          <GroupedRow minHeight={52} className="justify-between">
+            <span className="text-[17px]">Time between customers</span>
+            <span className="text-[17px] text-label-2 tabular-nums">{formatDuration(stats.avgChangeoverSec)}</span>
+          </GroupedRow>
+        </GroupedList>
+        <p className="px-4 text-[13px] text-label-2">
+          Measured automatically from the last {HISTORY_WINDOW} customers. Used for wait-time estimates.
+        </p>
+      </div>
 
       <GroupedList>
         <GroupedRow minHeight={52} className="justify-between">

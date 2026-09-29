@@ -219,7 +219,9 @@ export function AdminScreen() {
         />
       ) : null}
 
-      {overlay.type === "settings" ? <SettingsSheet day={day} onClose={() => setOverlay({ type: "none" })} /> : null}
+      {overlay.type === "settings" ? (
+        <SettingsSheet day={day} stats={snapshot.stats} onClose={() => setOverlay({ type: "none" })} />
+      ) : null}
 
       {overlay.type === "closeConfirm" ? (
         <ConfirmSheet

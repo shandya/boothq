@@ -1,6 +1,8 @@
 # Data Model
 
 > The draw-from-photo feature (after MVP) adds a `mode`, photo fields, a `READY` status and extra transitions. See `PHOTO_TICKETS.md`; don't add them during MVP phases.
+>
+> The Events feature (after MVP) adds an `Event` model that groups Days (`Day.eventId`). See `EVENTS.md`.
 
 ## Prisma schema
 
@@ -49,9 +51,9 @@ model Day {
   closedAt           DateTime?
   nextNumber         Int       @default(1)
   acceptingTickets   Boolean   @default(true)
-  defaultDurationSec Int       @default(600) // prior for ETA before real data exists
-  changeoverSec      Int       @default(60)  // gap between customers (payment, seating)
   headsUpAhead       Int       @default(3)   // show "head back to the booth" when this many or fewer are ahead
+  // Drawing time and time between customers are measured from recent tickets,
+  // not stored (BUSINESS_LOGIC.md §5). Events (EVENTS.md) will add `eventId`.
   pausedAt           DateTime? // non-null = on break
   pauseUntil         DateTime? // null while paused = untimed break
   pauseReason        String?
@@ -85,6 +87,7 @@ model Ticket {
   @@unique([dayId, number])
   @@index([dayId, status, position])
   @@index([phone])
+  @@index([startedAt]) // recent-history lookup for the measured ETA
 }
 
 model ActionLog {

@@ -35,7 +35,7 @@ At a live illustration booth each portrait takes several minutes, so a line form
 3. Customer scans the QR with their camera and lands on `/t/{token}`: their number, now serving, people ahead, estimated wait.
 4. Illustrator taps **Call next**. The customer's page switches to "It's your turn".
 5. Customer sits down. Illustrator taps **Start drawing**, which starts the session timer.
-6. Illustrator taps **Finish** (or **Finish & call next**). The session duration feeds the day's average, which updates everyone's ETA.
+6. Illustrator taps **Finish** (or **Finish & call next**). The session duration and the gap before the next Start feed the measured drawing time and time between customers (last 10 customers), which update everyone's ETA.
 7. At the end, admin taps **Close booth** and sees a day summary.
 
 ## Features
@@ -46,7 +46,7 @@ Priority: **MVP** = build first. **P1** = right after MVP. **P2** = later.
 
 | ID | Feature | Priority |
 |---|---|---|
-| C1 | Shows their number and first name, the number now being served, people ahead, and ETA as a range plus clock time ("~20–25 min, around 14:35"). Small note: "Based on today's average drawing time of 8 min." | MVP |
+| C1 | Shows their number and first name, the number now being served, people ahead, and ETA as a range plus clock time ("~20–25 min, around 14:35"). Small note: "Based on the recent average drawing time of 8 min." | MVP |
 | C2 | Clear state for each status: waiting, your turn, being drawn, done, missed (no-show), cancelled, plus booth-on-break and booth-closed banners | MVP |
 | C3 | Auto-refresh every 10 s, "Updated 4 s ago" label, offline indicator, pauses polling when the tab is hidden, refreshes on focus | MVP |
 | C4 | Cancel my place, with a confirmation sheet | MVP |
@@ -62,7 +62,7 @@ Priority: **MVP** = build first. **P1** = right after MVP. **P2** = later.
 
 | ID | Feature | Priority |
 |---|---|---|
-| A1 | Open booth (set default session length, changeover time, and heads-up threshold) and Close booth (remaining waiting tickets are cancelled, with confirmation) | MVP |
+| A1 | Open booth (set the heads-up threshold) and Close booth (remaining waiting tickets are cancelled, with confirmation). Drawing time and time between customers are never typed in: they're measured automatically from the last 10 customers and shown read-only in Settings | MVP |
 | A2 | New ticket form: name, phone, optional notes (e.g. "couple portrait", "cat ears"). Phone validated and normalized to E.164 | MVP |
 | A3 | Duplicate check: if that phone already has an active ticket today, offer "Show their existing QR" or "Create anyway" | MVP |
 | A4 | Full-screen QR after creating, with number and name, plus **Copy link** | MVP |
@@ -74,8 +74,10 @@ Priority: **MVP** = build first. **P1** = right after MVP. **P2** = later.
 | A10 | **Regenerate link**: new token, old link stops working. For a link sent to the wrong number or shared around | MVP |
 | A11 | Accepting-tickets toggle. When off, creating a ticket needs an explicit override | MVP |
 | A12 | Day summary on close: served, no-shows, cancelled, average session, longest wait | MVP |
-| A13 | History of previous days + CSV export | P1 |
+| A13 | History of previous days + CSV export (grouped by Event once A15 ships) | P1 |
 | A14 | Privacy clean-up: phone numbers erased automatically 30 days after the Day closes | P1 |
+| A15 | **Events**: start, rename and end an Event (e.g. one convention). An Event contains one or more Days. Starting a new Event means wait-time estimates are re-learned from scratch; ticket numbers still restart per Day. Spec: `EVENTS.md` | P2 |
+| A16 | Events list: name, dates, number of Days, served count | P2 |
 
 ### Illustrator console
 
@@ -85,7 +87,7 @@ The illustrator uses this between drawings, often with one hand and paint on the
 |---|---|---|
 | I1 | **Now card**: number, name, notes, status (called X min ago / drawing) | MVP |
 | I2 | **Call next** button showing who's next ("Call #10 Budi"). Disabled while someone is current | MVP |
-| I3 | **Start drawing / Finish** with a large plain session timer ("Drawing for 6:12") and one line comparing it to today's average ("Usually takes 8 min today"). No charts. Timer text turns orange past the average and red past 1.5× | MVP |
+| I3 | **Start drawing / Finish** with a large plain session timer ("Drawing for 6:12") and one line comparing it to the measured drawing time ("Usually takes 8 min"). No charts. Timer text turns orange past the average and red past 1.5× | MVP |
 | I4 | **Finish & call next** in one tap | MVP |
 | I5 | **Waiting list**: every waiting ticket in queue order, with name, notes, and how long they've waited. Read-only — no drag-to-reorder (see A8, Admin only) | MVP |
 | I5a | **New ticket** (same flow as A2–A4): a floating **+ New Ticket** button opens the same form, duplicate check, and full-screen QR as Admin's | MVP |

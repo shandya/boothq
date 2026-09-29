@@ -42,8 +42,6 @@ model Day {
   closedAt           DateTime?
   nextNumber         Int         @default(1)
   acceptingTickets   Boolean     @default(true)
-  defaultDurationSec Int         @default(600) // prior for ETA before real data exists
-  changeoverSec      Int         @default(60) // gap between customers (payment, seating)
   headsUpAhead       Int         @default(3) // show "head back to the booth" when this many or fewer are ahead
   pausedAt           DateTime? // non-null = on break
   pauseUntil         DateTime? // null while paused = untimed break
@@ -78,6 +76,7 @@ model Ticket {
   @@unique([dayId, number])
   @@index([dayId, status, position])
   @@index([phone])
+  @@index([startedAt]) // recent-history lookup for the measured ETA
 }
 
 model ActionLog {

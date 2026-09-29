@@ -81,11 +81,7 @@ export async function openDay(actorRole: Role, input: OpenDayInput): Promise<{ d
   try {
     const day = await prisma.$transaction(async (tx) => {
       const created = await tx.day.create({
-        data: {
-          defaultDurationSec: input.defaultDurationSec ?? 600,
-          changeoverSec: input.changeoverSec ?? 60,
-          headsUpAhead: input.headsUpAhead ?? 3,
-        },
+        data: { headsUpAhead: input.headsUpAhead ?? 3 },
       });
       await logAction(tx, { dayId: created.id, action: "OPEN_DAY", actorRole, after: created });
       return created;
@@ -447,8 +443,6 @@ export async function patchDay(actorRole: Role, input: PatchDayInput): Promise<{
       where: { id: day.id },
       data: {
         ...(input.acceptingTickets !== undefined ? { acceptingTickets: input.acceptingTickets } : {}),
-        ...(input.defaultDurationSec !== undefined ? { defaultDurationSec: input.defaultDurationSec } : {}),
-        ...(input.changeoverSec !== undefined ? { changeoverSec: input.changeoverSec } : {}),
         ...(input.headsUpAhead !== undefined ? { headsUpAhead: input.headsUpAhead } : {}),
       },
     });
