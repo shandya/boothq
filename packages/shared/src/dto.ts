@@ -1,4 +1,4 @@
-import type { CancelReason, TicketStatus } from "./enums.js";
+import type { CancelReason, TicketMode, TicketStatus } from "./enums.js";
 
 export type EventDTO = {
   // staff only; customers never see the Event (CLAUDE.md → Naming)
@@ -40,6 +40,8 @@ export type TicketDTO = {
   phoneDisplay: string | null; // national format for display
   notes: string | null;
   status: TicketStatus;
+  mode: TicketMode;
+  hasPhoto: boolean; // the image itself is fetched from GET /api/tickets/:id/photo
   position: number | null;
   customerUrl: string; // `${PUBLIC_WEB_URL}/t/${token}`
   createdAt: string;
@@ -49,11 +51,14 @@ export type TicketDTO = {
   endedAt: string | null;
   durationSec: number | null;
   cancelReason: CancelReason | null;
+  readyAt: string | null;
+  pickedUpAt: string | null;
   etaSec: number | null; // WAITING only
 };
 
 export type StatsDTO = {
-  servedCount: number;
+  servedCount: number; // DONE + READY (a finished portrait counts even before pickup)
+  readyForPickupCount: number;
   noShowCount: number;
   cancelledCount: number;
   waitingCount: number;
@@ -76,6 +81,7 @@ export type QueueSnapshot = {
   day: DayDTO | null; // null = booth closed, no open day
   current: TicketDTO | null; // CALLED or SERVING
   waiting: TicketDTO[]; // ordered by position
+  readyForPickup: TicketDTO[]; // READY, oldest first
   recent: TicketDTO[]; // last 10 DONE / NO_SHOW / CANCELLED, newest first
   stats: StatsDTO;
   undo: UndoDTO | null; // the last action, if Undo can still reverse it (staff only)
@@ -88,6 +94,7 @@ export type PublicTicketView = {
   number: number;
   firstName: string; // first word of name
   status: TicketStatus;
+  mode: TicketMode;
   cancelReason: CancelReason | null;
   calledAt: string | null;
   nowServing: { number: number; status: "CALLED" | "SERVING" } | null;
@@ -102,6 +109,7 @@ export type PublicTicketView = {
     confidence: "low" | "medium" | "high";
     pausedUntimed: boolean;
   } | null; // WAITING only
+  readyEta: { sec: number; estimatedAt: string } | null; // FROM_PHOTO WAITING/SERVING: when the portrait is done
   avgSessionSec: number;
   pause: { active: boolean; until: string | null; reason: string | null };
 };

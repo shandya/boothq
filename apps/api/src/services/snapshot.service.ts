@@ -44,7 +44,7 @@ export async function loadRecentHistory(eventId: string): Promise<RecentHistory>
     where: { startedAt: { not: null }, day: { eventId } },
     orderBy: { startedAt: "desc" },
     take: HISTORY_TICKET_LIMIT,
-    select: { dayId: true, status: true, createdAt: true, startedAt: true, endedAt: true, durationSec: true },
+    select: { dayId: true, status: true, mode: true, createdAt: true, startedAt: true, endedAt: true, durationSec: true },
   });
   const oldest = tickets.at(-1)?.startedAt;
   const pauses = oldest
@@ -96,6 +96,8 @@ export function toTicketDTO(ticket: Ticket, opts: { etaSec: number | null }): Ti
     phoneDisplay: ticket.phone ? nationalDisplay(ticket.phone) : null,
     notes: ticket.notes,
     status: ticket.status,
+    mode: ticket.mode,
+    hasPhoto: ticket.photoPath != null,
     position: ticket.position,
     customerUrl: `${publicWebUrl}/t/${ticket.token}`,
     createdAt: ticket.createdAt.toISOString(),
@@ -105,6 +107,8 @@ export function toTicketDTO(ticket: Ticket, opts: { etaSec: number | null }): Ti
     endedAt: ticket.endedAt?.toISOString() ?? null,
     durationSec: ticket.durationSec,
     cancelReason: ticket.cancelReason,
+    readyAt: ticket.readyAt?.toISOString() ?? null,
+    pickedUpAt: ticket.pickedUpAt?.toISOString() ?? null,
     etaSec: opts.etaSec,
   };
 }
@@ -125,7 +129,8 @@ export async function buildStats(
 }
 
 function statsFor(day: Day, tickets: Ticket[], recent: RecentHistory, now: Date): StatsDTO {
-  const servedCount = tickets.filter((t) => t.status === "DONE").length;
+  const servedCount = tickets.filter((t) => t.status === "DONE" || t.status === "READY").length;
+  const readyForPickupCount = tickets.filter((t) => t.status === "READY").length;
   const noShowCount = tickets.filter((t) => t.status === "NO_SHOW").length;
   const cancelledCount = tickets.filter((t) => t.status === "CANCELLED").length;
   const waitingCount = tickets.filter((t) => t.status === "WAITING").length;
@@ -154,6 +159,7 @@ function statsFor(day: Day, tickets: Ticket[], recent: RecentHistory, now: Date)
 
   return {
     servedCount,
+    readyForPickupCount,
     noShowCount,
     cancelledCount,
     waitingCount,
@@ -168,7 +174,7 @@ function statsFor(day: Day, tickets: Ticket[], recent: RecentHistory, now: Date)
 export async function buildDaySummary(dayId: string): Promise<StatsDTO> {
   const stats = await buildStats(dayId);
   const durations = (
-    await prisma.ticket.findMany({ where: { dayId, status: "DONE" }, select: { durationSec: true } })
+    await prisma.ticket.findMany({ where: { dayId, status: { in: ["DONE", "READY"] } }, select: { durationSec: true } })
   ).flatMap((t) => (t.durationSec != null && t.durationSec >= 60 ? [t.durationSec] : []));
   const avgSessionSec = durations.length
     ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
@@ -191,9 +197,11 @@ export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueS
       day: null,
       current: null,
       waiting: [],
+      readyForPickup: [],
       recent: [],
       stats: {
         servedCount: 0,
+        readyForPickupCount: 0,
         noShowCount: 0,
         cancelledCount: 0,
         waitingCount: 0,
@@ -211,6 +219,9 @@ export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueS
   const waiting = tickets
     .filter((t) => t.status === "WAITING")
     .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+  const readyForPickup = tickets
+    .filter((t) => t.status === "READY")
+    .sort((a, b) => (a.readyAt?.getTime() ?? 0) - (b.readyAt?.getTime() ?? 0));
   const recent = tickets
     .filter((t) => t.status === "DONE" || t.status === "NO_SHOW" || t.status === "CANCELLED")
     .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
@@ -238,6 +249,7 @@ export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueS
     day: toDayDTO(day),
     current: current ? toTicketDTO(current, { etaSec: null }) : null,
     waiting: waitingDTOs,
+    readyForPickup: readyForPickup.map((t) => toTicketDTO(t, { etaSec: null })),
     recent: recent.map((t) => toTicketDTO(t, { etaSec: null })),
     stats: statsFor(day, tickets, history, now),
     undo: await currentUndo(day.id, now),
@@ -307,7 +319,20 @@ export async function buildPublicTicketView(token: string, now: Date = new Date(
       })
     : null;
 
-  const almostUp = isWaiting && day.headsUpAhead > 0 && (peopleAhead ?? Number.POSITIVE_INFINITY) <= day.headsUpAhead;
+  const fromPhoto = ticket.mode === "FROM_PHOTO";
+  const avgSessionSec = measuredAverages(history, now).avgSessionSec;
+  // FROM_PHOTO customers care about when the portrait is done, not when they're called.
+  let readyEta: PublicTicketView["readyEta"] = null;
+  if (fromPhoto && eta) {
+    const sec = eta.etaSec + avgSessionSec;
+    readyEta = { sec, estimatedAt: new Date(now.getTime() + sec * 1000).toISOString() };
+  } else if (fromPhoto && ticket.status === "SERVING") {
+    const elapsedSec = ticket.startedAt ? (now.getTime() - ticket.startedAt.getTime()) / 1000 : 0;
+    const sec = Math.round(Math.max(avgSessionSec - elapsedSec, 60));
+    readyEta = { sec, estimatedAt: new Date(now.getTime() + sec * 1000).toISOString() };
+  }
+
+  const almostUp = !fromPhoto && isWaiting && day.headsUpAhead > 0 && (peopleAhead ?? Number.POSITIVE_INFINITY) <= day.headsUpAhead;
 
   return {
     serverTime: now.toISOString(),
@@ -315,6 +340,7 @@ export async function buildPublicTicketView(token: string, now: Date = new Date(
     number: ticket.number,
     firstName: ticket.name.split(/\s+/)[0] ?? ticket.name,
     status: ticket.status,
+    mode: ticket.mode,
     cancelReason: ticket.cancelReason,
     calledAt: ticket.calledAt?.toISOString() ?? null,
     nowServing: current ? { number: current.number, status: current.status as "CALLED" | "SERVING" } : null,
@@ -331,7 +357,8 @@ export async function buildPublicTicketView(token: string, now: Date = new Date(
           pausedUntimed: eta.pausedUntimed,
         }
       : null,
-    avgSessionSec: measuredAverages(history, now).avgSessionSec,
+    readyEta,
+    avgSessionSec,
     pause: { active: day.pausedAt != null, until: day.pauseUntil?.toISOString() ?? null, reason: day.pauseReason },
   };
 }

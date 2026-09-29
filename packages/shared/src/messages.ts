@@ -7,3 +7,8 @@ export function buildWhatsAppUrl(phoneE164: string, text: string): string {
   const digits = phoneE164.replace(/[^0-9]/g, "");
   return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
 }
+
+export const messages = {
+  readyForPickup: (v: { firstName: string; number: number; booth: string }) =>
+    `Hi ${v.firstName}! Your portrait (#${v.number}) from ${v.booth} is ready. Pick it up at the booth any time before we close.`,
+};

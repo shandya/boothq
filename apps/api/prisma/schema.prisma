@@ -22,9 +22,15 @@ enum TicketStatus {
   WAITING // in line
   CALLED // illustrator called them, not seated yet
   SERVING // being drawn
+  READY // FROM_PHOTO drawing finished, waiting for pickup
   DONE // finished
   NO_SHOW // called but didn't come
   CANCELLED // by customer, admin, or day close
+}
+
+enum TicketMode {
+  IN_PERSON
+  FROM_PHOTO // set by the service when a photo is confirmed; never by staff directly
 }
 
 enum CancelReason {
@@ -92,6 +98,11 @@ model Ticket {
   durationSec  Int? // endedAt - startedAt, set on finish
   cancelledAt  DateTime?
   cancelReason CancelReason?
+  mode            TicketMode @default(IN_PERSON)
+  photoPath       String? // storage pathname; null = no photo
+  photoUploadedAt DateTime?
+  readyAt         DateTime? // FROM_PHOTO finish time
+  pickedUpAt      DateTime?
 
   @@unique([dayId, number])
   @@index([dayId, status, position])

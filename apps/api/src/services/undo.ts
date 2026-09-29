@@ -30,6 +30,8 @@ export async function loadUndoable(
 
   const primary = rows[0];
   if (!primary || !rows.every((r) => UNDOABLE.has(r.action) && r.ticketId != null)) return null;
+  // Finishing a photo ticket deletes its photo, which Undo can't bring back.
+  if (rows.some((r) => r.action === "FINISH" && (r.before as { mode?: unknown } | null)?.mode === "FROM_PHOTO")) return null;
   if (now.getTime() - primary.createdAt.getTime() > UNDO_WINDOW_MS) return null;
   return { primary, rows };
 }

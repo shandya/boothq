@@ -12,6 +12,7 @@
   "dependencies": {
     "@boothq/shared": "workspace:*",
     "@tanstack/react-query": "^5.104.0",
+    "@vercel/blob": "^2.8.0",
     "clsx": "^2.1.1",
     "libphonenumber-js": "^1.13.14",
     "lucide-react": "^1.48.0",
