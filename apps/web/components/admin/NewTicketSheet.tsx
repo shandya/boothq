@@ -54,7 +54,7 @@ export function NewTicketSheet({ nextNumber, onClose, onCreated, onShowExisting 
             onClick={() => submit(false)}
             disabled={!canSubmit}
             aria-label="Create ticket"
-            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-accent text-white disabled:cursor-default disabled:opacity-50"
+            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-accent text-on-accent disabled:cursor-default disabled:opacity-50"
           >
             <Check className="h-5 w-5" strokeWidth={2} aria-hidden="true" />
           </button>

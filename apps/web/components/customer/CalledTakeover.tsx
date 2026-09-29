@@ -10,14 +10,14 @@ type CalledTakeoverProps = {
 // parent whenever calledAt changes (recall), even after being dismissed.
 export function CalledTakeover({ number, onDismiss }: CalledTakeoverProps) {
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-accent px-6 text-center text-white">
-      <TicketNumber number={number} size="hero" className="text-white" />
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-accent px-6 text-center text-on-accent">
+      <TicketNumber number={number} size="hero" className="text-on-accent" />
       <span className="text-[26px] font-bold">It&apos;s your turn!</span>
       <span className="text-[17px]">Please come to the booth now.</span>
       <button
         type="button"
         onClick={onDismiss}
-        className="mt-8 h-12 cursor-pointer rounded-full bg-white/20 px-7 text-[15px] font-semibold text-white"
+        className="mt-8 h-12 cursor-pointer rounded-full bg-white/20 px-7 text-[15px] font-semibold text-on-accent"
       >
         OK
       </button>

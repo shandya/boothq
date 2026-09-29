@@ -104,7 +104,7 @@ export function IllustratorScreen() {
         type="button"
         aria-label="New Ticket"
         onClick={() => setOverlay({ type: "newTicket" })}
-        className="fixed bottom-[92px] right-4 z-40 flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-accent text-white shadow-[0_6px_16px_rgba(0,113,227,0.45)]"
+        className="fixed bottom-[92px] right-4 z-40 flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-accent text-on-accent shadow-[0_6px_16px_rgba(235,172,31,0.5)]"
       >
         <Plus className="h-6 w-6" strokeWidth={2.5} aria-hidden="true" />
       </button>

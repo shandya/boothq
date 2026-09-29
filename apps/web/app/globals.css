@@ -3,73 +3,83 @@
 :root {
   color-scheme: light dark;
 
-  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-inter), system-ui, sans-serif;
+  --font-body: var(--font-londrina), "Arial Narrow", system-ui, sans-serif;
 
-  --bg: #f2f2f7;
-  --card: #ffffff;
-  --sheet: #f2f2f7;
-  --cell: #ffffff;
-  --fill: #e9e9ee;
-  --label: #000000;
-  --label-2: #6c6c70;
-  --separator: #d1d1d6;
-  --accent: #0071e3;
-  --link: #0066cc;
-  --danger: #d70015;
-  --switch-on: #248a3d;
-  --ring: #0071e3;
-  --track: #e5e5ea;
+  /* Palette: mustard #ebac1f, sky #91c8d3, peach #efd0af, ink #1c211f, paper #eee8e5 */
+  --bg: #eee8e5;
+  --card: #f8f4f1;
+  --sheet: #eee8e5;
+  --cell: #f8f4f1;
+  --fill: #efd0af;
+  --label: #1c211f;
+  --label-2: #565d59;
+  --separator: #d8cec6;
+  --accent: #ebac1f;
+  --on-accent: #1c211f;
+  --link: #266372;
+  --danger: #b3261e;
+  --switch-on: #4f9fae;
+  --ring: #266372;
+  --track: #ddd3cb;
 
-  --glass: rgba(255, 255, 255, 0.72);
-  --glass-edge: rgba(255, 255, 255, 0.95);
-  --glass-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
-  --dim: rgba(0, 0, 0, 0.3);
+  --glass: rgba(238, 232, 229, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 8px 28px rgba(28, 33, 31, 0.14);
+  --dim: rgba(28, 33, 31, 0.35);
 
-  --status-gray-bg: #e5e5ea;
-  --status-gray-fg: #3c3c43;
-  --status-orange-bg: #fff0db;
-  --status-orange-fg: #b04a00;
-  --status-blue-bg: #e3efff;
-  --status-blue-fg: #0058b0;
-  --status-green-bg: #e3f5e7;
-  --status-green-fg: #1b7a34;
+  --status-gray-bg: #ddd3cb;
+  --status-gray-fg: #3b423e;
+  --status-orange-bg: #f9e2b0;
+  --status-orange-fg: #6e4300;
+  --status-blue-bg: #d3e9ee;
+  --status-blue-fg: #1d5866;
+  --status-green-bg: #dbe9d6;
+  --status-green-fg: #2a6535;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #000000;
-    --card: #1c1c1e;
-    --sheet: #1c1c1e;
-    --cell: #2c2c2e;
-    --fill: #2c2c2e;
-    --label: #ffffff;
-    --label-2: #aeaeb2;
-    --separator: #38383a;
-    --accent: #0071e3;
-    --link: #409cff;
-    --danger: #ff6961;
-    --switch-on: #30d158;
-    --ring: #0a84ff;
-    --track: #3a3a3c;
+    --bg: #1c211f;
+    --card: #262c29;
+    --sheet: #262c29;
+    --cell: #323936;
+    --fill: #3a423e;
+    --label: #eee8e5;
+    --label-2: #b4aea8;
+    --separator: #3a423e;
+    --accent: #ebac1f;
+    --on-accent: #1c211f;
+    --link: #91c8d3;
+    --danger: #ff8f85;
+    --switch-on: #91c8d3;
+    --ring: #91c8d3;
+    --track: #3a423e;
 
-    --glass: rgba(38, 38, 40, 0.72);
-    --glass-edge: rgba(255, 255, 255, 0.14);
-    --glass-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
+    --glass: rgba(38, 44, 41, 0.72);
+    --glass-edge: rgba(238, 232, 229, 0.14);
+    --glass-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
     --dim: rgba(0, 0, 0, 0.55);
 
-    --status-gray-bg: #2c2c2e;
-    --status-gray-fg: #ebebf5;
-    --status-orange-bg: #3a2400;
-    --status-orange-fg: #ffb340;
-    --status-blue-bg: #0b2745;
-    --status-blue-fg: #7cb9ff;
-    --status-green-bg: #0d2e17;
-    --status-green-fg: #4ade7b;
+    --status-gray-bg: #3a423e;
+    --status-gray-fg: #e0dad4;
+    --status-orange-bg: #3d2c08;
+    --status-orange-fg: #f3bf52;
+    --status-blue-bg: #1c3a42;
+    --status-blue-fg: #a8d6df;
+    --status-green-bg: #1f3421;
+    --status-green-fg: #9fd39b;
   }
 }
 
 @theme inline {
   --font-sans: var(--font-body);
+
+  /* Londrina Solid ships Thin 100 and Regular 400 only: body copy is Thin,
+     every emphasised weight collapses to Regular. */
+  --font-weight-normal: 100;
+  --font-weight-medium: 400;
+  --font-weight-semibold: 400;
+  --font-weight-bold: 400;
 
   --color-bg: var(--bg);
   --color-card: var(--card);
@@ -80,6 +90,7 @@
   --color-label-2: var(--label-2);
   --color-separator: var(--separator);
   --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
   --color-link: var(--link);
   --color-danger: var(--danger);
   --color-switch-on: var(--switch-on);
@@ -101,6 +112,7 @@ body {
   background: var(--bg);
   color: var(--label);
   font-family: var(--font-body);
+  font-weight: 100;
   -webkit-font-smoothing: antialiased;
 }
 

@@ -45,7 +45,7 @@ export function BreakSheet({ onClose, onSubmit, pending, disabled }: BreakSheetP
                 onClick={() => setChoice(minutes)}
                 className={clsx(
                   "flex h-12 cursor-pointer items-center justify-center rounded-[16px] text-[17px] font-semibold",
-                  choice === minutes ? "bg-accent text-white" : "bg-fill text-label",
+                  choice === minutes ? "bg-accent text-on-accent" : "bg-fill text-label",
                 )}
               >
                 {minutes} min
@@ -56,7 +56,7 @@ export function BreakSheet({ onClose, onSubmit, pending, disabled }: BreakSheetP
               onClick={() => setChoice(CUSTOM)}
               className={clsx(
                 "flex h-12 cursor-pointer items-center justify-center rounded-[16px] text-[17px] font-semibold",
-                choice === CUSTOM ? "bg-accent text-white" : "bg-fill text-label",
+                choice === CUSTOM ? "bg-accent text-on-accent" : "bg-fill text-label",
               )}
             >
               Custom
@@ -66,7 +66,7 @@ export function BreakSheet({ onClose, onSubmit, pending, disabled }: BreakSheetP
               onClick={() => setChoice(UNTIMED)}
               className={clsx(
                 "col-span-2 flex h-12 cursor-pointer items-center justify-center rounded-[16px] text-[17px] font-semibold",
-                choice === UNTIMED ? "bg-accent text-white" : "bg-fill text-label",
+                choice === UNTIMED ? "bg-accent text-on-accent" : "bg-fill text-label",
               )}
             >
               Until I&apos;m Back
