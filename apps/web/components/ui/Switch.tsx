@@ -24,7 +24,7 @@ export function Switch({ checked, onChange, disabled, className, ...rest }: Swit
       {...rest}
     >
       <span
-        className="absolute top-[2px] h-[27px] w-[27px] rounded-full bg-white shadow-[0_2px_6px_rgba(0,0,0,0.3)] transition-transform"
+        className="absolute left-0 top-[2px] h-[27px] w-[27px] rounded-full bg-white shadow-[0_2px_6px_rgba(0,0,0,0.3)] transition-transform"
         style={{ transform: checked ? "translateX(22px)" : "translateX(2px)" }}
       />
     </button>
