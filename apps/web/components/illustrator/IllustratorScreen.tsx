@@ -105,7 +105,7 @@ export function IllustratorScreen() {
         type="button"
         aria-label="New Ticket"
         onClick={() => setOverlay({ type: "newTicket" })}
-        className="fixed bottom-[92px] right-4 z-40 flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-accent text-white shadow-[0_6px_16px_rgba(0,113,227,0.45)]"
+        className="fixed bottom-[92px] right-4 z-40 flex h-14 w-14 cursor-pointer items-center justify-center shape-sq bg-pop text-on-pop shadow-[0_6px_16px_rgba(235,172,31,0.5)]"
       >
         <Plus className="h-6 w-6" strokeWidth={2.5} aria-hidden="true" />
       </button>
@@ -115,7 +115,7 @@ export function IllustratorScreen() {
           type="button"
           onClick={() => setOverlay({ type: "break" })}
           disabled={day.paused}
-          className="flex h-11 cursor-pointer items-center gap-1.5 rounded-full bg-fill px-4 text-[15px] font-semibold text-link disabled:cursor-default disabled:opacity-50"
+          className="flex h-11 cursor-pointer items-center gap-1.5 shape-sq bg-fill px-4 text-[15px] font-semibold text-link disabled:cursor-default disabled:opacity-50"
         >
           <Coffee className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
           Break

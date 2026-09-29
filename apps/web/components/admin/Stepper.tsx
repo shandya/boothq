@@ -16,7 +16,7 @@ export function Stepper({ value, onChange, min = 0, max = 10, ...rest }: Stepper
         onClick={() => onChange(Math.max(min, value - 1))}
         disabled={value <= min}
         aria-label="Decrease"
-        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-fill text-label disabled:cursor-default disabled:opacity-30"
+        className="flex h-8 w-8 cursor-pointer items-center justify-center shape-sq bg-fill text-label disabled:cursor-default disabled:opacity-30"
       >
         <Minus className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
       </button>
@@ -26,7 +26,7 @@ export function Stepper({ value, onChange, min = 0, max = 10, ...rest }: Stepper
         onClick={() => onChange(Math.min(max, value + 1))}
         disabled={value >= max}
         aria-label="Increase"
-        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-fill text-label disabled:cursor-default disabled:opacity-30"
+        className="flex h-8 w-8 cursor-pointer items-center justify-center shape-sq bg-fill text-label disabled:cursor-default disabled:opacity-30"
       >
         <Plus className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
       </button>

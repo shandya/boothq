@@ -13,7 +13,7 @@ import {
 } from "../../lib/queries";
 import { formatClockTime } from "../../lib/format";
 import { ConfirmSheet } from "../ui/ConfirmSheet";
-import { GlassIconButton } from "../ui/GlassIconButton";
+import { Sheet } from "../ui/Sheet";
 import { GroupedList, GroupedSeparator } from "../ui/GroupedList";
 import { NotHereSheet } from "../ui/NotHereSheet";
 import { StatusChip } from "../ui/StatusChip";
@@ -48,23 +48,21 @@ export function TicketSheet({ ticket, positionLabel, onClose, onEdit, onShowQr, 
 
   return (
     <>
-      <div className="fixed inset-0 z-50" role="dialog" aria-modal="true">
-        <div className="absolute inset-0 bg-dim" onClick={onClose} aria-hidden="true" />
-        <section className="fixed inset-x-2 bottom-2 flex max-h-[calc(100%-16px)] flex-col gap-4 overflow-y-auto rounded-[38px] bg-sheet px-4 pb-[22px] pt-3.5 shadow-[0_-4px_40px_rgba(0,0,0,0.25)]">
-          <div className="flex items-center justify-between">
-            <GlassIconButton icon={<CloseIcon />} onClick={onClose} aria-label="Close" />
-            <h2 className="m-0 text-[17px] font-semibold">Ticket #{ticket.number}</h2>
-            <button
-              type="button"
-              onClick={onEdit}
-              className="glass h-11 cursor-pointer rounded-full px-4 text-[17px] font-semibold text-link"
-            >
-              Edit
-            </button>
-          </div>
-
+      <Sheet
+        title={`Ticket #${ticket.number}`}
+        onClose={onClose}
+        headerAction={
+          <button
+            type="button"
+            onClick={onEdit}
+            className="h-11 cursor-pointer shape-sq bg-fill px-4 text-[17px] font-semibold text-link"
+          >
+            Edit
+          </button>
+        }
+      >
           <div className="flex items-center gap-3.5 px-1">
-            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-fill text-[22px] font-bold tabular-nums">
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center shape-sq bg-fill text-[22px] font-bold tabular-nums">
               {ticket.number}
             </span>
             <div className="flex flex-col gap-1">
@@ -85,7 +83,7 @@ export function TicketSheet({ ticket, positionLabel, onClose, onEdit, onShowQr, 
                 <a
                   href={`tel:${ticket.phone}`}
                   aria-label={`Call ${ticket.name}`}
-                  className="flex h-11 w-11 items-center justify-center rounded-full bg-fill text-link"
+                  className="flex h-11 w-11 items-center justify-center shape-sq bg-fill text-link"
                 >
                   <Phone className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden="true" />
                 </a>
@@ -152,8 +150,7 @@ export function TicketSheet({ ticket, positionLabel, onClose, onEdit, onShowQr, 
               </button>
             </GroupedList>
           ) : null}
-        </section>
-      </div>
+      </Sheet>
 
       {notHere ? (
         <NotHereSheet
@@ -212,13 +209,5 @@ function ActionRow({
       {icon}
       {label}
     </button>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-      <path d="M18 6 6 18M6 6l12 12" />
-    </svg>
   );
 }

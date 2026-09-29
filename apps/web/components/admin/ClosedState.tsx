@@ -13,7 +13,7 @@ export function ClosedState({ event, onOpenBooth, onStartEvent, onChangeEvent }:
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-bg px-6 text-center text-label">
-      <div className="flex w-full max-w-[320px] flex-col items-center gap-2 rounded-[28px] bg-card px-8 py-10">
+      <div className="flex w-full max-w-[320px] flex-col items-center gap-2 shape-card sticker bg-card px-8 py-10">
         <span className="text-[17px] font-semibold">{event ? "Booth is closed" : "No event running"}</span>
         <span className="text-[13px] text-label-2">{boothName}</span>
         {event ? (

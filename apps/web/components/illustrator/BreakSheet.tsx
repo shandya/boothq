@@ -44,8 +44,8 @@ export function BreakSheet({ onClose, onSubmit, pending, disabled }: BreakSheetP
                 type="button"
                 onClick={() => setChoice(minutes)}
                 className={clsx(
-                  "flex h-12 cursor-pointer items-center justify-center rounded-[16px] text-[17px] font-semibold",
-                  choice === minutes ? "bg-accent text-white" : "bg-fill text-label",
+                  "flex h-12 cursor-pointer items-center justify-center shape-tile text-[17px] font-semibold",
+                  choice === minutes ? "bg-accent text-on-accent" : "bg-fill text-label",
                 )}
               >
                 {minutes} min
@@ -55,8 +55,8 @@ export function BreakSheet({ onClose, onSubmit, pending, disabled }: BreakSheetP
               type="button"
               onClick={() => setChoice(CUSTOM)}
               className={clsx(
-                "flex h-12 cursor-pointer items-center justify-center rounded-[16px] text-[17px] font-semibold",
-                choice === CUSTOM ? "bg-accent text-white" : "bg-fill text-label",
+                "flex h-12 cursor-pointer items-center justify-center shape-tile text-[17px] font-semibold",
+                choice === CUSTOM ? "bg-accent text-on-accent" : "bg-fill text-label",
               )}
             >
               Custom
@@ -65,8 +65,8 @@ export function BreakSheet({ onClose, onSubmit, pending, disabled }: BreakSheetP
               type="button"
               onClick={() => setChoice(UNTIMED)}
               className={clsx(
-                "col-span-2 flex h-12 cursor-pointer items-center justify-center rounded-[16px] text-[17px] font-semibold",
-                choice === UNTIMED ? "bg-accent text-white" : "bg-fill text-label",
+                "col-span-2 flex h-12 cursor-pointer items-center justify-center shape-tile text-[17px] font-semibold",
+                choice === UNTIMED ? "bg-accent text-on-accent" : "bg-fill text-label",
               )}
             >
               Until I&apos;m Back
@@ -82,7 +82,7 @@ export function BreakSheet({ onClose, onSubmit, pending, disabled }: BreakSheetP
               placeholder="Minutes"
               value={custom}
               onChange={(event) => setCustom(event.target.value)}
-              className="h-11 rounded-[16px] bg-fill px-4 text-[17px] text-label outline-none"
+              className="h-11 shape-tile bg-fill px-4 text-[17px] text-label outline-none"
             />
           ) : null}
 
@@ -91,7 +91,7 @@ export function BreakSheet({ onClose, onSubmit, pending, disabled }: BreakSheetP
             placeholder="Reason (optional)"
             value={reason}
             onChange={(event) => setReason(event.target.value)}
-            className="h-11 rounded-[16px] bg-fill px-4 text-[17px] text-label outline-none placeholder:text-label-2"
+            className="h-11 shape-tile bg-fill px-4 text-[17px] text-label outline-none placeholder:text-label-2"
           />
 
           <CapsuleButton pending={pending} disabled={!canSubmit} onClick={submit}>

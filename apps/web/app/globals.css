@@ -3,73 +3,92 @@
 :root {
   color-scheme: light dark;
 
-  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-inter), system-ui, sans-serif;
+  --font-body: var(--font-londrina), "Arial Narrow", system-ui, sans-serif;
 
-  --bg: #f2f2f7;
-  --card: #ffffff;
-  --sheet: #f2f2f7;
-  --cell: #ffffff;
-  --fill: #e9e9ee;
-  --label: #000000;
-  --label-2: #6c6c70;
-  --separator: #d1d1d6;
-  --accent: #0071e3;
-  --link: #0066cc;
-  --danger: #d70015;
-  --switch-on: #248a3d;
-  --ring: #0071e3;
-  --track: #e5e5ea;
+  /* Palette: blue is primary (sky #91c8d3 + deep blue derived from it), mustard #ebac1f is the accent ("pop"),
+     peach #efd0af for warm neutrals, ink #1c211f, paper #eee8e5. */
+  --bg: #e9f3f5;
+  --card: #f7fbfc;
+  --sheet: #e9f3f5;
+  --cell: #f7fbfc;
+  --fill: #c9e4ea;
+  --label: #1c211f;
+  --label-2: #4c5a5e;
+  --separator: #cddfe3;
+  --accent: #2a6f80;
+  --on-accent: #ffffff;
+  --pop: #ebac1f;
+  --on-pop: #1c211f;
+  --link: #1f5f70;
+  --danger: #b3261e;
+  --switch-on: #4f9fae;
+  --ring: #2a6f80;
+  --track: #d3e3e7;
 
-  --glass: rgba(255, 255, 255, 0.72);
-  --glass-edge: rgba(255, 255, 255, 0.95);
-  --glass-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
-  --dim: rgba(0, 0, 0, 0.3);
+  --glass: rgba(233, 243, 245, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 8px 28px rgba(28, 33, 31, 0.14);
+  --dim: rgba(28, 33, 31, 0.35);
+  --outline: #086385;
+  --on-danger: #ffffff;
 
-  --status-gray-bg: #e5e5ea;
-  --status-gray-fg: #3c3c43;
-  --status-orange-bg: #fff0db;
-  --status-orange-fg: #b04a00;
-  --status-blue-bg: #e3efff;
-  --status-blue-fg: #0058b0;
-  --status-green-bg: #e3f5e7;
-  --status-green-fg: #1b7a34;
+  --status-gray-bg: #d6e3e6;
+  --status-gray-fg: #3b4a4d;
+  --status-orange-bg: #f9e2b0;
+  --status-orange-fg: #6e4300;
+  --status-blue-bg: #bfe0e8;
+  --status-blue-fg: #174f5e;
+  --status-green-bg: #dbe9d6;
+  --status-green-fg: #2a6535;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #000000;
-    --card: #1c1c1e;
-    --sheet: #1c1c1e;
-    --cell: #2c2c2e;
-    --fill: #2c2c2e;
-    --label: #ffffff;
-    --label-2: #aeaeb2;
-    --separator: #38383a;
-    --accent: #0071e3;
-    --link: #409cff;
-    --danger: #ff6961;
-    --switch-on: #30d158;
-    --ring: #0a84ff;
-    --track: #3a3a3c;
+    --bg: #1c211f;
+    --card: #242c2d;
+    --sheet: #242c2d;
+    --cell: #2f393b;
+    --fill: #33474c;
+    --label: #eee8e5;
+    --label-2: #b4bfc1;
+    --separator: #37454a;
+    --accent: #91c8d3;
+    --on-accent: #1c211f;
+    --pop: #ebac1f;
+    --on-pop: #1c211f;
+    --link: #91c8d3;
+    --danger: #ff8f85;
+    --switch-on: #91c8d3;
+    --ring: #91c8d3;
+    --track: #37454a;
 
-    --glass: rgba(38, 38, 40, 0.72);
-    --glass-edge: rgba(255, 255, 255, 0.14);
-    --glass-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
+    --glass: rgba(36, 44, 45, 0.72);
+    --glass-edge: rgba(238, 232, 229, 0.14);
+    --glass-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
     --dim: rgba(0, 0, 0, 0.55);
+    --outline: #4a9dbb;
+    --on-danger: #1c211f;
 
-    --status-gray-bg: #2c2c2e;
-    --status-gray-fg: #ebebf5;
-    --status-orange-bg: #3a2400;
-    --status-orange-fg: #ffb340;
-    --status-blue-bg: #0b2745;
-    --status-blue-fg: #7cb9ff;
-    --status-green-bg: #0d2e17;
-    --status-green-fg: #4ade7b;
+    --status-gray-bg: #37454a;
+    --status-gray-fg: #dbe6e8;
+    --status-orange-bg: #3d2c08;
+    --status-orange-fg: #f3bf52;
+    --status-blue-bg: #1f4650;
+    --status-blue-fg: #b5dfe8;
+    --status-green-bg: #1f3421;
+    --status-green-fg: #9fd39b;
   }
 }
 
 @theme inline {
   --font-sans: var(--font-body);
+
+  /* Londrina Solid ships Thin 100 and Regular 400 only: body copy is Thin,
+     every emphasised weight collapses to Regular. */
+  --font-weight-normal: 100;
+  --font-weight-medium: 400;
+  --font-weight-semibold: 400;
+  --font-weight-bold: 400;
 
   --color-bg: var(--bg);
   --color-card: var(--card);
@@ -80,10 +99,16 @@
   --color-label-2: var(--label-2);
   --color-separator: var(--separator);
   --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-pop: var(--pop);
+  --color-on-pop: var(--on-pop);
   --color-link: var(--link);
   --color-danger: var(--danger);
   --color-switch-on: var(--switch-on);
   --color-ring: var(--ring);
+  --color-outline: var(--outline);
+  --color-on-danger: var(--on-danger);
+  --color-dim: var(--dim);
   --color-track: var(--track);
 
   --color-status-gray-bg: var(--status-gray-bg);
@@ -101,6 +126,7 @@ body {
   background: var(--bg);
   color: var(--label);
   font-family: var(--font-body);
+  font-weight: 100;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -167,4 +193,59 @@ body {
 
 .shake {
   animation: shake 0.4s ease-in-out;
+}
+
+/* Organic shapes: asymmetric radii instead of perfect rounded rectangles,
+   with a few variants cycled by position so neighbours are never identical.
+   Pair with .sticker for the hand-printed outline + offset shadow. */
+.shape-card {
+  border-radius: 14px 11px 13px 10px / 10px 13px 11px 14px;
+}
+.shape-card:nth-child(3n + 2) {
+  border-radius: 11px 14px 10px 13px / 13px 10px 14px 11px;
+}
+.shape-card:nth-child(3n) {
+  border-radius: 12px 12px 14px 10px / 14px 10px 12px 12px;
+}
+
+.shape-tile {
+  border-radius: 10px 8px 9px 7px / 8px 10px 7px 9px;
+}
+.shape-tile:nth-child(2n) {
+  border-radius: 8px 10px 7px 9px / 9px 7px 10px 8px;
+}
+
+.shape-btn {
+  border-radius: 11px 9px 10px 8px / 9px 11px 8px 10px;
+}
+.shape-btn:nth-child(2n) {
+  border-radius: 9px 11px 8px 10px / 10px 8px 11px 9px;
+}
+
+/* Small controls: icon buttons, keypad, chips, steppers, number badges. */
+.shape-sq {
+  border-radius: 9px 7px 8px 6px / 7px 9px 6px 8px;
+}
+.shape-sq:nth-child(2n) {
+  border-radius: 7px 9px 6px 8px / 8px 6px 9px 7px;
+}
+
+.shape-modal {
+  border-radius: 16px 13px 15px 12px / 12px 15px 13px 16px;
+}
+
+.sticker {
+  border: 2px solid var(--outline);
+  box-shadow: 3px 4px 0 var(--outline);
+}
+
+button.sticker:active,
+a.sticker:active {
+  transform: translate(2px, 3px);
+  box-shadow: 1px 1px 0 var(--outline);
+}
+
+/* Faint paper grain (inline SVG noise) so flat backgrounds don't look digital. */
+body {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.11 0 0 0 0 0.13 0 0 0 0 0.12 0 0 0 0.05 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
 }

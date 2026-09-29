@@ -28,7 +28,7 @@ export function IllustratorHeader({ day, stats, wakeLockActive, onRequestWakeLoc
     <header className="flex items-start justify-between gap-2 px-1 pt-1">
       <div className="flex min-w-0 flex-col gap-0.5">
         <span className="flex items-center gap-1.5 text-[17px] font-semibold">
-          <span className={`h-[9px] w-[9px] shrink-0 rounded-full ${status.dot}`} aria-hidden="true" />
+          <span className={`h-[9px] w-[9px] shrink-0 rounded-[3px] ${status.dot}`} aria-hidden="true" />
           {status.label}
           <span className="truncate font-normal text-label-2">
             · Served {stats.servedCount} · Avg {avgMin}m

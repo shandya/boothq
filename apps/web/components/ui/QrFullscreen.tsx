@@ -28,7 +28,7 @@ export function QrFullscreen({ number, name, url, onCopyLink, onDone }: QrFullsc
         <button
           type="button"
           onClick={onDone}
-          className="glass h-11 cursor-pointer rounded-full px-[18px] text-[17px] font-semibold text-link"
+          className="glass h-11 cursor-pointer shape-sq px-[18px] text-[17px] font-semibold text-link"
         >
           Done
         </button>
@@ -39,7 +39,7 @@ export function QrFullscreen({ number, name, url, onCopyLink, onDone }: QrFullsc
         <span className="text-[22px] font-semibold">{name}</span>
       </div>
 
-      <div className="self-center rounded-[32px] bg-white p-[18px] shadow-[0_6px_24px_rgba(0,0,0,0.10)]">
+      <div className="self-center shape-card sticker bg-white p-[18px]">
         <QRCodeSVG value={url} size={250} level="M" marginSize={4} title={`QR code for ticket ${number}`} />
       </div>
 
@@ -50,11 +50,11 @@ export function QrFullscreen({ number, name, url, onCopyLink, onDone }: QrFullsc
       </p>
       <p className="m-0 text-center font-mono text-[13px] text-label-2">{displayUrl(url)}</p>
 
-      <div className="fixed inset-x-3 bottom-6 glass rounded-full p-1.5">
+      <div className="fixed inset-x-3 bottom-6 glass shape-sq p-1.5">
         <button
           type="button"
           onClick={onCopyLink}
-          className="flex h-[52px] w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-fill text-[15px] font-semibold text-link"
+          className="flex h-[52px] w-full cursor-pointer items-center justify-center gap-2 shape-sq bg-fill text-[15px] font-semibold text-link"
         >
           <Copy className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden="true" />
           Copy Link

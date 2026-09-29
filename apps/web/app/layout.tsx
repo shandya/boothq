@@ -1,13 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Londrina_Solid } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
-const inter = Inter({
+const londrina = Londrina_Solid({
   subsets: ["latin"],
+  weight: ["100", "400"],
   display: "swap",
-  axes: ["opsz"],
-  variable: "--font-inter",
+  variable: "--font-londrina",
 });
 
 // Customer-facing screens never mention BoothQ (CLAUDE.md → Naming), so the
@@ -31,14 +31,14 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f2f2f7" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+    { media: "(prefers-color-scheme: light)", color: "#eee8e5" },
+    { media: "(prefers-color-scheme: dark)", color: "#1c211f" },
   ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={londrina.variable}>
       <body>
         <Providers>{children}</Providers>
       </body>

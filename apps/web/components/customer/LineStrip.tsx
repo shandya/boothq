@@ -34,8 +34,8 @@ export function LineStrip({ currentNumber, aheadNumbers, waitingAhead, ownNumber
           <span
             key={c.key}
             className={clsx(
-              "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[15px] font-bold tabular-nums",
-              c.mine ? "border-2 border-accent text-accent" : "bg-fill text-label",
+              "flex h-11 w-11 shrink-0 items-center justify-center shape-sq text-[15px] font-bold tabular-nums",
+              c.mine ? "bg-pop text-on-pop" : "bg-fill text-label",
             )}
           >
             {c.content}

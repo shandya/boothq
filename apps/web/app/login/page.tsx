@@ -109,7 +109,7 @@ function LoginForm() {
           {Array.from({ length: PIN_LENGTH }, (_, index) => (
             <span
               key={index}
-              className="h-[13px] w-[13px] rounded-full border-[1.5px] border-label"
+              className="h-[13px] w-[13px] rounded-[3px] border-[1.5px] border-label"
               style={{ background: index < pin.length ? "var(--label)" : "transparent" }}
             />
           ))}
@@ -133,7 +133,7 @@ function LoginForm() {
             type="button"
             onClick={() => pressDigit(digit)}
             disabled={mutation.isPending}
-            className="h-20 w-20 cursor-pointer rounded-full bg-fill text-[34px] font-normal text-label disabled:cursor-default disabled:opacity-50"
+            className="h-20 w-20 cursor-pointer shape-sq sticker bg-fill text-[34px] font-normal text-label disabled:cursor-default disabled:opacity-50"
           >
             {digit}
           </button>
@@ -143,7 +143,7 @@ function LoginForm() {
           type="button"
           onClick={() => pressDigit("0")}
           disabled={mutation.isPending}
-          className="h-20 w-20 cursor-pointer rounded-full bg-fill text-[34px] font-normal text-label disabled:cursor-default disabled:opacity-50"
+          className="h-20 w-20 cursor-pointer shape-sq sticker bg-fill text-[34px] font-normal text-label disabled:cursor-default disabled:opacity-50"
         >
           0
         </button>

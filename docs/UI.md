@@ -12,25 +12,25 @@
 - Booth name from `NEXT_PUBLIC_BOOTH_NAME` in headers.
 - The design reference is the Claude Design canvas "BoothQ" (light and dark rows for every screen): <https://claude.ai/artifact/F1etBuSDFs6pshetBxHvti>. Match it.
 
-## Visual style: iOS 27 look (MVP)
+## Visual style: iOS 27 layout, Londrina + blue/mustard palette (MVP)
 
 The app should feel like a native iOS 27 app: Apple's system colors, large titles, inset grouped lists, capsule buttons, and translucent "Liquid Glass" toolbars and floating bars.
 
 ### Typography
 
-- Font stack everywhere: `-apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, system-ui, sans-serif`. iPhones and Macs get the real San Francisco font; every other device gets **Inter**, the Google Font closest to SF Pro.
-- Load Inter with `next/font/google` (variable, `opsz` + `wght` axes, `display: swap`) and put its CSS variable after the Apple fonts in the stack.
-- Type scale (px / weight): Large Title 34/700 (tracking -0.02em) · Title 28/700 · Title 3 20/600 · Headline 17/600 · Body 17/400 · Subhead 15/400 · Footnote 13/400 · Caption 12/600. Section headers above grouped lists: 13/600, uppercase, secondary label color.
-- Ticket numbers: weight 700, `font-variant-numeric: tabular-nums`, tracking -0.045em. Timers also use tabular numbers.
+- Font: **Londrina Solid** (Google Font) everywhere, loaded with `next/font/google` at weights 100 and 400 only (`display: swap`), exposed as `--font-londrina`. Body copy is **Thin 100**; titles, headings, buttons, chips and numbers are **Regular 400**. The font has no bold, so Tailwind's `font-medium/semibold/bold` all resolve to 400 and `font-normal` to 100.
+- Type scale (px / weight): Large Title 34/400 · Title 28/400 · Title 3 20/400 · Headline 17/400 · Body 17/100 · Subhead 15/100 · Footnote 13/100 · Caption 12/400. Section headers above grouped lists: 13/400, uppercase, secondary label color.
+- Ticket numbers: weight 400, `font-variant-numeric: tabular-nums`. Timers also use tabular numbers.
 - Button labels use Title Case ("Start Drawing", "Copy Link").
 
 ### Components
 
-- **Inset grouped lists**: rounded containers (radius 24px) on the grouped background, 1px separators inset past the leading icon, 50–64px rows.
-- **Cards**: radius 28px; stat tiles radius 20px.
-- **Buttons**: capsules (`border-radius: 999px`). Primary = accent fill, white text, 56–60px tall. Secondary = gray fill with link-colored text, 52px. Destructive = danger-colored text in its own grouped row.
+- **Organic shapes**: everything is square-ish with a small, slightly uneven radius (6–16px, never pills or circles): `.shape-card` (cards, lists), `.shape-tile`, `.shape-btn` (buttons), `.shape-sq` (keypad keys, icon buttons, chips, switches, number badges, steppers), `.shape-modal`. Each has 2–3 variants cycled by position so neighbours differ. Add `.sticker` for the 2px `--outline` border and 3px/4px solid offset shadow (pressed state shifts it). Only spinners and tiny status dots stay round. A faint SVG paper-grain sits on the page background. The QR code sits on a white `.shape-card`; tap targets stay ≥44px.
+- **Grouped lists**: organic-shaped containers on the page background, 1px separators inset past the leading icon, 50–64px rows.
+- **Cards**: `.shape-card`; stat tiles `.shape-tile`.
+- **Buttons**: small-radius rounded squares. Primary = `--accent` (blue) fill, `.shape-btn .sticker`, `--on-accent` text, 56–60px tall. Secondary = gray fill with link-colored text, 52px. Destructive = `--danger` fill with `--on-danger` text (e.g. Remove in confirm dialogs).
 - **Glass surfaces**: top-bar icon buttons (44px circles), floating bottom bars and pills use the glass tokens with `backdrop-filter: blur(24px) saturate(180%)`. Provide a solid fallback (`@supports not (backdrop-filter: blur(1px))` → use `--card`) and honor `prefers-reduced-transparency: reduce` and `prefers-contrast: more` by switching glass to solid `--card`.
-- **Sheets**: float 8px in from the screen edges with 38px corner radius, a glass close (✕) button on the left and a confirm action on the right.
+- **Modals**: every dialog is built on `components/ui/Modal.tsx`: centered on screen (never bottom sheets), 24px side margin, max 380px wide, `.shape-modal .sticker` on `--sheet`, 20px title centered, dimmed backdrop (`--dim`). Form dialogs (`Sheet`) add a ✕ on the left and an optional confirm action on the right. Alerts (`ConfirmSheet`, `NotHereSheet`, `TicketNoteSheet`) put their actions as full-width stacked capsule buttons in the footer: primary/destructive first, Cancel last. New dialogs must use `Modal`, not hand-rolled overlays.
 - **Segmented controls, switches, search field**: iOS style (capsule segmented control on a gray fill; 51×31 green switch; capsule search field).
 - **Icons**: SF Symbols look: 2px stroke, rounded caps. Use `lucide-react` in the app.
 - Minimum touch target 44×44px.
@@ -41,31 +41,38 @@ The app follows the phone's light/dark setting automatically. There is no in-app
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `--bg` | `#F2F2F7` | `#000000` | Page (grouped) background |
-| `--card` | `#FFFFFF` | `#1C1C1E` | Cards, grouped lists |
-| `--sheet` / `--cell` | `#F2F2F7` / `#FFFFFF` | `#1C1C1E` / `#2C2C2E` | Sheet background / rows inside sheets |
-| `--fill` | `#E9E9EE` | `#2C2C2E` | Secondary buttons, number circles, search field |
-| `--label` | `#000000` | `#FFFFFF` | Primary text |
-| `--label-2` | `#6C6C70` | `#AEAEB2` | Secondary text (AA contrast on both backgrounds) |
-| `--separator` | `#D1D1D6` | `#38383A` | List separators |
-| `--accent` | `#0071E3` | `#0071E3` | Primary button fill (white text passes AA) |
-| `--link` | `#0066CC` | `#409CFF` | Text buttons, links, tinted icons |
-| `--danger` | `#D70015` | `#FF6961` | Destructive text |
-| `--switch-on` | `#248A3D` | `#30D158` | Switches, live dots |
-| `--glass` | `rgba(255,255,255,.72)` | `rgba(38,38,40,.72)` | Glass surfaces |
-| `--glass-edge` | `rgba(255,255,255,.95)` | `rgba(255,255,255,.14)` | Glass 1px border |
-| `--dim` | `rgba(0,0,0,.3)` | `rgba(0,0,0,.55)` | Backdrop behind sheets |
+| `--bg` | `#E9F3F5` | `#1C211F` | Page (grouped) background |
+| `--card` | `#F7FBFC` | `#242C2D` | Cards, grouped lists |
+| `--sheet` / `--cell` | `#E9F3F5` / `#F7FBFC` | `#242C2D` / `#2F393B` | Sheet background / rows inside sheets |
+| `--fill` | `#C9E4EA` | `#33474C` | Secondary buttons, number circles, search field |
+| `--label` | `#1C211F` | `#EEE8E5` | Primary text |
+| `--label-2` | `#4C5A5E` | `#B4BFC1` | Secondary text (AA contrast on both backgrounds) |
+| `--separator` | `#CDDFE3` | `#37454A` | List separators |
+| `--accent` | `#2A6F80` | `#91C8D3` | **Primary** (blue): primary button fill, selected states |
+| `--on-accent` | `#FFFFFF` | `#1C211F` | Text/icons on `--accent` |
+| `--pop` | `#EBAC1F` | `#EBAC1F` | **Accent** (mustard): "your turn" takeover, "You" circle, floating action button |
+| `--on-pop` | `#1C211F` | `#1C211F` | Text/icons on `--pop` (white fails AA on mustard) |
+| `--link` | `#1F5F70` | `#91C8D3` | Text buttons, links, tinted icons |
+| `--danger` | `#B3261E` | `#FF8F85` | Destructive fill and text |
+| `--on-danger` | `#FFFFFF` | `#1C211F` | Text on `--danger` fill |
+| `--switch-on` | `#4F9FAE` | `#91C8D3` | Switches, live dots |
+| `--glass` | `rgba(233,243,245,.72)` | `rgba(36,44,45,.72)` | Glass surfaces |
+| `--glass-edge` | `rgba(255,255,255,.9)` | `rgba(238,232,229,.14)` | Glass 1px border |
+| `--dim` | `rgba(28,33,31,.35)` | `rgba(0,0,0,.55)` | Backdrop behind sheets |
+| `--outline` | `#086385` | `#4A9DBB` | `.sticker` border and offset shadow |
+
+Palette source: sky blue `#91C8D3` (primary family, with a deeper blue `#2A6F80` derived for light-mode buttons/links), mustard `#EBAC1F` (accent), peach `#EFD0AF`, ink `#1C211F`, paper `#EEE8E5`. Dark scheme uses ink as the background and the sky blue as primary.
 
 Status chips (background / text):
 
 | Status | Light | Dark |
 |---|---|---|
-| WAITING, NO_SHOW, CANCELLED (gray) | `#E5E5EA` / `#3C3C43` | `#2C2C2E` / `#EBEBF5` |
-| CALLED (orange) | `#FFF0DB` / `#B04A00` | `#3A2400` / `#FFB340` |
-| SERVING (blue) | `#E3EFFF` / `#0058B0` | `#0B2745` / `#7CB9FF` |
-| DONE, Open (green) | `#E3F5E7` / `#1B7A34` | `#0D2E17` / `#4ADE7B` |
+| WAITING, NO_SHOW, CANCELLED (gray) | `#D6E3E6` / `#3B4A4D` | `#37454A` / `#DBE6E8` |
+| CALLED (orange) | `#F9E2B0` / `#6E4300` | `#3D2C08` / `#F3BF52` |
+| SERVING (blue) | `#BFE0E8` / `#174F5E` | `#1F4650` / `#B5DFE8` |
+| DONE, Open (green) | `#DBE9D6` / `#2A6535` | `#1F3421` / `#9FD39B` |
 
-Exceptions: the customer "It's your turn" takeover is solid `--accent` with white text in both schemes, and the QR code always sits on a white card with black modules (scanners need dark-on-light), even in dark mode.
+Exceptions: the customer "It's your turn" takeover is solid `--pop` with `--on-pop` text in both schemes, and the QR code always sits on a white card with black modules (scanners need dark-on-light), even in dark mode.
 
 ## Shared components
 

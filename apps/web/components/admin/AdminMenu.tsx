@@ -14,7 +14,7 @@ export function AdminMenu({ onClose, onSettings, onEvents, onCloseBooth, onLogou
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-dim" onClick={onClose} aria-hidden="true" />
       <div className="relative z-10 flex w-[calc(100vw-30px)] max-w-105 flex-col gap-2">
-        <div className="flex flex-col overflow-hidden rounded-[20px] border border-separator bg-card shadow-(--glass-shadow)">
+        <div className="flex flex-col overflow-hidden shape-tile sticker bg-card shadow-(--glass-shadow)">
           <Link
             href="/illustrator"
             className="flex h-[52px] items-center justify-center text-[17px] text-link no-underline"
@@ -49,7 +49,7 @@ export function AdminMenu({ onClose, onSettings, onEvents, onCloseBooth, onLogou
         <button
           type="button"
           onClick={onLogout}
-          className="flex h-[52px] cursor-pointer items-center justify-center rounded-[20px] border border-separator bg-card text-[17px] font-semibold text-link shadow-(--glass-shadow)"
+          className="flex h-[52px] cursor-pointer items-center justify-center shape-tile sticker bg-card text-[17px] font-semibold text-link shadow-(--glass-shadow)"
         >
           Log Out
         </button>

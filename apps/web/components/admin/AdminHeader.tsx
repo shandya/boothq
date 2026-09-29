@@ -28,8 +28,8 @@ export function AdminHeader({ day, waitingCount, avgSessionLabel, projectedFinis
   return (
     <div className="flex flex-col gap-3">
       <header className="flex h-11 items-center justify-between px-1">
-        <span className={`flex items-center gap-1.5 rounded-full px-[11px] py-1.5 text-[13px] font-semibold ${chip.bg} ${chip.fg}`}>
-          {chip.dot ? <span className={`h-[7px] w-[7px] rounded-full ${chip.dot}`} /> : null}
+        <span className={`flex items-center gap-1.5 shape-sq px-[11px] py-1.5 text-[13px] font-semibold ${chip.bg} ${chip.fg}`}>
+          {chip.dot ? <span className={`h-[7px] w-[7px] rounded-[3px] ${chip.dot}`} /> : null}
           {chip.label}
         </span>
         <GlassIconButton icon={<MoreHorizontal className="h-[22px] w-[22px]" strokeWidth={2} aria-hidden="true" />} onClick={onMenu} aria-label="More" />
@@ -41,15 +41,15 @@ export function AdminHeader({ day, waitingCount, avgSessionLabel, projectedFinis
       </div>
 
       <div className="grid grid-cols-3 gap-2">
-        <div className="flex min-w-0 flex-col gap-0.5 rounded-[20px] bg-card px-3.5 py-2.5">
+        <div className="flex min-w-0 flex-col gap-0.5 shape-tile sticker bg-card px-3.5 py-2.5">
           <span className="truncate text-[12px] font-semibold text-label-2">Waiting</span>
           <span className="truncate text-[22px] font-bold tabular-nums">{waitingCount}</span>
         </div>
-        <div className="flex min-w-0 flex-col gap-0.5 rounded-[20px] bg-card px-3.5 py-2.5">
+        <div className="flex min-w-0 flex-col gap-0.5 shape-tile sticker bg-card px-3.5 py-2.5">
           <span className="truncate text-[12px] font-semibold text-label-2">Avg drawing</span>
           <span className="truncate text-[22px] font-bold tabular-nums">{avgSessionLabel}</span>
         </div>
-        <div className="flex min-w-0 flex-col gap-0.5 rounded-[20px] bg-card px-3.5 py-2.5">
+        <div className="flex min-w-0 flex-col gap-0.5 shape-tile sticker bg-card px-3.5 py-2.5">
           <span className="truncate text-[12px] font-semibold text-label-2">Line done by</span>
           <span className="truncate text-[22px] font-bold tabular-nums">{projectedFinishLabel}</span>
         </div>

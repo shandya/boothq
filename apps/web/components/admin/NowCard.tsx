@@ -20,7 +20,7 @@ export function NowCard({ ticket, onOpen }: NowCardProps) {
           <GroupedRow minHeight={64} onClick={() => onOpen(ticket.id)}>
             <span
               className={clsx(
-                "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[17px] font-bold tabular-nums",
+                "flex h-11 w-11 shrink-0 items-center justify-center shape-sq text-[17px] font-bold tabular-nums",
                 serving ? "bg-status-blue-bg text-status-blue-fg" : "bg-status-orange-bg text-status-orange-fg",
               )}
             >
@@ -38,7 +38,7 @@ export function NowCard({ ticket, onOpen }: NowCardProps) {
             </span>
             <span
               className={clsx(
-                "shrink-0 rounded-full px-2.5 py-[5px] text-[13px] font-semibold tabular-nums",
+                "shrink-0 shape-sq px-2.5 py-[5px] text-[13px] font-semibold tabular-nums",
                 serving ? "bg-status-blue-bg text-status-blue-fg" : "bg-status-orange-bg text-status-orange-fg",
               )}
             >

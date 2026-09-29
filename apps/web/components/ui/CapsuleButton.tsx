@@ -4,9 +4,9 @@ import clsx from "clsx";
 type Variant = "primary" | "secondary" | "destructive";
 
 const VARIANT_CLASSES: Record<Variant, string> = {
-  primary: "bg-accent text-white",
+  primary: "bg-accent text-on-accent",
   secondary: "bg-fill text-link",
-  destructive: "bg-fill text-danger",
+  destructive: "bg-danger text-on-danger",
 };
 
 type CapsuleButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className"> & {
@@ -33,7 +33,7 @@ export function CapsuleButton({
       type="button"
       disabled={disabled || pending}
       className={clsx(
-        "flex w-full cursor-pointer items-center justify-center gap-2 rounded-full text-[17px] font-semibold transition-opacity disabled:cursor-default disabled:opacity-50",
+        "shape-btn sticker flex w-full cursor-pointer items-center justify-center gap-2 text-[17px] font-semibold transition-opacity disabled:cursor-default disabled:opacity-50",
         size === "lg" ? "h-14" : "h-[52px]",
         VARIANT_CLASSES[variant],
         className,
