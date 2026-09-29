@@ -1,14 +1,17 @@
-import type { EventDTO } from "@boothq/shared";
+import type { EventDTO, TicketDTO } from "@boothq/shared";
 import { CapsuleButton } from "../ui/CapsuleButton";
+import { ReadyForPickupSection } from "./ReadyForPickupSection";
 
 type ClosedStateProps = {
   event: EventDTO | null;
   onOpenBooth: () => void;
   onStartEvent: () => void;
   onChangeEvent: () => void;
+  readyForPickup: TicketDTO[]; // portraits from earlier Days still waiting to be collected
+  onToast: (message: string) => void;
 };
 
-export function ClosedState({ event, onOpenBooth, onStartEvent, onChangeEvent }: ClosedStateProps) {
+export function ClosedState({ event, onOpenBooth, onStartEvent, onChangeEvent, readyForPickup, onToast }: ClosedStateProps) {
   const boothName = process.env.NEXT_PUBLIC_BOOTH_NAME ?? "the booth";
 
   return (
@@ -40,6 +43,11 @@ export function ClosedState({ event, onOpenBooth, onStartEvent, onChangeEvent }:
           Start Event
         </CapsuleButton>
       )}
+      {readyForPickup.length > 0 ? (
+        <div className="w-full max-w-[380px] text-left">
+          <ReadyForPickupSection tickets={readyForPickup} onToast={onToast} />
+        </div>
+      ) : null}
     </div>
   );
 }

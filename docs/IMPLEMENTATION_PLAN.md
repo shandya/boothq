@@ -172,16 +172,16 @@ Docs: `UI.md` (customer), `PRD.md` C1–C8
 
 Docs: `PHOTO_TICKETS.md`
 
-- [ ] Migration: `TicketMode`, `READY` status, photo and pickup fields; update invariants helper
-- [ ] `PhotoStorage` interface + Vercel Blob implementation + in-memory fake for tests
-- [ ] Endpoints: upload-token, confirm (sets mode), view, delete (resets mode), picked-up
-- [ ] Service rules: call-next skips CALLED for photo tickets, out-of-order start, finish → READY + delete photo, close day keeps READY + deletePrefix
-- [ ] Snapshot/public view: `readyForPickup`, `readyEta`, `almostUp` false for photo tickets
-- [ ] Web: client-side resize + EXIF strip, upload with progress/retry, photo row in New ticket sheet and Ticket sheet
-- [ ] Illustrator: photo Now card with full-screen zoom, camera icons in Up next, "Start" instead of "Call" for virtual tickets
-- [ ] Admin: Ready for pickup section with WhatsApp + Picked Up
-- [ ] Customer: photo waiting state and Ready screen
-- [ ] All tests listed in `PHOTO_TICKETS.md`
+- [x] Migration: `TicketMode`, `READY` status, photo and pickup fields; update invariants helper
+- [x] `PhotoStorage` interface + Vercel Blob implementation + in-memory fake for tests
+- [x] Endpoints: upload-token, confirm (sets mode), view, delete (resets mode), picked-up
+- [x] Service rules: call-next skips CALLED for photo tickets, out-of-order start, finish → READY + delete photo, close day keeps READY + deletePrefix
+- [x] Snapshot/public view: `readyForPickup`, `readyEta`, `almostUp` false for photo tickets
+- [x] Web: client-side resize + EXIF strip, upload with progress/retry, photo row in New ticket sheet and Ticket sheet
+- [x] Illustrator: photo Now card with full-screen zoom, camera icons in Up next, "Start" instead of "Call" for virtual tickets
+- [x] Admin: Ready for pickup section with WhatsApp + Picked Up
+- [x] Customer: photo waiting state and Ready screen
+- [x] All tests listed in `PHOTO_TICKETS.md`
 
 **Acceptance (Phase 8)**
 - On real phones: create a photo ticket with the camera and one from the library; draw one in line and convert one in-person ticket to virtual by adding a photo from the ticket sheet; the customer page moves to Ready; mark picked up. Confirm in the Blob dashboard that no photos remain after finishing and after closing the day.

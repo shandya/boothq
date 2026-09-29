@@ -2,7 +2,7 @@
 
 import type { TicketDTO } from "@boothq/shared";
 import { formatDuration } from "@boothq/shared/format";
-import { ChevronRight, GripVertical, Pen } from "lucide-react";
+import { Camera, ChevronRight, GripVertical, Pen } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { getServerNow } from "../../lib/server-time";
 import { GroupedList, GroupedSeparator } from "../ui/GroupedList";
@@ -203,6 +203,9 @@ export function WaitingSection({
                   <span className="flex min-w-0 flex-grow flex-col gap-0.5">
                     <span className="flex items-center gap-1.5 truncate text-[17px] font-semibold">
                       {ticket.name}
+                      {ticket.mode === "FROM_PHOTO" ? (
+                        <Camera className="h-[13px] w-[13px] shrink-0 text-label-2" strokeWidth={2} aria-label="Drawn from photo" />
+                      ) : null}
                       {ticket.notes ? (
                         <Pen className="h-[13px] w-[13px] shrink-0 text-label-2" strokeWidth={2} aria-label="Has a note" />
                       ) : null}

@@ -1,10 +1,12 @@
 "use client";
 
 import type { TicketDTO } from "@boothq/shared";
-import { Phone, QrCode, RefreshCw } from "lucide-react";
+import { Camera, ImageIcon, Phone, QrCode, RefreshCw, Trash2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import {
+  useDeletePhoto,
   useNoShowTicket,
+  usePickedUp,
   useRecallTicket,
   useRemoveTicket,
   useRequeueTicket,
@@ -12,7 +14,11 @@ import {
   useStartTicket,
 } from "../../lib/queries";
 import { formatClockTime } from "../../lib/format";
+import { ticketPhotoUrl } from "../../lib/photo";
 import { ConfirmSheet } from "../ui/ConfirmSheet";
+import { PhotoViewer } from "../ui/PhotoViewer";
+import { AddPhotoSheet } from "./AddPhotoSheet";
+import { ReadyWhatsAppButton } from "./ReadyForPickupSection";
 import { Sheet } from "../ui/Sheet";
 import { GroupedList, GroupedSeparator } from "../ui/GroupedList";
 import { NotHereSheet } from "../ui/NotHereSheet";
@@ -36,6 +42,11 @@ export function ordinal(n: number): string {
 export function TicketSheet({ ticket, positionLabel, onClose, onEdit, onShowQr, onToast }: TicketSheetProps) {
   const [notHere, setNotHere] = useState(false);
   const [confirmRemove, setConfirmRemove] = useState(false);
+  const [addPhoto, setAddPhoto] = useState(false);
+  const [viewPhoto, setViewPhoto] = useState(false);
+  const [confirmRemovePhoto, setConfirmRemovePhoto] = useState(false);
+  // Cache-busts the photo URL when it's removed and a new one is added.
+  const [photoVersion] = useState(() => Date.now());
 
   const start = useStartTicket();
   const recall = useRecallTicket();
@@ -43,8 +54,12 @@ export function TicketSheet({ ticket, positionLabel, onClose, onEdit, onShowQr, 
   const requeue = useRequeueTicket();
   const remove = useRemoveTicket();
   const rotateToken = useRotateTicketToken();
+  const deletePhoto = useDeletePhoto();
+  const pickedUp = usePickedUp();
 
   const canRemove = ticket.status === "WAITING" || ticket.status === "CALLED" || ticket.status === "NO_SHOW";
+  // A photo can be added or removed until drawing starts (docs/PHOTO_TICKETS.md).
+  const photoEditable = ticket.status === "WAITING" || ticket.status === "CALLED";
 
   return (
     <>
@@ -70,6 +85,11 @@ export function TicketSheet({ ticket, positionLabel, onClose, onEdit, onShowQr, 
               <StatusChip status={ticket.status} className="self-start">
                 {positionLabel ? `Waiting · ${positionLabel} in line` : undefined}
               </StatusChip>
+              {ticket.mode === "FROM_PHOTO" ? (
+                <span className="flex items-center gap-1 text-[13px] text-label-2">
+                  <Camera className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" /> From photo
+                </span>
+              ) : null}
             </div>
           </div>
 
@@ -105,6 +125,47 @@ export function TicketSheet({ ticket, positionLabel, onClose, onEdit, onShowQr, 
           </GroupedList>
 
           <GroupedList>
+            {ticket.status === "READY" ? (
+              <>
+                <ActionRow
+                  label="Picked Up"
+                  onClick={() => pickedUp.mutate(ticket.id, { onSuccess: () => onToast("Marked picked up") })}
+                  pending={pickedUp.isPending}
+                />
+                <GroupedSeparator inset={16} />
+                <ReadyWhatsAppButton ticket={ticket} row />
+                <GroupedSeparator inset={16} />
+              </>
+            ) : null}
+            {ticket.hasPhoto ? (
+              <>
+                <ActionRow
+                  icon={<ImageIcon className="h-5 w-5" strokeWidth={2} aria-hidden="true" />}
+                  label="View Photo"
+                  onClick={() => setViewPhoto(true)}
+                />
+                <GroupedSeparator inset={48} />
+                {photoEditable ? (
+                  <>
+                    <ActionRow
+                      icon={<Trash2 className="h-5 w-5" strokeWidth={2} aria-hidden="true" />}
+                      label="Remove Photo"
+                      onClick={() => setConfirmRemovePhoto(true)}
+                    />
+                    <GroupedSeparator inset={48} />
+                  </>
+                ) : null}
+              </>
+            ) : photoEditable ? (
+              <>
+                <ActionRow
+                  icon={<Camera className="h-5 w-5" strokeWidth={2} aria-hidden="true" />}
+                  label="Add Photo"
+                  onClick={() => setAddPhoto(true)}
+                />
+                <GroupedSeparator inset={48} />
+              </>
+            ) : null}
             {ticket.status === "CALLED" ? (
               <>
                 <ActionRow label="Start Drawing" onClick={() => start.mutate(ticket.id)} pending={start.isPending} />
@@ -151,6 +212,45 @@ export function TicketSheet({ ticket, positionLabel, onClose, onEdit, onShowQr, 
             </GroupedList>
           ) : null}
       </Sheet>
+
+      {addPhoto ? (
+        <AddPhotoSheet
+          ticket={ticket}
+          onClose={() => setAddPhoto(false)}
+          onDone={() => {
+            setAddPhoto(false);
+            onToast("Photo added: this is now a virtual session");
+          }}
+        />
+      ) : null}
+
+      {viewPhoto ? (
+        <PhotoViewer
+          src={ticketPhotoUrl(ticket.id, photoVersion)}
+          alt={`Photo of ${ticket.name}`}
+          onClose={() => setViewPhoto(false)}
+        />
+      ) : null}
+
+      {confirmRemovePhoto ? (
+        <ConfirmSheet
+          title={`Remove the photo for #${ticket.number}?`}
+          description="The ticket goes back to being an in-person session."
+          destructive
+          confirmLabel="Remove Photo"
+          pending={deletePhoto.isPending}
+          onCancel={() => setConfirmRemovePhoto(false)}
+          onConfirm={() =>
+            deletePhoto.mutate(ticket.id, {
+              onSuccess: () => {
+                setConfirmRemovePhoto(false);
+                onToast("Photo removed");
+              },
+              onError: () => setConfirmRemovePhoto(false),
+            })
+          }
+        />
+      ) : null}
 
       {notHere ? (
         <NotHereSheet

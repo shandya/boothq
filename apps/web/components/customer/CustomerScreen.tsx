@@ -1,7 +1,7 @@
 "use client";
 
 import { formatEtaConfidenceNote, formatEtaLine } from "@boothq/shared/format";
-import { Copy, MapPin } from "lucide-react";
+import { Camera, Copy, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ApiError } from "../../lib/api";
 import { formatClockTime } from "../../lib/format";
@@ -61,13 +61,15 @@ export function CustomerScreen({ token }: { token: string }) {
   useEffect(() => {
     if (!view) return;
     document.title =
-      view.status === "CALLED"
+      view.status === "READY"
+        ? `#${view.number} · Portrait ready!`
+        : view.status === "CALLED" && view.mode !== "FROM_PHOTO"
         ? `#${view.number} · Your turn!`
         : view.status === "WAITING" && view.almostUp
           ? `#${view.number} · Head back now`
           : view.status === "WAITING" && view.peopleAhead != null
             ? `#${view.number} · ${view.peopleAhead} ahead`
-            : `#${view.number} · BoothQ`;
+            : `#${view.number} · ${boothName}`;
   }, [view]);
 
   if (query.isError) {
@@ -103,7 +105,10 @@ export function CustomerScreen({ token }: { token: string }) {
     }
   }
 
-  if (view.status === "CALLED" && view.calledAt && view.calledAt !== dismissedCalledAt) {
+  // Photo tickets are drawn without the customer present: no walk-up prompts.
+  const fromPhoto = view.mode === "FROM_PHOTO";
+
+  if (view.status === "CALLED" && !fromPhoto && view.calledAt && view.calledAt !== dismissedCalledAt) {
     return <CalledTakeover number={view.number} onDismiss={() => setDismissedCalledAt(view.calledAt)} />;
   }
 
@@ -117,6 +122,14 @@ export function CustomerScreen({ token }: { token: string }) {
         <span className="text-[15px] font-semibold text-label-2">{boothName}</span>
       </header>
 
+      {fromPhoto && (view.status === "WAITING" || view.status === "CALLED" || view.status === "SERVING") ? (
+        <Banner
+          tone="info"
+          icon={<Camera className="h-[18px] w-[18px] shrink-0" strokeWidth={2} aria-hidden="true" />}
+          lines={["We're drawing you from your photo"]}
+        />
+      ) : null}
+
       {view.status === "WAITING" && view.almostUp && view.eta ? (
         <Banner
           icon={<MapPin className="h-[18px] w-[18px] shrink-0" strokeWidth={2} aria-hidden="true" />}
@@ -124,7 +137,9 @@ export function CustomerScreen({ token }: { token: string }) {
         />
       ) : null}
 
-      {view.status === "CALLED" ? <Banner lines={["It's your turn", "Please come to the booth now."]} /> : null}
+      {view.status === "CALLED" && !fromPhoto ? (
+        <Banner lines={["It's your turn", "Please come to the booth now."]} />
+      ) : null}
 
       {(view.status === "WAITING" || view.status === "CALLED") && view.pause.active ? (
         <Banner lines={breakLines(view.pause)} />
@@ -142,7 +157,7 @@ export function CustomerScreen({ token }: { token: string }) {
                   : "shape-sq bg-status-gray-bg px-2.5 py-1 text-[13px] font-semibold text-status-gray-fg"
               }
             >
-              {view.almostUp ? "Almost up" : "In line"}
+              {view.almostUp ? "Almost up" : fromPhoto ? "In line · from photo" : "In line"}
             </span>
           </div>
 
@@ -160,7 +175,29 @@ export function CustomerScreen({ token }: { token: string }) {
             </span>
           </div>
 
-          {view.eta ? (
+          {fromPhoto && view.readyEta ? (
+            <div className="flex flex-col items-center gap-3 shape-card sticker bg-card p-5 text-center">
+              <div className="flex flex-col items-center gap-0.5">
+                <span className="text-[13px] font-semibold uppercase tracking-[0.02em] text-label-2">
+                  Estimated ready
+                </span>
+                <span className="text-[20px] font-bold">
+                  about {minutesLabel(view.readyEta.sec)} &middot; around {formatClockTime(view.readyEta.estimatedAt)}
+                </span>
+              </div>
+              <LineStrip
+                currentNumber={view.nowServing?.number ?? null}
+                aheadNumbers={view.aheadNumbers}
+                waitingAhead={(view.peopleAhead ?? 0) - (view.nowServing ? 1 : 0)}
+                ownNumber={view.number}
+              />
+              <span className="text-[13px] text-label-2">
+                Based on the recent average drawing time of {Math.round(view.avgSessionSec / 60)} min.
+              </span>
+            </div>
+          ) : null}
+
+          {!fromPhoto && view.eta ? (
             <div className="flex flex-col items-center gap-3 shape-card sticker bg-card p-5 text-center">
               <div className="flex flex-col items-center gap-0.5">
                 <span className="text-[13px] font-semibold uppercase tracking-[0.02em] text-label-2">
@@ -193,11 +230,27 @@ export function CustomerScreen({ token }: { token: string }) {
             </div>
           ) : null}
 
-          <p className="m-0 text-center text-[14px] text-label-2">Feel free to walk around — keep this page open.</p>
+          <p className="m-0 text-center text-[14px] text-label-2">
+            {fromPhoto
+              ? "You don't need to wait at the booth. Keep this page open and we'll show when your portrait is ready."
+              : "Feel free to walk around — keep this page open."}
+          </p>
         </>
       ) : null}
 
-      {view.status === "CALLED" ? (
+      {view.status === "CALLED" && fromPhoto ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
+          <TicketNumber number={view.number} size="lg" />
+          <span className="text-[20px] font-semibold">You&apos;re up next</span>
+          {view.readyEta ? (
+            <span className="text-[15px] text-label-2">
+              Ready in about {minutesLabel(view.readyEta.sec)} &middot; around {formatClockTime(view.readyEta.estimatedAt)}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
+      {view.status === "CALLED" && !fromPhoto ? (
         <div className="flex flex-col items-center gap-1 pt-2">
           <TicketNumber number={view.number} size="hero" />
           <span className="text-[17px] text-label-2">Hi {view.firstName}</span>
@@ -207,7 +260,29 @@ export function CustomerScreen({ token }: { token: string }) {
       {view.status === "SERVING" ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
           <TicketNumber number={view.number} size="lg" />
-          <span className="text-[20px] font-semibold">You&apos;re being drawn right now ✏️</span>
+          <span className="text-[20px] font-semibold">
+            {fromPhoto ? `We're drawing your portrait now ✏️` : `You're being drawn right now ✏️`}
+          </span>
+          {fromPhoto && view.readyEta ? (
+            <span className="text-[15px] text-label-2">
+              Ready in about {minutesLabel(view.readyEta.sec)} &middot; around {formatClockTime(view.readyEta.estimatedAt)}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
+      {view.status === "READY" ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
+          <span className="shape-sq bg-status-green-bg px-2.5 py-1 text-[13px] font-semibold text-status-green-fg">
+            Ready
+          </span>
+          <TicketNumber number={view.number} size="hero" />
+          <span className="text-[24px] font-bold text-status-green-fg">Your Portrait Is Ready!</span>
+          <span className="text-[17px] text-label-2">
+            {view.boothOpen
+              ? "Pick it up at the booth any time before we close."
+              : "Pick it up at the booth, and show this page."}
+          </span>
         </div>
       ) : null}
 

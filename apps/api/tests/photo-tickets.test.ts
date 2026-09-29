@@ -257,7 +257,10 @@ describe("close day", () => {
     expect(await ticketRow(a.id)).toMatchObject({ status: "READY" });
     expect(await ticketRow(b.id)).toMatchObject({ status: "CANCELLED", cancelReason: "DAY_CLOSED", photoPath: null });
 
-    // Pickup is still recorded after the booth closes.
+    // The portrait stays listed and can still be picked up after the booth closes.
+    const closed = await request(app).get("/api/queue").set("Cookie", admin);
+    expect(closed.body.day).toBeNull();
+    expect(closed.body.readyForPickup.map((r: { id: string }) => r.id)).toEqual([a.id]);
     const pickup = await post(`/api/tickets/${a.id}/picked-up`);
     expect(pickup.status).toBe(200);
   });

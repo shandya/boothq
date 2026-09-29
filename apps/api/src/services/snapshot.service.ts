@@ -187,9 +187,17 @@ async function currentUndo(dayId: string, now: Date) {
   return undoable ? toUndoDTO(undoable) : null;
 }
 
+// READY portraits stay collectable after their Day closes, so this looks
+// across every Day rather than only the open one.
+async function loadReadyForPickup(): Promise<TicketDTO[]> {
+  const ready = await prisma.ticket.findMany({ where: { status: "READY" }, orderBy: { readyAt: "asc" }, take: 100 });
+  return ready.map((t) => toTicketDTO(t, { etaSec: null }));
+}
+
 export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueSnapshot> {
   const day = await prisma.day.findFirst({ where: { status: "OPEN" } });
   const event = await getActiveEventDTO();
+  const readyForPickup = await loadReadyForPickup();
   if (!day) {
     return {
       serverTime: now.toISOString(),
@@ -197,7 +205,7 @@ export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueS
       day: null,
       current: null,
       waiting: [],
-      readyForPickup: [],
+      readyForPickup,
       recent: [],
       stats: {
         servedCount: 0,
@@ -219,9 +227,6 @@ export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueS
   const waiting = tickets
     .filter((t) => t.status === "WAITING")
     .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
-  const readyForPickup = tickets
-    .filter((t) => t.status === "READY")
-    .sort((a, b) => (a.readyAt?.getTime() ?? 0) - (b.readyAt?.getTime() ?? 0));
   const recent = tickets
     .filter((t) => t.status === "DONE" || t.status === "NO_SHOW" || t.status === "CANCELLED")
     .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
@@ -249,7 +254,7 @@ export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueS
     day: toDayDTO(day),
     current: current ? toTicketDTO(current, { etaSec: null }) : null,
     waiting: waitingDTOs,
-    readyForPickup: readyForPickup.map((t) => toTicketDTO(t, { etaSec: null })),
+    readyForPickup,
     recent: recent.map((t) => toTicketDTO(t, { etaSec: null })),
     stats: statsFor(day, tickets, history, now),
     undo: await currentUndo(day.id, now),
@@ -326,6 +331,9 @@ export async function buildPublicTicketView(token: string, now: Date = new Date(
   if (fromPhoto && eta) {
     const sec = eta.etaSec + avgSessionSec;
     readyEta = { sec, estimatedAt: new Date(now.getTime() + sec * 1000).toISOString() };
+  } else if (fromPhoto && ticket.status === "CALLED") {
+    // Called before the photo was added: drawing starts as soon as the illustrator taps Start.
+    readyEta = { sec: avgSessionSec, estimatedAt: new Date(now.getTime() + avgSessionSec * 1000).toISOString() };
   } else if (fromPhoto && ticket.status === "SERVING") {
     const elapsedSec = ticket.startedAt ? (now.getTime() - ticket.startedAt.getTime()) / 1000 : 0;
     const sec = Math.round(Math.max(avgSessionSec - elapsedSec, 60));

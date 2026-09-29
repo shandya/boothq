@@ -1,6 +1,7 @@
 "use client";
 
 import type { DayDTO, TicketDTO } from "@boothq/shared";
+import { Camera } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { formatClockTime } from "../../lib/format";
 import {
@@ -13,10 +14,13 @@ import {
   useStartTicket,
 } from "../../lib/queries";
 import { onStale, vibrate } from "../../lib/feedback";
+import { ticketPhotoUrl } from "../../lib/photo";
 import { getServerNow } from "../../lib/server-time";
 import { CapsuleButton } from "../ui/CapsuleButton";
 import { NotHereSheet } from "../ui/NotHereSheet";
+import { PhotoThumb } from "../ui/PhotoViewer";
 import { TicketNumber } from "../ui/TicketNumber";
+import { ElapsedTimer } from "../ui/ElapsedTimer";
 import { SessionTimer } from "./SessionTimer";
 
 type IllustratorNowCardProps = {
@@ -37,6 +41,8 @@ function calledAgoLabel(calledAt: string, callCount: number): string {
   return callCount > 1 ? `Called ${when} (×${callCount})` : `Called ${when}`;
 }
 
+const fromPhoto = (ticket: TicketDTO): boolean => ticket.mode === "FROM_PHOTO";
+
 function pauseLabel(day: DayDTO): string {
   return day.pauseUntil ? `On break until ${formatClockTime(day.pauseUntil)}` : "On break";
 }
@@ -55,6 +61,7 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
   const noShow = useNoShowTicket();
   const requeue = useRequeueTicket();
   const resumeDay = useResumeDay();
+  const [photoVersion] = useState(() => Date.now());
 
   if (day.paused) {
     return (
@@ -98,6 +105,9 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
         <span className="text-[13px] font-semibold uppercase tracking-[0.02em] text-label-2">Next up</span>
         <span className="flex items-center gap-2 text-[22px] font-semibold">
           <TicketNumber number={nextWaiting.number} size="md" /> {nextWaiting.name}
+          {fromPhoto(nextWaiting) ? (
+            <Camera className="h-[18px] w-[18px] shrink-0 text-label-2" strokeWidth={2} aria-label="Drawn from photo" />
+          ) : null}
         </span>
         <CapsuleButton
           className="mt-2 w-full"
@@ -109,9 +119,11 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
             })
           }
         >
-          Call #{nextWaiting.number} {nextWaiting.name}
+          {fromPhoto(nextWaiting)
+            ? `Start #${nextWaiting.number} ${nextWaiting.name} (from photo)`
+            : `Call #${nextWaiting.number} ${nextWaiting.name}`}
         </CapsuleButton>
-        <button
+        {fromPhoto(nextWaiting) ? null : (<button
           type="button"
           onClick={() =>
             start.mutate(nextWaiting.id, {
@@ -123,7 +135,7 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
           className="mt-4 h-11 w-full cursor-pointer bg-transparent px-4 py-2 text-center text-[15px] font-medium text-link disabled:cursor-default disabled:opacity-50"
         >
           Start directly
-        </button>
+        </button>)}
       </Card>
     );
   }
@@ -194,6 +206,53 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
           />
         ) : null}
       </>
+    );
+  }
+
+  // SERVING, from a photo: the photo is the hero (docs/PHOTO_TICKETS.md → UI changes)
+  if (fromPhoto(current)) {
+    return (
+      <Card>
+        <span className="flex items-center gap-1.5 shape-sq bg-status-blue-bg px-2.5 py-1 text-[13px] font-semibold text-status-blue-fg">
+          <Camera className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" /> Drawing from photo
+        </span>
+        <span className="mt-1 flex items-center gap-2 text-[22px] font-semibold">
+          <TicketNumber number={current.number} size="md" /> {current.name}
+        </span>
+        {current.hasPhoto ? (
+          <PhotoThumb
+            src={ticketPhotoUrl(current.id, photoVersion)}
+            alt={`Photo of ${current.name}`}
+            className="max-h-[52dvh] w-full shape-tile object-contain"
+          />
+        ) : null}
+        {current.notes ? <span className="text-[15px] text-label-2">&ldquo;{current.notes}&rdquo;</span> : null}
+        <span className="text-[13px] text-label-2">
+          Drawing for <ElapsedTimer since={current.startedAt ?? current.createdAt} />
+        </span>
+        <CapsuleButton
+          className="mt-2 w-full"
+          pending={finish.isPending}
+          onClick={() =>
+            finish.mutate({ id: current.id, callNext: true }, { onSuccess: () => vibrate(), onError: onStale(onToast) })
+          }
+        >
+          Finish &amp; Start Next
+        </CapsuleButton>
+        <CapsuleButton
+          className="w-full"
+          variant="secondary"
+          pending={finish.isPending}
+          onClick={() =>
+            finish.mutate({ id: current.id, callNext: false }, { onSuccess: () => vibrate(), onError: onStale(onToast) })
+          }
+        >
+          Finish
+        </CapsuleButton>
+        <span className="text-[13px] text-label-2">
+          Finishing tells {current.name} their portrait is ready for pickup.
+        </span>
+      </Card>
     );
   }
 

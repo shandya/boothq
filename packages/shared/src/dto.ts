@@ -81,7 +81,7 @@ export type QueueSnapshot = {
   day: DayDTO | null; // null = booth closed, no open day
   current: TicketDTO | null; // CALLED or SERVING
   waiting: TicketDTO[]; // ordered by position
-  readyForPickup: TicketDTO[]; // READY, oldest first
+  readyForPickup: TicketDTO[]; // READY from any Day, oldest first (portraits outlive the Day)
   recent: TicketDTO[]; // last 10 DONE / NO_SHOW / CANCELLED, newest first
   stats: StatsDTO;
   undo: UndoDTO | null; // the last action, if Undo can still reverse it (staff only)

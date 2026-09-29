@@ -8,6 +8,7 @@ const STATUS_CLASSES: Record<TicketStatus, string> = {
   CANCELLED: "bg-status-gray-bg text-status-gray-fg",
   CALLED: "bg-status-orange-bg text-status-orange-fg",
   SERVING: "bg-status-blue-bg text-status-blue-fg",
+  READY: "bg-status-green-bg text-status-green-fg",
   DONE: "bg-status-green-bg text-status-green-fg",
 };
 
@@ -15,6 +16,7 @@ const STATUS_LABELS: Record<TicketStatus, string> = {
   WAITING: "Waiting",
   CALLED: "Called",
   SERVING: "Drawing",
+  READY: "Ready",
   DONE: "Done",
   NO_SHOW: "No-show",
   CANCELLED: "Cancelled",
