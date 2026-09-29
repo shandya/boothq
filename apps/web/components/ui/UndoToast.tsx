@@ -2,23 +2,14 @@
 
 import type { UndoDTO } from "@boothq/shared";
 import { useEffect } from "react";
+import { type TFunction, useT } from "../../lib/i18n";
 import { ApiError } from "../../lib/api";
 import { vibrate } from "../../lib/feedback";
 import { useUndo } from "../../lib/queries";
 import { clearUndoOffer, UNDO_TOAST_MS, useUndoOffer } from "../../lib/undo-store";
 
-function label(undo: UndoDTO): string {
-  const n = undo.ticketNumber;
-  switch (undo.action) {
-    case "CALL_NEXT":
-      return `Called #${n}`;
-    case "START":
-      return `Started #${n}`;
-    case "FINISH":
-      return `Finished #${n}`;
-    case "NO_SHOW":
-      return `#${n} marked no-show`;
-  }
+function label(undo: UndoDTO, t: TFunction): string {
+  return t(`ui.undo.${undo.action}`, { n: undo.ticketNumber });
 }
 
 type UndoToastProps = {
@@ -29,6 +20,7 @@ type UndoToastProps = {
 };
 
 export function UndoToast({ currentUndoId, onToast }: UndoToastProps) {
+  const t = useT();
   const offer = useUndoOffer();
   const undo = useUndo();
   const offerId = offer?.actionId ?? null;
@@ -46,11 +38,11 @@ export function UndoToast({ currentUndoId, onToast }: UndoToastProps) {
       onSuccess: () => {
         clearUndoOffer();
         vibrate();
-        onToast("Undone");
+        onToast(t("ui.undo.done"));
       },
       onError: (error) => {
         clearUndoOffer();
-        onToast(error instanceof ApiError && error.status === 409 ? "Can't undo — the queue changed" : "Couldn't undo");
+        onToast(error instanceof ApiError && error.status === 409 ? t("ui.undo.stale") : t("ui.undo.failed"));
       },
     });
   }
@@ -60,14 +52,14 @@ export function UndoToast({ currentUndoId, onToast }: UndoToastProps) {
       role="status"
       className="glass fixed bottom-[164px] left-1/2 z-[60] flex -translate-x-1/2 items-center gap-1 rounded-full py-1 pl-4 pr-1 text-[15px] font-medium text-label"
     >
-      <span className="whitespace-nowrap">{label(offer)}</span>
+      <span className="whitespace-nowrap">{label(offer, t)}</span>
       <button
         type="button"
         onClick={() => handleUndo(offer)}
         disabled={undo.isPending}
         className="h-11 min-w-16 cursor-pointer rounded-full bg-transparent px-4 text-[15px] font-semibold text-link disabled:cursor-default disabled:opacity-50"
       >
-        Undo
+        {t("ui.undo.button")}
       </button>
     </div>
   );

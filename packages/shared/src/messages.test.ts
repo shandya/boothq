@@ -14,4 +14,10 @@ describe("messages.readyForPickup", () => {
       "Hi Ana! Your portrait (#7) from Ink Booth is ready. Pick it up at the booth any time before we close.",
     );
   });
+
+  it("has an Indonesian version", () => {
+    expect(messages.readyForPickup({ firstName: "Ana", number: 7, booth: "Ink Booth" }, "id")).toBe(
+      "Halo Ana! Potretmu (#7) dari Ink Booth sudah siap. Ambil di booth kapan saja sebelum kami tutup.",
+    );
+  });
 });

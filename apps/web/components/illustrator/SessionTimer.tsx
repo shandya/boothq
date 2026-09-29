@@ -22,14 +22,22 @@ export function SessionTimer({ since, avgSessionSec, className }: SessionTimerPr
     return () => clearInterval(id);
   }, []);
 
-  const elapsedSec = Math.max(0, Math.round((getServerNow().getTime() - new Date(since).getTime()) / 1000));
-  const pace = elapsedSec > avgSessionSec * 1.5 ? "danger" : elapsedSec > avgSessionSec ? "orange" : "normal";
+  const elapsedSec = Math.max(
+    0,
+    Math.round((getServerNow().getTime() - new Date(since).getTime()) / 1000),
+  );
+  const pace =
+    elapsedSec > avgSessionSec * 1.5 ? "danger" : elapsedSec > avgSessionSec ? "orange" : "normal";
 
   return (
     <span
       className={clsx(
         "font-bold tabular-nums",
-        pace === "danger" ? "text-danger" : pace === "orange" ? "text-status-orange-fg" : "text-label",
+        pace === "danger"
+          ? "text-danger"
+          : pace === "orange"
+            ? "text-status-orange-fg"
+            : "text-label",
         className,
       )}
       aria-live="off"

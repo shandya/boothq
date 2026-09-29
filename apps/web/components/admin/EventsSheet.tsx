@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ApiError, type EventWithSummary } from "../../lib/api";
+import { type EventWithSummary } from "../../lib/api";
+import { type TFunction, useI18n } from "../../lib/i18n";
+import { errorText } from "../../lib/i18n/errors";
 import { formatShortDate } from "../../lib/format";
 import { useEndEvent, useEvents } from "../../lib/queries";
 import { CapsuleButton } from "../ui/CapsuleButton";
@@ -17,22 +19,24 @@ type EventsSheetProps = {
   onToast: (message: string) => void;
 };
 
-function plural(count: number, one: string): string {
-  return `${count} ${one}${count === 1 ? "" : "s"}`;
-}
-
-function dateRange(event: EventWithSummary): string {
-  const start = formatShortDate(event.startedAt);
-  if (!event.endedAt) return `Since ${start}`;
-  const end = formatShortDate(event.endedAt);
+function dateRange(event: EventWithSummary, t: TFunction, locale: string): string {
+  const start = formatShortDate(event.startedAt, locale);
+  if (!event.endedAt) return t("admin.events.since", { date: start });
+  const end = formatShortDate(event.endedAt, locale);
   return start === end ? start : `${start} – ${end}`;
 }
 
-function facts(event: EventWithSummary): string {
-  return `${dateRange(event)} · ${plural(event.summary.dayCount, "day")} · ${event.summary.servedCount} served`;
+function facts(event: EventWithSummary, t: TFunction, locale: string): string {
+  const { dayCount, servedCount } = event.summary;
+  return t("admin.events.facts", {
+    range: dateRange(event, t, locale),
+    days: t(dayCount === 1 ? "admin.events.day" : "admin.events.days", { n: dayCount }),
+    served: servedCount,
+  });
 }
 
 export function EventsSheet({ dayOpen, onClose, onStart, onRename, onToast }: EventsSheetProps) {
+  const { t, lang } = useI18n();
   const query = useEvents();
   const endEvent = useEndEvent();
   const [confirmEnd, setConfirmEnd] = useState(false);
@@ -43,16 +47,16 @@ export function EventsSheet({ dayOpen, onClose, onStart, onRename, onToast }: Ev
 
   return (
     <>
-      <Sheet title="Events" onClose={onClose}>
+      <Sheet title={t("admin.events.title")} onClose={onClose}>
         {query.isError ? (
           <div className="flex flex-col items-center gap-3 py-6 text-center">
-            <span className="text-[15px] text-label-2">Couldn&apos;t load events.</span>
+            <span className="text-[15px] text-label-2">{t("admin.events.loadFailed")}</span>
             <button
               type="button"
               onClick={() => void query.refetch()}
               className="h-11 cursor-pointer bg-transparent px-4 text-[17px] text-link"
             >
-              Try Again
+              {t("common.tryAgain")}
             </button>
           </div>
         ) : !query.data ? (
@@ -60,7 +64,7 @@ export function EventsSheet({ dayOpen, onClose, onStart, onRename, onToast }: Ev
             <div
               className="h-7 w-7 animate-spin rounded-full border-2 border-fill border-t-label-2"
               role="status"
-              aria-label="Loading"
+              aria-label={t("common.loading")}
             />
           </div>
         ) : (
@@ -68,29 +72,33 @@ export function EventsSheet({ dayOpen, onClose, onStart, onRename, onToast }: Ev
             {active ? (
               <GroupedList>
                 <div className="flex flex-col gap-0.5 px-4 py-3.5">
-                  <span className="text-[13px] font-semibold uppercase tracking-[0.02em] text-label-2">Current</span>
+                  <span className="text-[13px] font-semibold uppercase tracking-[0.02em] text-label-2">
+                    {t("admin.events.current")}
+                  </span>
                   <span className="text-[17px] font-semibold">{active.name}</span>
-                  <span className="text-[13px] text-label-2">{facts(active)}</span>
+                  <span className="text-[13px] text-label-2">{facts(active, t, lang)}</span>
                 </div>
                 <GroupedSeparator />
                 <GroupedRow minHeight={52} onClick={onRename}>
-                  <span className="text-link">Rename</span>
+                  <span className="text-link">{t("admin.events.rename")}</span>
                 </GroupedRow>
                 <GroupedSeparator />
                 <GroupedRow minHeight={52} onClick={() => setConfirmEnd(true)} disabled={dayOpen}>
-                  <span className="text-danger">End Event</span>
+                  <span className="text-danger">{t("admin.events.end")}</span>
                 </GroupedRow>
               </GroupedList>
             ) : (
               <GroupedList>
-                <div className="flex min-h-16 items-center px-4 text-[15px] text-label-2">No event running</div>
+                <div className="flex min-h-16 items-center px-4 text-[15px] text-label-2">
+                  {t("admin.events.none")}
+                </div>
               </GroupedList>
             )}
 
             {past.length > 0 ? (
               <div className="flex flex-col gap-2">
                 <span className="px-4 text-[13px] font-semibold uppercase tracking-[0.02em] text-label-2">
-                  Past events
+                  {t("admin.events.past")}
                 </span>
                 <GroupedList>
                   {past.map((event, index) => (
@@ -98,7 +106,7 @@ export function EventsSheet({ dayOpen, onClose, onStart, onRename, onToast }: Ev
                       {index > 0 ? <GroupedSeparator /> : null}
                       <div className="flex flex-col gap-0.5 px-4 py-3">
                         <span className="text-[17px]">{event.name}</span>
-                        <span className="text-[13px] text-label-2">{facts(event)}</span>
+                        <span className="text-[13px] text-label-2">{facts(event, t, lang)}</span>
                       </div>
                     </div>
                   ))}
@@ -108,9 +116,13 @@ export function EventsSheet({ dayOpen, onClose, onStart, onRename, onToast }: Ev
 
             <div className="flex flex-col gap-2">
               <CapsuleButton variant="secondary" onClick={onStart} disabled={dayOpen}>
-                Start New Event
+                {t("admin.events.startNew")}
               </CapsuleButton>
-              {dayOpen ? <p className="m-0 text-center text-[13px] text-label-2">Close the booth first.</p> : null}
+              {dayOpen ? (
+                <p className="m-0 text-center text-[13px] text-label-2">
+                  {t("admin.events.closeFirst")}
+                </p>
+              ) : null}
             </div>
           </>
         )}
@@ -118,9 +130,9 @@ export function EventsSheet({ dayOpen, onClose, onStart, onRename, onToast }: Ev
 
       {confirmEnd && active ? (
         <ConfirmSheet
-          title={`End ${active.name}?`}
-          description="You can start another event any time."
-          confirmLabel="End Event"
+          title={t("admin.events.endTitle", { name: active.name })}
+          description={t("admin.events.endDesc")}
+          confirmLabel={t("admin.events.end")}
           destructive
           pending={endEvent.isPending}
           onCancel={() => setConfirmEnd(false)}
@@ -128,11 +140,11 @@ export function EventsSheet({ dayOpen, onClose, onStart, onRename, onToast }: Ev
             endEvent.mutate(undefined, {
               onSuccess: (result) => {
                 setConfirmEnd(false);
-                onToast(`Event ended · ${result.summary.servedCount} served`);
+                onToast(t("admin.events.ended", { n: result.summary.servedCount }));
               },
               onError: (err) => {
                 setConfirmEnd(false);
-                onToast(err instanceof ApiError ? err.message : "Couldn't end the event.");
+                onToast(errorText(err, t, "admin.events.endFailed"));
               },
             })
           }

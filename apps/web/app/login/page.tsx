@@ -6,8 +6,10 @@ import { Delete } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { LargeTitle } from "../../components/ui/LargeTitle";
+import { LanguageSwitch } from "../../components/ui/LanguageSwitch";
 import { SegmentedControl } from "../../components/ui/SegmentedControl";
 import { ApiError, login } from "../../lib/api";
+import { useT } from "../../lib/i18n";
 import { useStaffTitle } from "../../lib/useStaffTitle";
 
 type Role = "ILLUSTRATOR" | "ADMIN";
@@ -32,6 +34,7 @@ export default function LoginPage() {
 
 function LoginForm() {
   useStaffTitle();
+  const t = useT();
   const router = useRouter();
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
@@ -51,7 +54,7 @@ function LoginForm() {
       router.replace(safeNextPath(searchParams.get("next")) ?? (data.role === "ADMIN" ? "/admin" : "/illustrator"));
     },
     onError: (err: unknown) => {
-      setError(err instanceof ApiError && err.status === 429 ? "Too many tries, wait a minute." : "Wrong PIN");
+      setError(err instanceof ApiError && err.status === 429 ? t("login.tooMany") : t("login.wrongPin"));
       setPin("");
       setShake(true);
     },
@@ -89,23 +92,26 @@ function LoginForm() {
     <main className="flex min-h-dvh flex-col gap-5 bg-bg px-4 pb-7 pt-3 text-label">
       <header className="flex h-11 items-center justify-between px-1">
         <span className="text-[15px] font-semibold text-label-2">{boothName}</span>
-        <span className="text-[13px] font-bold tracking-[-0.01em] text-label-2">BoothQ</span>
+        <span className="flex items-center gap-3">
+          <LanguageSwitch className="w-24" />
+          <span className="text-[13px] font-bold tracking-[-0.01em] text-label-2">BoothQ</span>
+        </span>
       </header>
 
-      <LargeTitle className="px-1">Staff Sign In</LargeTitle>
+      <LargeTitle className="px-1">{t("login.title")}</LargeTitle>
 
       <SegmentedControl
         options={[
-          { value: "ILLUSTRATOR", label: "Illustrator" },
-          { value: "ADMIN", label: "Admin" },
+          { value: "ILLUSTRATOR", label: t("login.illustrator") },
+          { value: "ADMIN", label: t("login.admin") },
         ]}
         value={role}
         onChange={changeRole}
       />
 
       <div className={clsx("mt-3 flex flex-col items-center gap-4", shake && "shake")}>
-        <span className="text-[20px] font-semibold">Enter PIN</span>
-        <div className="flex gap-[18px]" aria-label={`${pin.length} of ${PIN_LENGTH} digits entered`}>
+        <span className="text-[20px] font-semibold">{t("login.enterPin")}</span>
+        <div className="flex gap-[18px]" aria-label={t("login.pinProgress", { n: pin.length, total: PIN_LENGTH })}>
           {Array.from({ length: PIN_LENGTH }, (_, index) => (
             <span
               key={index}
@@ -150,7 +156,7 @@ function LoginForm() {
         <button
           type="button"
           onClick={pressDelete}
-          aria-label="Delete digit"
+          aria-label={t("login.deleteDigit")}
           disabled={mutation.isPending}
           className="flex h-20 w-20 cursor-pointer items-center justify-center text-label disabled:cursor-default disabled:opacity-50"
         >

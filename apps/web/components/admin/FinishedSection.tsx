@@ -3,6 +3,7 @@
 import type { TicketDTO } from "@boothq/shared";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { useT } from "../../lib/i18n";
 import { GroupedList, GroupedRow, GroupedSeparator } from "../ui/GroupedList";
 import { StatusChip } from "../ui/StatusChip";
 
@@ -12,12 +13,13 @@ type FinishedSectionProps = {
 };
 
 export function FinishedSection({ tickets, onRowClick }: FinishedSectionProps) {
+  const t = useT();
   const [open, setOpen] = useState(false);
 
   return (
     <GroupedList>
       <GroupedRow minHeight={52} onClick={() => setOpen((v) => !v)} className="justify-between">
-        <span className="text-[17px]">Finished &amp; Cancelled</span>
+        <span className="text-[17px]">{t("admin.finished")}</span>
         <span className="flex items-center gap-1.5 text-label-2">
           {tickets.length}
           {open ? (

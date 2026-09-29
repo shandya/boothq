@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import { useState } from "react";
+import { useT } from "../../lib/i18n";
 import { CapsuleButton } from "../ui/CapsuleButton";
 import { Sheet } from "../ui/Sheet";
 
@@ -19,6 +20,7 @@ const UNTIMED = 0;
 // 5 / 10 / 15 / 30 min, Custom, or Until I'm Back, plus an optional reason
 // (docs/UI.md → Illustrator: /illustrator, Break sheet).
 export function BreakSheet({ onClose, onSubmit, pending, disabled }: BreakSheetProps) {
+  const t = useT();
   const [choice, setChoice] = useState<number>(5);
   const [custom, setCustom] = useState("");
   const [reason, setReason] = useState("");
@@ -32,9 +34,9 @@ export function BreakSheet({ onClose, onSubmit, pending, disabled }: BreakSheetP
   }
 
   return (
-    <Sheet title="Take a Break" onClose={onClose}>
+    <Sheet title={t("ill.break.title")} onClose={onClose}>
       {disabled ? (
-        <p className="m-0 px-1 text-[15px] text-label-2">Finish the current drawing first.</p>
+        <p className="m-0 px-1 text-[15px] text-label-2">{t("ill.break.finishFirst")}</p>
       ) : (
         <>
           <div className="grid grid-cols-3 gap-2">
@@ -48,7 +50,7 @@ export function BreakSheet({ onClose, onSubmit, pending, disabled }: BreakSheetP
                   choice === minutes ? "bg-accent text-on-accent" : "bg-fill text-label",
                 )}
               >
-                {minutes} min
+                {t("fmt.min", { n: minutes })}
               </button>
             ))}
             <button
@@ -59,7 +61,7 @@ export function BreakSheet({ onClose, onSubmit, pending, disabled }: BreakSheetP
                 choice === CUSTOM ? "bg-accent text-on-accent" : "bg-fill text-label",
               )}
             >
-              Custom
+              {t("ill.break.custom")}
             </button>
             <button
               type="button"
@@ -69,7 +71,7 @@ export function BreakSheet({ onClose, onSubmit, pending, disabled }: BreakSheetP
                 choice === UNTIMED ? "bg-accent text-on-accent" : "bg-fill text-label",
               )}
             >
-              Until I&apos;m Back
+              {t("ill.break.untimed")}
             </button>
           </div>
 
@@ -79,7 +81,7 @@ export function BreakSheet({ onClose, onSubmit, pending, disabled }: BreakSheetP
               inputMode="numeric"
               min={1}
               max={240}
-              placeholder="Minutes"
+              placeholder={t("ill.break.minutes")}
               value={custom}
               onChange={(event) => setCustom(event.target.value)}
               className="h-11 shape-tile bg-fill px-4 text-[17px] text-label outline-none"
@@ -88,14 +90,14 @@ export function BreakSheet({ onClose, onSubmit, pending, disabled }: BreakSheetP
 
           <input
             type="text"
-            placeholder="Reason (optional)"
+            placeholder={t("ill.break.reason")}
             value={reason}
             onChange={(event) => setReason(event.target.value)}
             className="h-11 shape-tile bg-fill px-4 text-[17px] text-label outline-none placeholder:text-label-2"
           />
 
           <CapsuleButton pending={pending} disabled={!canSubmit} onClick={submit}>
-            Start Break
+            {t("ill.break.start")}
           </CapsuleButton>
         </>
       )}

@@ -56,7 +56,7 @@ Priority: **MVP** = build first. **P1** = right after MVP. **P2** = later.
 | C7 | Copy-link button and a hint to bookmark the page | MVP |
 | C8 | Done screen: thank you + booth social handle | MVP |
 | C9 | Opt-in sound and vibration alert when the heads-up banner first appears and when called (needs one tap to unlock audio; vibration doesn't work on iOS) | P1 |
-| C10 | Bilingual page (e.g. English + Bahasa Indonesia) with a toggle | P1 |
+| C10 | Bilingual page (English + Bahasa Indonesia) with a toggle. Built for the whole site, not just the customer page: see `UI.md` → Language | P1 |
 
 ### Admin
 

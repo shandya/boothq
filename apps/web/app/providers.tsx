@@ -3,6 +3,7 @@
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { ApiError } from "../lib/api";
+import { I18nProvider } from "../lib/i18n";
 import { setServerTime } from "../lib/server-time";
 
 function extractServerTime(data: unknown): string | null {
@@ -53,5 +54,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       }),
   );
 
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <I18nProvider>{children}</I18nProvider>
+    </QueryClientProvider>
+  );
 }

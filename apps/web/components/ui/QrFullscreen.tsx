@@ -1,5 +1,6 @@
 import { Check, Copy } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
+import { useT } from "../../lib/i18n";
 import { TicketNumber } from "./TicketNumber";
 
 type QrFullscreenProps = {
@@ -18,19 +19,20 @@ function displayUrl(url: string): string {
 // The QR always sits on a white card with black modules, even in dark mode
 // (scanners need dark-on-light) — docs/UI.md → Color exceptions.
 export function QrFullscreen({ number, name, url, onCopyLink, onDone }: QrFullscreenProps) {
+  const t = useT();
   return (
     <div className="fixed inset-0 z-50 flex flex-col gap-4 bg-bg px-4 pb-[110px] pt-3 text-label">
       <header className="flex h-11 items-center justify-between px-1">
         <span className="flex items-center gap-1.5 text-[15px] font-semibold text-status-green-fg">
           <Check className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden="true" />
-          Ticket created
+          {t("ui.qr.created")}
         </span>
         <button
           type="button"
           onClick={onDone}
           className="glass h-11 cursor-pointer shape-sq px-[18px] text-[17px] font-semibold text-link"
         >
-          Done
+          {t("common.done")}
         </button>
       </header>
 
@@ -40,13 +42,13 @@ export function QrFullscreen({ number, name, url, onCopyLink, onDone }: QrFullsc
       </div>
 
       <div className="self-center shape-card sticker bg-white p-[18px]">
-        <QRCodeSVG value={url} size={250} level="M" marginSize={4} title={`QR code for ticket ${number}`} />
+        <QRCodeSVG value={url} size={250} level="M" marginSize={4} title={t("qr.qrAlt", { n: number })} />
       </div>
 
       <p className="m-0 text-center text-[17px] leading-[1.4] text-label-2">
-        Ask {name} to scan this with
+        {t("qr.askScan", { name })}
         <br />
-        their phone camera.
+        {t("qr.theirCamera")}
       </p>
       <p className="m-0 text-center font-mono text-[13px] text-label-2">{displayUrl(url)}</p>
 
@@ -57,7 +59,7 @@ export function QrFullscreen({ number, name, url, onCopyLink, onDone }: QrFullsc
           className="flex h-[52px] w-full cursor-pointer items-center justify-center gap-2 shape-sq bg-fill text-[15px] font-semibold text-link"
         >
           <Copy className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden="true" />
-          Copy Link
+          {t("qr.copyLink")}
         </button>
       </div>
     </div>

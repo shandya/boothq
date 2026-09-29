@@ -1,3 +1,4 @@
+import { useT } from "../../lib/i18n";
 import { CapsuleButton } from "./CapsuleButton";
 import { Modal } from "./Modal";
 
@@ -17,13 +18,14 @@ type ConfirmSheetProps = {
 export function ConfirmSheet({
   title,
   description,
-  cancelLabel = "Cancel",
-  confirmLabel = "Confirm",
+  cancelLabel,
+  confirmLabel,
   destructive = false,
   pending = false,
   onCancel,
   onConfirm,
 }: ConfirmSheetProps) {
+  const t = useT();
   return (
     <Modal
       title={title}
@@ -37,10 +39,10 @@ export function ConfirmSheet({
             onClick={onConfirm}
             disabled={pending}
           >
-            {confirmLabel}
+            {confirmLabel ?? t("common.confirm")}
           </CapsuleButton>
           <CapsuleButton variant="secondary" size="md" onClick={onCancel}>
-            {cancelLabel}
+            {cancelLabel ?? t("common.cancel")}
           </CapsuleButton>
         </>
       }

@@ -1,4 +1,5 @@
 import { Minus, Plus } from "lucide-react";
+import { useT } from "../../lib/i18n";
 
 type StepperProps = {
   value: number;
@@ -9,13 +10,14 @@ type StepperProps = {
 };
 
 export function Stepper({ value, onChange, min = 0, max = 10, ...rest }: StepperProps) {
+  const t = useT();
   return (
     <div className="flex items-center gap-4" {...rest}>
       <button
         type="button"
         onClick={() => onChange(Math.max(min, value - 1))}
         disabled={value <= min}
-        aria-label="Decrease"
+        aria-label={t("admin.decrease")}
         className="flex h-8 w-8 cursor-pointer items-center justify-center shape-sq bg-fill text-label disabled:cursor-default disabled:opacity-30"
       >
         <Minus className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
@@ -25,7 +27,7 @@ export function Stepper({ value, onChange, min = 0, max = 10, ...rest }: Stepper
         type="button"
         onClick={() => onChange(Math.min(max, value + 1))}
         disabled={value >= max}
-        aria-label="Increase"
+        aria-label={t("admin.increase")}
         className="flex h-8 w-8 cursor-pointer items-center justify-center shape-sq bg-fill text-label disabled:cursor-default disabled:opacity-30"
       >
         <Plus className="h-4 w-4" strokeWidth={2} aria-hidden="true" />

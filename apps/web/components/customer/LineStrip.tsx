@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { useT } from "../../lib/i18n";
 
 type LineStripProps = {
   currentNumber: number | null;
@@ -13,19 +14,20 @@ type Circle = { key: string; label: string | undefined; content: string; mine?: 
 // collapses whatever aheadNumbers didn't cover into a single "+N" circle
 // (docs/UI.md → Customer: /t/[token], Line strip).
 export function LineStrip({ currentNumber, aheadNumbers, waitingAhead, ownNumber }: LineStripProps) {
+  const t = useT();
   const circles: Circle[] = [];
 
   if (currentNumber != null) {
-    circles.push({ key: "current", label: "Drawing", content: String(currentNumber) });
+    circles.push({ key: "current", label: t("cust.line.drawing"), content: String(currentNumber) });
   }
   aheadNumbers.forEach((n, i) => {
-    circles.push({ key: `ahead-${n}`, label: i === 0 ? "Next" : undefined, content: String(n) });
+    circles.push({ key: `ahead-${n}`, label: i === 0 ? t("cust.line.next") : undefined, content: String(n) });
   });
   const hidden = waitingAhead - aheadNumbers.length;
   if (hidden > 0) {
     circles.push({ key: "more", label: undefined, content: `+${hidden}` });
   }
-  circles.push({ key: "you", label: "You", content: String(ownNumber), mine: true });
+  circles.push({ key: "you", label: t("cust.line.you"), content: String(ownNumber), mine: true });
 
   return (
     <div className="flex flex-col items-center gap-1.5">

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import { me } from "../lib/api";
+import { useT } from "../lib/i18n";
 
 type Role = "ADMIN" | "ILLUSTRATOR";
 
@@ -14,6 +15,7 @@ function satisfiesRole(actual: Role, minRole: Role): boolean {
 }
 
 export function RoleGuard({ minRole, children }: { minRole: Role; children: ReactNode }) {
+  const t = useT();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -43,7 +45,7 @@ export function RoleGuard({ minRole, children }: { minRole: Role; children: Reac
         <div
           className="h-8 w-8 animate-spin rounded-full border-2 border-fill border-t-label-2"
           role="status"
-          aria-label="Loading"
+          aria-label={t("common.loading")}
         />
       </div>
     );

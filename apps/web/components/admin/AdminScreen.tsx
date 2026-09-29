@@ -3,8 +3,8 @@
 import type { StatsDTO, TicketDTO } from "@boothq/shared";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { logout } from "../../lib/api";
-import { ApiError } from "../../lib/api";
+import { ApiError, logout } from "../../lib/api";
+import { useT } from "../../lib/i18n";
 import { useCloseDay, useOpenDay, useQueue, useReorderQueue, useTicketSearch } from "../../lib/queries";
 import { CapsuleButton } from "../ui/CapsuleButton";
 import { ConfirmSheet } from "../ui/ConfirmSheet";
@@ -52,6 +52,7 @@ type ReorderState = { mode: "list" } | { mode: "reorder" } | { mode: "confirm"; 
 
 export function AdminScreen() {
   useStaffTitle();
+  const t = useT();
   const router = useRouter();
   const { data: snapshot, dataUpdatedAt } = useQueue();
   const openDay = useOpenDay();
@@ -99,7 +100,7 @@ export function AdminScreen() {
   if (!snapshot) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-bg">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-fill border-t-label-2" role="status" aria-label="Loading" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-fill border-t-label-2" role="status" aria-label={t("common.loading")} />
       </div>
     );
   }
@@ -172,9 +173,9 @@ export function AdminScreen() {
   async function handleCopyLink(url: string) {
     try {
       await navigator.clipboard.writeText(url);
-      showToast("Link copied");
+      showToast(t("admin.linkCopied"));
     } catch {
-      showToast("Couldn't copy link");
+      showToast(t("admin.linkCopyFailed"));
     }
   }
 
@@ -186,17 +187,17 @@ export function AdminScreen() {
         <AdminHeader
           day={day}
           waitingCount={snapshot.stats.waitingCount}
-          avgSessionLabel={`${Math.round(snapshot.stats.avgSessionSec / 60)} min`}
+          avgSessionLabel={t("fmt.min", { n: Math.round(snapshot.stats.avgSessionSec / 60) })}
           projectedFinishLabel={snapshot.stats.projectedFinishAt ? formatClockTime(snapshot.stats.projectedFinishAt) : "—"}
           onMenu={() => setOverlay({ type: "menu" })}
         />
 
-        <SearchField value={search} onChange={setSearch} placeholder="Search name, phone or number" />
+        <SearchField value={search} onChange={setSearch} placeholder={t("admin.searchPlaceholder")} />
 
         {searchResults ? (
           <GroupedList>
             {searchResults.length === 0 ? (
-              <div className="flex min-h-16 items-center px-4 text-[15px] text-label-2">No matching tickets</div>
+              <div className="flex min-h-16 items-center px-4 text-[15px] text-label-2">{t("admin.noMatch")}</div>
             ) : (
               searchResults.map((ticket) => (
                 <button
@@ -238,13 +239,13 @@ export function AdminScreen() {
 
       {reorderState.mode !== "confirm" ? (
         <GlassBar className="fixed inset-x-3 bottom-6">
-          <CapsuleButton onClick={() => setOverlay({ type: "newTicket" })}>+ New Ticket</CapsuleButton>
+          <CapsuleButton onClick={() => setOverlay({ type: "newTicket" })}>{t("admin.newTicket")}</CapsuleButton>
         </GlassBar>
       ) : null}
 
       {reorderState.mode === "confirm" ? (
         <ConfirmSheet
-          title="Change the Order?"
+          title={t("admin.reorder.title")}
           description={reorderState.summary}
           onCancel={() => setReorderState({ mode: "reorder" })}
           onConfirm={() => {
@@ -252,11 +253,11 @@ export function AdminScreen() {
             reorderQueue.mutate(order, {
               onSuccess: () => {
                 setReorderState({ mode: "list" });
-                showToast("Order updated");
+                showToast(t("admin.reorder.updated"));
               },
               onError: () => {
                 setReorderState({ mode: "list" });
-                showToast("The queue changed — please reorder again");
+                showToast(t("admin.reorder.changed"));
               },
             });
           }}
@@ -283,9 +284,9 @@ export function AdminScreen() {
 
       {overlay.type === "closeConfirm" ? (
         <ConfirmSheet
-          title="Close the Booth?"
-          description={`${snapshot.waiting.length} waiting ticket${snapshot.waiting.length === 1 ? "" : "s"} will be cancelled.`}
-          confirmLabel="Close Booth"
+          title={t("admin.close.title")}
+          description={t(snapshot.waiting.length === 1 ? "admin.close.desc" : "admin.close.descMany", { n: snapshot.waiting.length })}
+          confirmLabel={t("admin.menu.closeBooth")}
           destructive
           pending={closeDay.isPending}
           onCancel={() => setOverlay({ type: "none" })}
@@ -295,8 +296,8 @@ export function AdminScreen() {
               onError: (err) =>
                 showToast(
                   err instanceof ApiError && err.code === "CURRENT_ACTIVE"
-                    ? "Finish the current drawing first"
-                    : "Couldn't close the booth. Try again.",
+                    ? t("admin.close.finishFirst")
+                    : t("admin.close.failed"),
                 ),
             })
           }
@@ -331,7 +332,7 @@ export function AdminScreen() {
             return (
               <TicketSheet
                 ticket={ticket}
-                positionLabel={ticket.status === "WAITING" && ticket.position ? ordinal(ticket.position) : null}
+                positionLabel={ticket.status === "WAITING" && ticket.position ? ordinal(ticket.position, t) : null}
                 onClose={() => setOverlay({ type: "none" })}
                 onEdit={() => setOverlay({ type: "editTicket", ticketId: ticket.id })}
                 onShowQr={() => setOverlay({ type: "qr", ticket })}

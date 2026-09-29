@@ -1,10 +1,11 @@
 "use client";
 
 import type { DayHistoryItemDTO } from "@boothq/shared";
-import { formatDuration } from "@boothq/shared/format";
 import { ChevronLeft, Download } from "lucide-react";
 import Link from "next/link";
 import { formatClockTime, formatShortDate } from "../../lib/format";
+import { type TFunction, useI18n, useT } from "../../lib/i18n";
+import { formatDurationT } from "../../lib/i18n/format";
 import { useDayHistory } from "../../lib/queries";
 import { useStaffTitle } from "../../lib/useStaffTitle";
 import { GroupedList, GroupedSeparator } from "../ui/GroupedList";
@@ -25,37 +26,49 @@ function groupByEvent(days: DayHistoryItemDTO[]): EventGroup[] {
   return groups;
 }
 
-function plural(count: number, one: string): string {
-  return `${count} ${one}${count === 1 ? "" : "s"}`;
+function daysLabel(count: number, t: TFunction): string {
+  return t(count === 1 ? "admin.events.day" : "admin.events.days", { n: count });
 }
 
 function DayRow({ day }: { day: DayHistoryItemDTO }) {
+  const { t, lang } = useI18n();
   const { summary } = day;
   const when = day.closedAt
     ? `${formatClockTime(day.openedAt)} – ${formatClockTime(day.closedAt)}`
-    : `Open now · since ${formatClockTime(day.openedAt)}`;
+    : t("admin.history.openNow", { time: formatClockTime(day.openedAt) });
   const pace = [
-    summary.avgSessionSec > 0 ? `Avg drawing ${formatDuration(summary.avgSessionSec)}` : null,
-    summary.longestWaitSec != null ? `Longest wait ${formatDuration(summary.longestWaitSec)}` : null,
+    summary.avgSessionSec > 0
+      ? t("admin.history.avg", { dur: formatDurationT(t, summary.avgSessionSec) })
+      : null,
+    summary.longestWaitSec != null
+      ? t("admin.history.longest", { dur: formatDurationT(t, summary.longestWaitSec) })
+      : null,
   ].filter(Boolean);
-  const label = `Day ${day.dayNumber} (${formatShortDate(day.openedAt)})`;
+  const date = formatShortDate(day.openedAt, lang);
+  const label = t("admin.history.dayLabel", { n: day.dayNumber, date });
 
   return (
     <div className="flex items-center gap-3 py-3 pl-4 pr-3">
       <div className="flex min-w-0 flex-grow flex-col gap-0.5">
         <span className="text-[17px] font-semibold">
-          Day {day.dayNumber} · {formatShortDate(day.openedAt)}
+          {t("admin.history.dayTitle", { n: day.dayNumber, date })}
         </span>
         <span className="text-[13px] text-label-2">{when}</span>
         <span className="text-[15px]">
-          {summary.servedCount} served · {summary.noShowCount} no-show · {summary.cancelledCount} cancelled
+          {t("admin.history.counts", {
+            served: summary.servedCount,
+            noShow: summary.noShowCount,
+            cancelled: summary.cancelledCount,
+          })}
         </span>
-        {pace.length > 0 ? <span className="text-[13px] text-label-2">{pace.join(" · ")}</span> : null}
+        {pace.length > 0 ? (
+          <span className="text-[13px] text-label-2">{pace.join(" · ")}</span>
+        ) : null}
       </div>
       <a
         href={`/api/days/${encodeURIComponent(day.id)}/export.csv`}
         download
-        aria-label={`Export ${label} as CSV`}
+        aria-label={t("admin.history.export", { label })}
         className="glass flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center shape-sq text-link"
       >
         <Download className="h-5 w-5" strokeWidth={2} aria-hidden="true" />
@@ -66,6 +79,7 @@ function DayRow({ day }: { day: DayHistoryItemDTO }) {
 
 export function HistoryScreen() {
   useStaffTitle();
+  const t = useT();
   const query = useDayHistory();
   const days = query.data?.days;
   const groups = days ? groupByEvent(days) : [];
@@ -78,7 +92,7 @@ export function HistoryScreen() {
         <header className="flex h-11 items-center px-1">
           <Link
             href="/admin"
-            aria-label="Back"
+            aria-label={t("admin.history.back")}
             className="glass flex h-11 w-11 shrink-0 items-center justify-center shape-sq text-label"
           >
             <ChevronLeft className="h-[22px] w-[22px]" strokeWidth={2} aria-hidden="true" />
@@ -86,19 +100,19 @@ export function HistoryScreen() {
         </header>
 
         <div className="flex flex-col px-1">
-          <LargeTitle>Day History</LargeTitle>
-          <span className="text-[15px] text-label-2">Tap the download button for a spreadsheet of that day.</span>
+          <LargeTitle>{t("admin.history.title")}</LargeTitle>
+          <span className="text-[15px] text-label-2">{t("admin.history.hint")}</span>
         </div>
 
         {query.isError ? (
           <div className="flex flex-col items-center gap-3 py-10 text-center">
-            <span className="text-[17px] font-semibold">Couldn&apos;t load the history</span>
+            <span className="text-[17px] font-semibold">{t("admin.history.loadFailed")}</span>
             <button
               type="button"
               onClick={() => void query.refetch()}
               className="h-11 cursor-pointer bg-transparent px-4 text-[17px] text-link"
             >
-              Try Again
+              {t("common.tryAgain")}
             </button>
           </div>
         ) : !days ? (
@@ -106,13 +120,13 @@ export function HistoryScreen() {
             <div
               className="h-8 w-8 animate-spin rounded-full border-2 border-fill border-t-label-2"
               role="status"
-              aria-label="Loading"
+              aria-label={t("common.loading")}
             />
           </div>
         ) : days.length === 0 ? (
           <div className="flex flex-col items-center gap-1 rounded-[28px] bg-card px-6 py-10 text-center">
-            <span className="text-[17px] font-semibold">No days yet</span>
-            <span className="text-[15px] text-label-2">Days show up here after you open the booth.</span>
+            <span className="text-[17px] font-semibold">{t("admin.history.empty")}</span>
+            <span className="text-[15px] text-label-2">{t("admin.history.emptyHint")}</span>
           </div>
         ) : (
           groups.map((group) => {
@@ -124,7 +138,10 @@ export function HistoryScreen() {
                     {group.name}
                   </h2>
                   <span className="shrink-0 text-[13px] text-label-2">
-                    {plural(group.days.length, "day")} · {served} served
+                    {t("admin.history.groupCount", {
+                      days: daysLabel(group.days.length, t),
+                      served,
+                    })}
                   </span>
                 </div>
                 <GroupedList>

@@ -1,9 +1,10 @@
 "use client";
 
 import type { TicketDTO } from "@boothq/shared";
-import { formatDuration } from "@boothq/shared/format";
 import { Camera, ChevronRight, GripVertical, Pen } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { type TFunction, useT } from "../../lib/i18n";
+import { formatDurationT } from "../../lib/i18n/format";
 import { getServerNow } from "../../lib/server-time";
 import { GroupedList, GroupedSeparator } from "../ui/GroupedList";
 
@@ -18,17 +19,17 @@ type WaitingSectionProps = {
   onRequestConfirm: (order: string[], summary: string) => void;
 };
 
-function waitedLabel(ticket: TicketDTO): string {
+function waitedLabel(ticket: TicketDTO, t: TFunction): string {
   const sec = Math.max(0, Math.round((getServerNow().getTime() - new Date(ticket.createdAt).getTime()) / 1000));
-  return `Waiting ${formatDuration(sec)}`;
+  return t("admin.waiting.for", { dur: formatDurationT(t, sec) });
 }
 
-function formatEtaShort(etaSec: number): string {
-  if (etaSec < 60) return "Any moment";
-  return `~${Math.round(etaSec / 60)} min`;
+function formatEtaShort(etaSec: number, t: TFunction): string {
+  if (etaSec < 60) return t("admin.waiting.anyMoment");
+  return t("fmt.etaMin", { n: Math.round(etaSec / 60) });
 }
 
-function summarizeReorder(oldOrder: TicketDTO[], newOrder: TicketDTO[]): string {
+function summarizeReorder(oldOrder: TicketDTO[], newOrder: TicketDTO[], t: TFunction): string {
   let moverIdx = -1;
   let maxDelta = 0;
   newOrder.forEach((ticket, i) => {
@@ -39,19 +40,19 @@ function summarizeReorder(oldOrder: TicketDTO[], newOrder: TicketDTO[]): string 
       moverIdx = i;
     }
   });
-  if (moverIdx === -1) return "This changes their estimated wait times.";
+  if (moverIdx === -1) return t("admin.reorder.noChange");
 
   const mover = newOrder[moverIdx]!;
   const oldIdx = oldOrder.findIndex((o) => o.id === mover.id);
   const jumped = oldOrder.slice(moverIdx, oldIdx).map((t) => t.name);
   const jumpedLabel =
     jumped.length === 0
-      ? "to the front"
+      ? t("admin.reorder.front")
       : jumped.length === 1
-        ? `ahead of ${jumped[0]}`
-        : `ahead of ${jumped.slice(0, -1).join(", ")} and ${jumped[jumped.length - 1]}`;
-  const positionLabel = moverIdx === 0 ? "next" : `position ${moverIdx + 1}`;
-  return `${mover.name} will move to ${positionLabel}, ${jumpedLabel}. This changes their estimated wait times.`;
+        ? t("admin.reorder.aheadOf", { a: jumped[0]! })
+        : t("admin.reorder.aheadOfMany", { list: jumped.slice(0, -1).join(", "), last: jumped[jumped.length - 1]! });
+  const positionLabel = moverIdx === 0 ? t("admin.reorder.next") : t("admin.reorder.position", { n: moverIdx + 1 });
+  return t("admin.reorder.summary", { name: mover.name, pos: positionLabel, jumped: jumpedLabel });
 }
 
 export function WaitingSection({
@@ -62,6 +63,7 @@ export function WaitingSection({
   onCancelReorder,
   onRequestConfirm,
 }: WaitingSectionProps) {
+  const t = useT();
   const [order, setOrder] = useState<string[]>(() => tickets.map((t) => t.id));
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState(0);
@@ -126,34 +128,34 @@ export function WaitingSection({
       onCancelReorder();
       return;
     }
-    onRequestConfirm(order, summarizeReorder(tickets, displayTickets));
+    onRequestConfirm(order, summarizeReorder(tickets, displayTickets, t));
   }
 
   return (
     <div className="flex flex-col gap-1.5">
       <div className="mt-1.5 flex items-center justify-between px-4">
         <h2 className="m-0 text-[13px] font-semibold uppercase tracking-[0.02em] text-label-2">
-          Waiting · {tickets.length}
+          {t("admin.waiting.header", { n: tickets.length })}
         </h2>
         {reordering ? (
           <div className="flex items-center gap-3">
             <button type="button" onClick={onCancelReorder} className="cursor-pointer bg-transparent text-[15px] text-link">
-              Cancel
+              {t("common.cancel")}
             </button>
             <button type="button" onClick={handleDone} className="cursor-pointer bg-transparent text-[15px] font-semibold text-link">
-              Done
+              {t("common.done")}
             </button>
           </div>
         ) : tickets.length > 1 ? (
           <button type="button" onClick={onEnterReorder} className="cursor-pointer bg-transparent text-[15px] font-semibold text-link">
-            Reorder
+            {t("admin.waiting.reorder")}
           </button>
         ) : null}
       </div>
 
       <GroupedList>
         {displayTickets.length === 0 ? (
-          <div className="flex min-h-16 items-center px-4 text-[15px] text-label-2">No one waiting</div>
+          <div className="flex min-h-16 items-center px-4 text-[15px] text-label-2">{t("admin.waiting.none")}</div>
         ) : null}
         {displayTickets.map((ticket, index) => {
           const isDragged = ticket.id === draggingId;
@@ -187,7 +189,7 @@ export function WaitingSection({
                   </span>
                   <span className="flex min-w-0 flex-grow flex-col gap-0.5">
                     <span className="truncate text-[17px] font-semibold">{ticket.name}</span>
-                    <span className="truncate text-[13px] text-label-2">{waitedLabel(ticket)}</span>
+                    <span className="truncate text-[13px] text-label-2">{waitedLabel(ticket, t)}</span>
                   </span>
                 </div>
               ) : (
@@ -204,16 +206,16 @@ export function WaitingSection({
                     <span className="flex items-center gap-1.5 truncate text-[17px] font-semibold">
                       {ticket.name}
                       {ticket.mode === "FROM_PHOTO" ? (
-                        <Camera className="h-[13px] w-[13px] shrink-0 text-label-2" strokeWidth={2} aria-label="Drawn from photo" />
+                        <Camera className="h-[13px] w-[13px] shrink-0 text-label-2" strokeWidth={2} aria-label={t("admin.fromPhoto")} />
                       ) : null}
                       {ticket.notes ? (
-                        <Pen className="h-[13px] w-[13px] shrink-0 text-label-2" strokeWidth={2} aria-label="Has a note" />
+                        <Pen className="h-[13px] w-[13px] shrink-0 text-label-2" strokeWidth={2} aria-label={t("admin.waiting.hasNote")} />
                       ) : null}
                     </span>
-                    <span className="truncate text-[13px] text-label-2">{waitedLabel(ticket)}</span>
+                    <span className="truncate text-[13px] text-label-2">{waitedLabel(ticket, t)}</span>
                   </span>
                   <span className="shrink-0 text-[15px] tabular-nums text-label-2">
-                    {ticket.etaSec != null ? formatEtaShort(ticket.etaSec) : null}
+                    {ticket.etaSec != null ? formatEtaShort(ticket.etaSec, t) : null}
                   </span>
                   <ChevronRight className="h-4 w-4 shrink-0 text-separator" strokeWidth={2} aria-hidden="true" />
                 </button>

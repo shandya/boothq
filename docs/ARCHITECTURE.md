@@ -148,6 +148,10 @@ On serverless the default memory store is per instance, so limits are best-effor
 Version pins that diverge from "latest" on purpose: `typescript` is pinned to the 5.x line (`typescript-eslint` doesn't yet support TypeScript 7's new CLI). `prisma`/`@prisma/client` are pinned to the 6.x line — Prisma 7+ removed `datasource.url`/`directUrl` from `schema.prisma` in favor of a `prisma.config.ts`, which would break the schema and `prisma migrate dev` workflow documented in `DATA_MODEL.md`. Revisit both pins periodically.
 **e2e (P1)**: @playwright/test.
 
+## Internationalization
+
+No library: a typed dictionary in `apps/web/lib/i18n` (English and Bahasa Indonesia), an `I18nProvider` in `app/providers.tsx`, and a per-role `localStorage` choice. See `UI.md` → Language.
+
 ## Environment variables
 
 `apps/api/.env`

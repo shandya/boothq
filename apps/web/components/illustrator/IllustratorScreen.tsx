@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { logout, me } from "../../lib/api";
 import { onStale, vibrate } from "../../lib/feedback";
+import { useT } from "../../lib/i18n";
 import { usePatchDay, usePauseDay, useQueue } from "../../lib/queries";
 import { useStaffTitle } from "../../lib/useStaffTitle";
 import { useWakeLock } from "../../lib/useWakeLock";
@@ -32,6 +33,7 @@ type Overlay =
 
 export function IllustratorScreen() {
   useStaffTitle();
+  const t = useT();
   const router = useRouter();
   const { data: snapshot, dataUpdatedAt } = useQueue();
   const roleQuery = useQuery({ queryKey: ["auth-me"], queryFn: me, retry: false });
@@ -47,7 +49,7 @@ export function IllustratorScreen() {
         <div
           className="h-8 w-8 animate-spin rounded-full border-2 border-fill border-t-label-2"
           role="status"
-          aria-label="Loading"
+          aria-label={t("common.loading")}
         />
       </div>
     );
@@ -56,8 +58,8 @@ export function IllustratorScreen() {
   if (!snapshot.day) {
     return (
       <div className="flex min-h-dvh flex-col items-center justify-center gap-2 bg-bg px-6 text-center text-label">
-        <span className="text-[22px] font-semibold">Booth is closed</span>
-        <span className="text-[15px] text-label-2">Ask an admin to open the booth.</span>
+        <span className="text-[22px] font-semibold">{t("ill.closed")}</span>
+        <span className="text-[15px] text-label-2">{t("ill.closedHint")}</span>
       </div>
     );
   }
@@ -66,14 +68,18 @@ export function IllustratorScreen() {
   const nextWaiting = snapshot.waiting[0] ?? null;
   const { stats } = snapshot;
   const totalTicketsCreated =
-    stats.servedCount + stats.noShowCount + stats.cancelledCount + stats.waitingCount + (snapshot.current ? 1 : 0);
+    stats.servedCount +
+    stats.noShowCount +
+    stats.cancelledCount +
+    stats.waitingCount +
+    (snapshot.current ? 1 : 0);
 
   async function handleCopyLink(url: string) {
     try {
       await navigator.clipboard.writeText(url);
-      showToast("Link copied");
+      showToast(t("admin.linkCopied"));
     } catch {
-      showToast("Couldn't copy link");
+      showToast(t("admin.linkCopyFailed"));
     }
   }
 
@@ -103,7 +109,7 @@ export function IllustratorScreen() {
 
       <button
         type="button"
-        aria-label="New Ticket"
+        aria-label={t("ill.newTicket")}
         onClick={() => setOverlay({ type: "newTicket" })}
         className="fixed bottom-[92px] right-4 z-40 flex h-14 w-14 cursor-pointer items-center justify-center shape-sq bg-pop text-on-pop shadow-[0_6px_16px_rgba(235,172,31,0.5)]"
       >
@@ -118,19 +124,19 @@ export function IllustratorScreen() {
           className="flex h-11 cursor-pointer items-center gap-1.5 shape-sq bg-fill px-4 text-[15px] font-semibold text-link disabled:cursor-default disabled:opacity-50"
         >
           <Coffee className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
-          Break
+          {t("ill.break")}
         </button>
         <div className="flex items-center gap-2 pr-1">
-          <span className="text-[15px] font-medium text-label">Accepting</span>
+          <span className="text-[15px] font-medium text-label">{t("ill.accepting")}</span>
           <Switch
             checked={day.acceptingTickets}
             onChange={(checked) =>
               patchDay.mutate(
                 { acceptingTickets: checked },
-                { onSuccess: () => vibrate(), onError: onStale(showToast) },
+                { onSuccess: () => vibrate(), onError: onStale(showToast, t) },
               )
             }
-            aria-label="Accepting tickets"
+            aria-label={t("admin.settings.acceptingAria")}
           />
         </div>
       </GlassBar>
@@ -155,9 +161,9 @@ export function IllustratorScreen() {
               onSuccess: () => {
                 setOverlay({ type: "none" });
                 vibrate();
-                showToast("On break");
+                showToast(t("ill.onBreakToast"));
               },
-              onError: onStale(showToast),
+              onError: onStale(showToast, t),
             })
           }
         />

@@ -1,6 +1,7 @@
 import { X } from "lucide-react";
 import type { ReactNode } from "react";
 import clsx from "clsx";
+import { useT } from "../../lib/i18n";
 
 type ModalProps = {
   title: string;
@@ -29,6 +30,7 @@ export function Modal({
   footer,
   className,
 }: ModalProps) {
+  const t = useT();
   const hasSides = showClose || headerAction;
   return (
     <div className="fixed inset-0 z-[70]" role={role} aria-modal="true" aria-labelledby="modal-title">
@@ -45,7 +47,7 @@ export function Modal({
               <button
                 type="button"
                 onClick={onClose}
-                aria-label="Close"
+                aria-label={t("common.close")}
                 className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center shape-sq bg-fill text-label"
               >
                 <X className="h-5 w-5" strokeWidth={2} />

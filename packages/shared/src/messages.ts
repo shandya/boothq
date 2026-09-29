@@ -8,7 +8,12 @@ export function buildWhatsAppUrl(phoneE164: string, text: string): string {
   return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
 }
 
+// Customer-facing WhatsApp templates, in the staff member's chosen language.
+export type MessageLang = "en" | "id";
+
 export const messages = {
-  readyForPickup: (v: { firstName: string; number: number; booth: string }) =>
-    `Hi ${v.firstName}! Your portrait (#${v.number}) from ${v.booth} is ready. Pick it up at the booth any time before we close.`,
+  readyForPickup: (v: { firstName: string; number: number; booth: string }, lang: MessageLang = "en") =>
+    lang === "id"
+      ? `Halo ${v.firstName}! Potretmu (#${v.number}) dari ${v.booth} sudah siap. Ambil di booth kapan saja sebelum kami tutup.`
+      : `Hi ${v.firstName}! Your portrait (#${v.number}) from ${v.booth} is ready. Pick it up at the booth any time before we close.`,
 };

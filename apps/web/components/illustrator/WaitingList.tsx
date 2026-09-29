@@ -1,22 +1,27 @@
 "use client";
 
 import type { TicketDTO } from "@boothq/shared";
-import { formatDuration } from "@boothq/shared/format";
 import { Camera, Pen } from "lucide-react";
 import { useState } from "react";
+import { type TFunction, useT } from "../../lib/i18n";
+import { formatDurationT } from "../../lib/i18n/format";
 import { getServerNow } from "../../lib/server-time";
 import { GroupedList, GroupedRow, GroupedSeparator } from "../ui/GroupedList";
 import { TicketNoteSheet } from "./TicketNoteSheet";
 
-function waitedLabel(ticket: TicketDTO): string {
-  const sec = Math.max(0, Math.round((getServerNow().getTime() - new Date(ticket.createdAt).getTime()) / 1000));
-  return `Waited ${formatDuration(sec)}`;
+function waitedLabel(ticket: TicketDTO, t: TFunction): string {
+  const sec = Math.max(
+    0,
+    Math.round((getServerNow().getTime() - new Date(ticket.createdAt).getTime()) / 1000),
+  );
+  return t("ill.waiting.waited", { dur: formatDurationT(t, sec) });
 }
 
 // Every WAITING ticket, in queue order; read-only (no drag handle, no
 // Reorder action — reordering stays on the Admin's Waiting section)
 // (docs/UI.md → Illustrator: /illustrator, Waiting list).
 export function WaitingList({ tickets }: { tickets: TicketDTO[] }) {
+  const t = useT();
   const [noteTicket, setNoteTicket] = useState<TicketDTO | null>(null);
 
   if (tickets.length === 0) return null;
@@ -24,7 +29,7 @@ export function WaitingList({ tickets }: { tickets: TicketDTO[] }) {
   return (
     <div className="flex flex-col gap-1.5">
       <h2 className="m-0 mt-1.5 px-4 text-[13px] font-semibold uppercase tracking-[0.02em] text-label-2">
-        Waiting &middot; {tickets.length}
+        {t("ill.waiting.header", { n: tickets.length })}
       </h2>
       <GroupedList>
         {tickets.map((ticket, index) => (
@@ -38,19 +43,29 @@ export function WaitingList({ tickets }: { tickets: TicketDTO[] }) {
                 <span className="flex items-center gap-1.5 truncate text-[17px] font-semibold">
                   {ticket.name}
                   {ticket.mode === "FROM_PHOTO" ? (
-                    <Camera className="h-[13px] w-[13px] shrink-0 text-label-2" strokeWidth={2} aria-label="Drawn from photo" />
+                    <Camera
+                      className="h-[13px] w-[13px] shrink-0 text-label-2"
+                      strokeWidth={2}
+                      aria-label={t("admin.fromPhoto")}
+                    />
                   ) : null}
                   {ticket.notes ? (
-                    <Pen className="h-[13px] w-[13px] shrink-0 text-label-2" strokeWidth={2} aria-label="Has a note" />
+                    <Pen
+                      className="h-[13px] w-[13px] shrink-0 text-label-2"
+                      strokeWidth={2}
+                      aria-label={t("admin.waiting.hasNote")}
+                    />
                   ) : null}
                 </span>
-                <span className="truncate text-[13px] text-label-2">{waitedLabel(ticket)}</span>
+                <span className="truncate text-[13px] text-label-2">{waitedLabel(ticket, t)}</span>
               </span>
             </GroupedRow>
           </div>
         ))}
       </GroupedList>
-      {noteTicket ? <TicketNoteSheet ticket={noteTicket} onClose={() => setNoteTicket(null)} /> : null}
+      {noteTicket ? (
+        <TicketNoteSheet ticket={noteTicket} onClose={() => setNoteTicket(null)} />
+      ) : null}
     </div>
   );
 }
