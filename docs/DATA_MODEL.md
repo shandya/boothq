@@ -44,8 +44,28 @@ enum Role {
   SYSTEM
 }
 
+enum EventStatus {
+  ACTIVE // the venue the booth is at now; at most one
+  ENDED
+}
+
+// One venue or convention: groups the Days held there (EVENTS.md).
+model Event {
+  id        String      @id @default(cuid())
+  name      String      // 1–60 chars
+  status    EventStatus @default(ACTIVE)
+  startedAt DateTime    @default(now())
+  endedAt   DateTime?
+  days      Day[]
+  actions   ActionLog[]
+
+  @@index([status])
+}
+
 model Day {
   id                 String    @id @default(cuid())
+  eventId            String
+  event              Event     @relation(fields: [eventId], references: [id])
   status             DayStatus @default(OPEN)
   openedAt           DateTime  @default(now())
   closedAt           DateTime?
@@ -53,7 +73,7 @@ model Day {
   acceptingTickets   Boolean   @default(true)
   headsUpAhead       Int       @default(3)   // show "head back to the booth" when this many or fewer are ahead
   // Drawing time and time between customers are measured from recent tickets,
-  // not stored (BUSINESS_LOGIC.md §5). Events (EVENTS.md) will add `eventId`.
+  // not stored (BUSINESS_LOGIC.md §5), scoped to the Day's Event.
   pausedAt           DateTime? // non-null = on break
   pauseUntil         DateTime? // null while paused = untimed break
   pauseReason        String?
@@ -61,6 +81,7 @@ model Day {
   actions            ActionLog[]
 
   @@index([status])
+  @@index([eventId])
 }
 
 model Ticket {
@@ -92,8 +113,10 @@ model Ticket {
 
 model ActionLog {
   id        String   @id @default(cuid())
-  dayId     String
-  day       Day      @relation(fields: [dayId], references: [id])
+  dayId     String?  // null for Event operations
+  day       Day?     @relation(fields: [dayId], references: [id], onDelete: Restrict)
+  eventId   String?  // set for Event operations (START_EVENT, RENAME_EVENT, END_EVENT)
+  event     Event?   @relation(fields: [eventId], references: [id], onDelete: Restrict)
   ticketId  String?
   action    String   // e.g. "CALL_NEXT", "START", "FINISH", "NO_SHOW", "REQUEUE", "CANCEL", "PAUSE"
   actorRole Role
@@ -102,16 +125,20 @@ model ActionLog {
   createdAt DateTime @default(now())
 
   @@index([dayId, createdAt])
+  @@index([eventId, createdAt])
 }
 ```
 
 ### Extra migration SQL
 
-Only one Day may be OPEN. Add this to the first migration by hand:
+Only one Day may be OPEN, and only one Event may be ACTIVE. Prisma can't express partial unique indexes, so they are added to migrations by hand:
 
 ```sql
 CREATE UNIQUE INDEX "one_open_day" ON "Day" ("status") WHERE "status" = 'OPEN';
+CREATE UNIQUE INDEX "Event_one_active" ON "Event" ("status") WHERE "status" = 'ACTIVE';
 ```
+
+The Events migration backfills existing installs: one ACTIVE "First event" (started at the oldest Day's `openedAt`) owns every existing Day, so their measured wait-time history carries over. A database with no Days gets no Event and starts at "No event running".
 
 ## Ticket state machine
 
@@ -151,3 +178,7 @@ Any other transition returns `409 INVALID_TRANSITION`. A SERVING or DONE ticket 
 5. `durationSec` is set if and only if `status = DONE`.
 6. Tickets can only be created while the Day is OPEN.
 7. Pausing is only allowed when no ticket is SERVING.
+8. At most one Event with `status = ACTIVE`.
+9. An OPEN Day belongs to the ACTIVE Event.
+10. An Event can't end, and a new one can't start, while a Day is OPEN.
+11. `Event.endedAt` is set if and only if `status = ENDED`.

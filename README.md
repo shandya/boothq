@@ -31,7 +31,10 @@ pnpm --filter api db:seed            # optional: a sample day + tickets
 pnpm dev                             # web on :3000, api on :4000
 ```
 
-Visit `http://localhost:3000/login`, sign in as Admin, and open the booth.
+Visit `http://localhost:3000/login`, sign in as Admin, tap **Start Event**
+(name the venue, e.g. "Comic Con 2026"), then **Open Booth**. A Day always
+belongs to an Event; wait-time estimates are learned per Event. The seed
+script creates a "Sample event" for you.
 
 ### Other commands
 

@@ -95,7 +95,7 @@ Staff never type the drawing time or the time between customers: both are **meas
 
 `recentHistory({ tickets, pauses })` in `eta.ts` is pure and scope-agnostic: it measures whatever tickets it is given. The API's `loadRecentHistory()` (`snapshot.service.ts`) is the **only** place that decides which Days count. It loads the 30 most recent tickets with a `startedAt`, plus the `PAUSE` actions since the oldest of them.
 
-- **History scope**: the Days of the current Event (see `EVENTS.md`). Until Events ship, that's every Day, so a new Day starts from the previous Day's measurements.
+- **History scope**: the Days of the Day's own Event (see `EVENTS.md`). `loadRecentHistory(eventId)` filters tickets and `PAUSE` actions by `day.eventId`. A new Day in the same Event starts from that Event's measurements; the first Day of a new Event starts from the built-in defaults.
 - **Drawing times**: `durationSec` of DONE tickets, newest `endedAt` first.
 - **Time between customers**: for each DONE ticket P, the next ticket started in the **same Day** after P's Finish. The gap `next.startedAt − P.endedAt` counts only if the next customer was already in line at Finish (`next.createdAt <= P.endedAt`) and no break started in between. That keeps idle time (nobody waiting) and breaks out of it. The gap naturally includes calling, walking up, payment and any no-shows in between.
 

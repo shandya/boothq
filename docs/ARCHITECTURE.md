@@ -58,7 +58,7 @@ booth-queue/
 │     └─ src/
 │        ├─ app.ts            # builds and exports the Express app (no listen)
 │        ├─ server.ts         # app.listen for local dev / Railway / Render
-│        ├─ routes/           # auth, public, queue, tickets, day, stats
+│        ├─ routes/           # auth, public, queue, tickets, day, events, stats
 │        ├─ services/
 │        │  ├─ queue.service.ts   # ALL state transitions live here
 │        │  ├─ day-lock.ts        # withOpenDayLock(tx => ...)

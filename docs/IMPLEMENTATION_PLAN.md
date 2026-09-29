@@ -192,13 +192,14 @@ Docs: `PHOTO_TICKETS.md`
 
 Docs: `EVENTS.md`
 
-- [ ] Migration: `Event` model, `EventStatus`, one-ACTIVE partial unique index, `Day.eventId`, nullable `ActionLog.dayId` + `eventId`; backfill existing Days into an ACTIVE "First event"
-- [ ] Shared: `EventDTO`, `EventSummaryDTO`, `startEventSchema`, `renameEventSchema`; `QueueSnapshot.event`
-- [ ] Service: `startEvent`, `renameEvent`, `endEvent` (lock ACTIVE Event, `DAY_OPEN` guard); `openDay` sets `eventId` and fails `NO_ACTIVE_EVENT`
-- [ ] Scope `loadRecentHistory()` to the Day's Event
-- [ ] Endpoints: `GET /api/events`, `POST /api/events`, `PATCH /api/events/current`, `POST /api/events/current/end`
-- [ ] Web: event name on the closed card, Start event sheet, Events sheet in the admin menu, Settings footnote, Day history grouped by Event
-- [ ] All tests listed in `EVENTS.md`
+- [x] Migration: `Event` model, `EventStatus`, one-ACTIVE partial unique index, `Day.eventId`, nullable `ActionLog.dayId` + `eventId`; backfill existing Days into an ACTIVE "First event"
+- [x] Shared: `EventDTO`, `EventSummaryDTO`, `startEventSchema`, `renameEventSchema`; `QueueSnapshot.event`
+- [x] Service: `startEvent`, `renameEvent`, `endEvent` (advisory lock, `DAY_OPEN` guard); `openDay` sets `eventId` and fails `NO_ACTIVE_EVENT`
+- [x] Scope `loadRecentHistory()` to the Day's Event
+- [x] Endpoints: `GET /api/events`, `POST /api/events`, `PATCH /api/events/current`, `POST /api/events/current/end`
+- [x] Web: event name on the closed card, Start event sheet, Events sheet in the admin menu, Settings footnote
+- [ ] Web: Day history grouped by Event — waits for the Day history screen (Phase 7)
+- [x] All tests listed in `EVENTS.md`
 
 **Acceptance (Phase 9)**
 - Start Event A, run two Days with several customers, then start Event B: B's first customer gets the default estimate (10 min / 1 min) while Event A's history and summaries are unchanged. Reopening the booth inside Event B carries B's measured values over.
