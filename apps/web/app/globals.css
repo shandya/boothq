@@ -29,7 +29,7 @@
   --glass-edge: rgba(255, 255, 255, 0.9);
   --glass-shadow: 0 8px 28px rgba(28, 33, 31, 0.14);
   --dim: rgba(28, 33, 31, 0.35);
-  --outline: #1c211f;
+  --outline: #086385;
   --on-danger: #ffffff;
 
   --status-gray-bg: #d6e3e6;
@@ -66,7 +66,7 @@
     --glass-edge: rgba(238, 232, 229, 0.14);
     --glass-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
     --dim: rgba(0, 0, 0, 0.55);
-    --outline: #6d8a91;
+    --outline: #4a9dbb;
     --on-danger: #1c211f;
 
     --status-gray-bg: #37454a;

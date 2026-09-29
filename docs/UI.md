@@ -59,6 +59,7 @@ The app follows the phone's light/dark setting automatically. There is no in-app
 | `--glass` | `rgba(233,243,245,.72)` | `rgba(36,44,45,.72)` | Glass surfaces |
 | `--glass-edge` | `rgba(255,255,255,.9)` | `rgba(238,232,229,.14)` | Glass 1px border |
 | `--dim` | `rgba(28,33,31,.35)` | `rgba(0,0,0,.55)` | Backdrop behind sheets |
+| `--outline` | `#086385` | `#4A9DBB` | `.sticker` border and offset shadow |
 
 Palette source: sky blue `#91C8D3` (primary family, with a deeper blue `#2A6F80` derived for light-mode buttons/links), mustard `#EBAC1F` (accent), peach `#EFD0AF`, ink `#1C211F`, paper `#EEE8E5`. Dark scheme uses ink as the background and the sky blue as primary.
 
