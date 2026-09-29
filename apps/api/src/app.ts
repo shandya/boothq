@@ -5,6 +5,7 @@ import { csrfProtection } from "./middleware/csrf.js";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
 import { authRouter } from "./routes/auth.js";
 import { dayRouter } from "./routes/day.js";
+import { daysRouter } from "./routes/days.js";
 import { eventsRouter } from "./routes/events.js";
 import { healthRouter } from "./routes/health.js";
 import { publicRouter } from "./routes/public.js";
@@ -35,6 +36,7 @@ export function createApp(): Express {
   app.use("/api", queueRouter);
   app.use("/api", ticketsRouter);
   app.use("/api", dayRouter);
+  app.use("/api", daysRouter);
   app.use("/api", eventsRouter);
 
   app.use(notFoundHandler);

@@ -18,6 +18,15 @@ export type EventSummaryDTO = {
   avgSessionSec: number; // plain average over the Event's valid drawings; 0 when none
 };
 
+export type DaySummaryDTO = {
+  ticketCount: number;
+  servedCount: number;
+  noShowCount: number;
+  cancelledCount: number;
+  avgSessionSec: number; // plain average over the Day's valid drawings; 0 when none
+  longestWaitSec: number | null; // created → called, over called tickets
+};
+
 export type DayDTO = {
   id: string;
   status: "OPEN" | "CLOSED";
@@ -29,6 +38,13 @@ export type DayDTO = {
   pausedAt: string | null;
   pauseUntil: string | null;
   pauseReason: string | null;
+};
+
+// One row of the admin Day history (staff only).
+export type DayHistoryItemDTO = DayDTO & {
+  event: { id: string; name: string };
+  dayNumber: number; // 1-based position of this Day within its Event
+  summary: DaySummaryDTO;
 };
 
 export type TicketDTO = {
