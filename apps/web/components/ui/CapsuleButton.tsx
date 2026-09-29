@@ -6,7 +6,7 @@ type Variant = "primary" | "secondary" | "destructive";
 const VARIANT_CLASSES: Record<Variant, string> = {
   primary: "bg-accent text-on-accent",
   secondary: "bg-fill text-link",
-  destructive: "bg-fill text-danger",
+  destructive: "bg-danger text-on-danger",
 };
 
 type CapsuleButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className"> & {

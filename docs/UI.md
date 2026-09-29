@@ -25,10 +25,10 @@ The app should feel like a native iOS 27 app: Apple's system colors, large title
 
 ### Components
 
-- **Organic shapes**: cards, lists, tiles, buttons and modals use asymmetric elliptical radii (`.shape-card`, `.shape-tile`, `.shape-btn`, `.shape-modal` in `globals.css`) with 2–3 variants cycled by position so neighbours differ. Add `.sticker` for the 2px `--outline` border and 3px/4px solid offset shadow (pressed state shifts it). A faint SVG paper-grain sits on the page background. The QR code sits on a white `.shape-card`, tap targets stay ≥44px.
+- **Organic shapes**: everything is square-ish with a small, slightly uneven radius (6–16px, never pills or circles): `.shape-card` (cards, lists), `.shape-tile`, `.shape-btn` (buttons), `.shape-sq` (keypad keys, icon buttons, chips, switches, number badges, steppers), `.shape-modal`. Each has 2–3 variants cycled by position so neighbours differ. Add `.sticker` for the 2px `--outline` border and 3px/4px solid offset shadow (pressed state shifts it). Only spinners and tiny status dots stay round. A faint SVG paper-grain sits on the page background. The QR code sits on a white `.shape-card`; tap targets stay ≥44px.
 - **Grouped lists**: organic-shaped containers on the page background, 1px separators inset past the leading icon, 50–64px rows.
 - **Cards**: `.shape-card`; stat tiles `.shape-tile`.
-- **Buttons**: capsules (`border-radius: 999px`). Primary = `--accent` (blue) fill, `.shape-btn .sticker`, `--on-accent` text, 56–60px tall. Secondary = gray fill with link-colored text, 52px. Destructive = danger-colored text in its own grouped row.
+- **Buttons**: capsules (`border-radius: 999px`). Primary = `--accent` (blue) fill, `.shape-btn .sticker`, `--on-accent` text, 56–60px tall. Secondary = gray fill with link-colored text, 52px. Destructive = `--danger` fill with `--on-danger` text (e.g. Remove in confirm dialogs).
 - **Glass surfaces**: top-bar icon buttons (44px circles), floating bottom bars and pills use the glass tokens with `backdrop-filter: blur(24px) saturate(180%)`. Provide a solid fallback (`@supports not (backdrop-filter: blur(1px))` → use `--card`) and honor `prefers-reduced-transparency: reduce` and `prefers-contrast: more` by switching glass to solid `--card`.
 - **Modals**: every dialog is built on `components/ui/Modal.tsx`: centered on screen (never bottom sheets), 24px side margin, max 380px wide, `.shape-modal .sticker` on `--sheet`, 20px title centered, dimmed backdrop (`--dim`). Form dialogs (`Sheet`) add a ✕ on the left and an optional confirm action on the right. Alerts (`ConfirmSheet`, `NotHereSheet`, `TicketNoteSheet`) put their actions as full-width stacked capsule buttons in the footer: primary/destructive first, Cancel last. New dialogs must use `Modal`, not hand-rolled overlays.
 - **Segmented controls, switches, search field**: iOS style (capsule segmented control on a gray fill; 51×31 green switch; capsule search field).
@@ -53,7 +53,8 @@ The app follows the phone's light/dark setting automatically. There is no in-app
 | `--pop` | `#EBAC1F` | `#EBAC1F` | **Accent** (mustard): "your turn" takeover, "You" circle, floating action button |
 | `--on-pop` | `#1C211F` | `#1C211F` | Text/icons on `--pop` (white fails AA on mustard) |
 | `--link` | `#1F5F70` | `#91C8D3` | Text buttons, links, tinted icons |
-| `--danger` | `#B3261E` | `#FF8F85` | Destructive text |
+| `--danger` | `#B3261E` | `#FF8F85` | Destructive fill and text |
+| `--on-danger` | `#FFFFFF` | `#1C211F` | Text on `--danger` fill |
 | `--switch-on` | `#4F9FAE` | `#91C8D3` | Switches, live dots |
 | `--glass` | `rgba(233,243,245,.72)` | `rgba(36,44,45,.72)` | Glass surfaces |
 | `--glass-edge` | `rgba(255,255,255,.9)` | `rgba(238,232,229,.14)` | Glass 1px border |

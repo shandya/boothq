@@ -31,7 +31,7 @@ export function WaitingList({ tickets }: { tickets: TicketDTO[] }) {
           <div key={ticket.id}>
             {index > 0 ? <GroupedSeparator inset={70} /> : null}
             <GroupedRow minHeight={62} onClick={() => setNoteTicket(ticket)}>
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-fill text-[17px] font-bold tabular-nums">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center shape-sq bg-fill text-[17px] font-bold tabular-nums">
                 {ticket.number}
               </span>
               <span className="flex min-w-0 flex-grow flex-col gap-0.5">

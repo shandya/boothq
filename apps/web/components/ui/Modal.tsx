@@ -46,7 +46,7 @@ export function Modal({
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
-                className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-fill text-label"
+                className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center shape-sq bg-fill text-label"
               >
                 <X className="h-5 w-5" strokeWidth={2} />
               </button>

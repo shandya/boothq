@@ -17,7 +17,7 @@ export function CalledTakeover({ number, onDismiss }: CalledTakeoverProps) {
       <button
         type="button"
         onClick={onDismiss}
-        className="mt-8 h-12 cursor-pointer rounded-full bg-white/20 px-7 text-[15px] font-semibold text-on-accent"
+        className="mt-8 h-12 cursor-pointer shape-sq sticker bg-on-pop/15 px-7 text-[15px] font-semibold text-on-pop"
       >
         OK
       </button>

@@ -18,7 +18,7 @@ export function SegmentedControl<T extends string>({
   return (
     <div
       role="tablist"
-      className={clsx("grid gap-0.5 rounded-full bg-fill p-[3px]", className)}
+      className={clsx("grid gap-0.5 shape-sq bg-fill p-[3px]", className)}
       style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
     >
       {options.map((option) => {
@@ -32,7 +32,7 @@ export function SegmentedControl<T extends string>({
             aria-pressed={selected}
             onClick={() => onChange(option.value)}
             className={clsx(
-              "h-10 cursor-pointer rounded-full text-[15px]",
+              "h-10 cursor-pointer shape-sq text-[15px]",
               selected
                 ? "bg-card font-semibold text-label shadow-[0_2px_8px_rgba(0,0,0,0.12)]"
                 : "bg-transparent font-medium text-label",

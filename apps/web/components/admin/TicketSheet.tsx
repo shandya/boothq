@@ -55,14 +55,14 @@ export function TicketSheet({ ticket, positionLabel, onClose, onEdit, onShowQr, 
           <button
             type="button"
             onClick={onEdit}
-            className="h-11 cursor-pointer rounded-full bg-fill px-4 text-[17px] font-semibold text-link"
+            className="h-11 cursor-pointer shape-sq bg-fill px-4 text-[17px] font-semibold text-link"
           >
             Edit
           </button>
         }
       >
           <div className="flex items-center gap-3.5 px-1">
-            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-fill text-[22px] font-bold tabular-nums">
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center shape-sq bg-fill text-[22px] font-bold tabular-nums">
               {ticket.number}
             </span>
             <div className="flex flex-col gap-1">
@@ -83,7 +83,7 @@ export function TicketSheet({ ticket, positionLabel, onClose, onEdit, onShowQr, 
                 <a
                   href={`tel:${ticket.phone}`}
                   aria-label={`Call ${ticket.name}`}
-                  className="flex h-11 w-11 items-center justify-center rounded-full bg-fill text-link"
+                  className="flex h-11 w-11 items-center justify-center shape-sq bg-fill text-link"
                 >
                   <Phone className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden="true" />
                 </a>

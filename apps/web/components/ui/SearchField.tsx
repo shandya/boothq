@@ -18,7 +18,7 @@ export function SearchField({
   className,
 }: SearchFieldProps) {
   return (
-    <label className={clsx("relative flex h-11 items-center gap-2 rounded-full bg-fill px-3.5 text-label-2", className)}>
+    <label className={clsx("relative flex h-11 items-center gap-2 shape-sq bg-fill px-3.5 text-label-2", className)}>
       <Search className="h-[18px] w-[18px] shrink-0" strokeWidth={2} aria-hidden="true" />
       <span className="absolute h-px w-px overflow-hidden [clip-path:inset(50%)]">{label}</span>
       <input

@@ -12,7 +12,7 @@ export function GlassIconButton({ icon, className, ...rest }: GlassIconButtonPro
     <button
       type="button"
       className={clsx(
-        "glass flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-label disabled:cursor-default disabled:opacity-50",
+        "glass flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center shape-sq text-label disabled:cursor-default disabled:opacity-50",
         className,
       )}
       {...rest}

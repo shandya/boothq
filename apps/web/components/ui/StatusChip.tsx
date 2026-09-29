@@ -30,7 +30,7 @@ export function StatusChip({ status, children, className }: StatusChipProps) {
   return (
     <span
       className={clsx(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[13px] font-semibold tabular-nums",
+        "inline-flex items-center gap-1.5 shape-sq px-2.5 py-1 text-[13px] font-semibold tabular-nums",
         STATUS_CLASSES[status],
         className,
       )}

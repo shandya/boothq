@@ -30,6 +30,7 @@
   --glass-shadow: 0 8px 28px rgba(28, 33, 31, 0.14);
   --dim: rgba(28, 33, 31, 0.35);
   --outline: #1c211f;
+  --on-danger: #ffffff;
 
   --status-gray-bg: #d6e3e6;
   --status-gray-fg: #3b4a4d;
@@ -66,6 +67,7 @@
     --glass-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
     --dim: rgba(0, 0, 0, 0.55);
     --outline: #6d8a91;
+    --on-danger: #1c211f;
 
     --status-gray-bg: #37454a;
     --status-gray-fg: #dbe6e8;
@@ -105,6 +107,7 @@
   --color-switch-on: var(--switch-on);
   --color-ring: var(--ring);
   --color-outline: var(--outline);
+  --color-on-danger: var(--on-danger);
   --color-dim: var(--dim);
   --color-track: var(--track);
 
@@ -196,31 +199,39 @@ body {
    with a few variants cycled by position so neighbours are never identical.
    Pair with .sticker for the hand-printed outline + offset shadow. */
 .shape-card {
-  border-radius: 34px 26px 32px 24px / 26px 34px 24px 32px;
+  border-radius: 14px 11px 13px 10px / 10px 13px 11px 14px;
 }
 .shape-card:nth-child(3n + 2) {
-  border-radius: 26px 34px 24px 32px / 32px 24px 34px 26px;
+  border-radius: 11px 14px 10px 13px / 13px 10px 14px 11px;
 }
 .shape-card:nth-child(3n) {
-  border-radius: 30px 30px 36px 24px / 34px 26px 30px 32px;
+  border-radius: 12px 12px 14px 10px / 14px 10px 12px 12px;
 }
 
 .shape-tile {
-  border-radius: 24px 18px 22px 16px / 18px 24px 16px 22px;
+  border-radius: 10px 8px 9px 7px / 8px 10px 7px 9px;
 }
 .shape-tile:nth-child(2n) {
-  border-radius: 18px 24px 16px 22px / 22px 16px 24px 18px;
+  border-radius: 8px 10px 7px 9px / 9px 7px 10px 8px;
 }
 
 .shape-btn {
-  border-radius: 34px 26px 32px 28px / 28px 32px 26px 34px;
+  border-radius: 11px 9px 10px 8px / 9px 11px 8px 10px;
 }
 .shape-btn:nth-child(2n) {
-  border-radius: 26px 34px 28px 32px / 32px 26px 34px 28px;
+  border-radius: 9px 11px 8px 10px / 10px 8px 11px 9px;
+}
+
+/* Small controls: icon buttons, keypad, chips, steppers, number badges. */
+.shape-sq {
+  border-radius: 9px 7px 8px 6px / 7px 9px 6px 8px;
+}
+.shape-sq:nth-child(2n) {
+  border-radius: 7px 9px 6px 8px / 8px 6px 9px 7px;
 }
 
 .shape-modal {
-  border-radius: 40px 32px 38px 30px / 32px 40px 30px 38px;
+  border-radius: 16px 13px 15px 12px / 12px 15px 13px 16px;
 }
 
 .sticker {

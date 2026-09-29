@@ -138,8 +138,8 @@ export function CustomerScreen({ token }: { token: string }) {
             <span
               className={
                 view.almostUp
-                  ? "rounded-full bg-status-orange-bg px-2.5 py-1 text-[13px] font-semibold text-status-orange-fg"
-                  : "rounded-full bg-status-gray-bg px-2.5 py-1 text-[13px] font-semibold text-status-gray-fg"
+                  ? "shape-sq bg-status-orange-bg px-2.5 py-1 text-[13px] font-semibold text-status-orange-fg"
+                  : "shape-sq bg-status-gray-bg px-2.5 py-1 text-[13px] font-semibold text-status-gray-fg"
               }
             >
               {view.almostUp ? "Almost up" : "In line"}
@@ -241,7 +241,7 @@ export function CustomerScreen({ token }: { token: string }) {
           <button
             type="button"
             onClick={handleCopyLink}
-            className="flex h-11 cursor-pointer items-center gap-2 rounded-full bg-fill px-5 text-[15px] font-semibold text-link"
+            className="flex h-11 cursor-pointer items-center gap-2 shape-sq bg-fill px-5 text-[15px] font-semibold text-link"
           >
             <Copy className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
             Copy Link

@@ -182,7 +182,7 @@ export function WaitingSection({
                   >
                     <GripVertical className="h-5 w-5" strokeWidth={2} aria-hidden="true" />
                   </span>
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-fill text-[17px] font-bold tabular-nums">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center shape-sq bg-fill text-[17px] font-bold tabular-nums">
                     {ticket.number}
                   </span>
                   <span className="flex min-w-0 flex-grow flex-col gap-0.5">
@@ -197,7 +197,7 @@ export function WaitingSection({
                   className="flex w-full cursor-pointer items-center gap-3 bg-transparent px-3 py-2 pl-3.5 text-left"
                   style={{ minHeight: 62 }}
                 >
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-fill text-[17px] font-bold tabular-nums">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center shape-sq bg-fill text-[17px] font-bold tabular-nums">
                     {ticket.number}
                   </span>
                   <span className="flex min-w-0 flex-grow flex-col gap-0.5">
