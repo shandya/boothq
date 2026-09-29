@@ -4,11 +4,12 @@ import { GroupedSeparator } from "../ui/GroupedList";
 type AdminMenuProps = {
   onClose: () => void;
   onSettings: () => void;
+  onEvents: () => void;
   onCloseBooth: () => void;
   onLogout: () => void;
 };
 
-export function AdminMenu({ onClose, onSettings, onCloseBooth, onLogout }: AdminMenuProps) {
+export function AdminMenu({ onClose, onSettings, onEvents, onCloseBooth, onLogout }: AdminMenuProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-dim" onClick={onClose} aria-hidden="true" />
@@ -27,6 +28,14 @@ export function AdminMenu({ onClose, onSettings, onCloseBooth, onLogout }: Admin
             className="flex h-[52px] cursor-pointer items-center justify-center bg-transparent text-[17px] text-link"
           >
             Settings
+          </button>
+          <GroupedSeparator inset={0} />
+          <button
+            type="button"
+            onClick={onEvents}
+            className="flex h-[52px] cursor-pointer items-center justify-center bg-transparent text-[17px] text-link"
+          >
+            Events
           </button>
           <GroupedSeparator inset={0} />
           <button

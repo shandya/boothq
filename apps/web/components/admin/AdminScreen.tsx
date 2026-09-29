@@ -18,6 +18,8 @@ import { Toast, useToast } from "../ui/Toast";
 import { AdminHeader } from "./AdminHeader";
 import { AdminMenu } from "./AdminMenu";
 import { ClosedState } from "./ClosedState";
+import { EventNameSheet } from "./EventNameSheet";
+import { EventsSheet } from "./EventsSheet";
 import { CloseSummary } from "./CloseSummary";
 import { EditTicketSheet } from "./EditTicketSheet";
 import { FinishedSection } from "./FinishedSection";
@@ -39,6 +41,8 @@ type Overlay =
   | { type: "ticket"; ticketId: string }
   | { type: "editTicket"; ticketId: string }
   | { type: "settings" }
+  | { type: "events" }
+  | { type: "eventName"; mode: "start" | "rename"; from: "events" | "closed" }
   | { type: "closeConfirm" }
   | { type: "closeSummary"; summary: StatsDTO };
 
@@ -93,6 +97,35 @@ export function AdminScreen() {
     );
   }
 
+  const activeEvent = snapshot.event;
+  const dayOpen = snapshot.day != null;
+
+  // Shared by the closed card and the open-day screen.
+  const eventSheets = (
+    <>
+      {overlay.type === "events" ? (
+        <EventsSheet
+          dayOpen={dayOpen}
+          onClose={() => setOverlay({ type: "none" })}
+          onStart={() => setOverlay({ type: "eventName", mode: "start", from: "events" })}
+          onRename={() => setOverlay({ type: "eventName", mode: "rename", from: "events" })}
+          onToast={showToast}
+        />
+      ) : null}
+      {overlay.type === "eventName" ? (
+        <EventNameSheet
+          mode={overlay.mode}
+          currentName={activeEvent?.name ?? null}
+          onClose={() => setOverlay(overlay.from === "events" ? { type: "events" } : { type: "none" })}
+          onDone={(message) => {
+            showToast(message);
+            setOverlay(overlay.from === "events" && overlay.mode === "rename" ? { type: "events" } : { type: "none" });
+          }}
+        />
+      ) : null}
+    </>
+  );
+
   if (!snapshot.day) {
     // The summary must win even though the day is already closed by the
     // time this renders: buildQueueSnapshot() returns day: null the instant
@@ -103,7 +136,12 @@ export function AdminScreen() {
 
     return (
       <>
-        <ClosedState onOpenBooth={() => setOverlay({ type: "openBooth" })} />
+        <ClosedState
+          event={activeEvent}
+          onOpenBooth={() => setOverlay({ type: "openBooth" })}
+          onStartEvent={() => setOverlay({ type: "eventName", mode: "start", from: "closed" })}
+          onChangeEvent={() => setOverlay({ type: "events" })}
+        />
         {overlay.type === "openBooth" ? (
           <OpenBoothSheet
             onClose={() => setOverlay({ type: "none" })}
@@ -111,6 +149,8 @@ export function AdminScreen() {
             onSubmit={(input) => openDay.mutate(input, { onSuccess: () => setOverlay({ type: "none" }) })}
           />
         ) : null}
+        {eventSheets}
+        <Toast message={toast} />
       </>
     );
   }
@@ -212,12 +252,15 @@ export function AdminScreen() {
         <AdminMenu
           onClose={() => setOverlay({ type: "none" })}
           onSettings={() => setOverlay({ type: "settings" })}
+          onEvents={() => setOverlay({ type: "events" })}
           onCloseBooth={() => setOverlay({ type: "closeConfirm" })}
           onLogout={() => {
             void logout().then(() => router.replace("/login"));
           }}
         />
       ) : null}
+
+      {eventSheets}
 
       {overlay.type === "settings" ? (
         <SettingsSheet day={day} stats={snapshot.stats} onClose={() => setOverlay({ type: "none" })} />

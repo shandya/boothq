@@ -4,3 +4,9 @@ export function formatClockTime(iso: string | Date): string {
   const date = typeof iso === "string" ? new Date(iso) : iso;
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
 }
+
+// e.g. "12 Sep"
+export function formatShortDate(iso: string | Date): string {
+  const date = typeof iso === "string" ? new Date(iso) : iso;
+  return date.toLocaleDateString([], { day: "numeric", month: "short" });
+}

@@ -1,5 +1,7 @@
 import type {
   CreateTicketInput,
+  EventDTO,
+  EventSummaryDTO,
   FinishTicketInput,
   LoginInput,
   OpenDayInput,
@@ -7,8 +9,10 @@ import type {
   PauseDayInput,
   PublicTicketView,
   QueueSnapshot,
+  RenameEventInput,
   ReorderQueueInput,
   RequeueTicketInput,
+  StartEventInput,
   StatsDTO,
   TicketDTO,
 } from "@boothq/shared";
@@ -97,6 +101,13 @@ export const updateTicket = (id: string, input: { name?: string; phone?: string;
 export const removeTicket = (id: string) => del<QueueSnapshot>(`/tickets/${encodeURIComponent(id)}`);
 export const rotateTicketToken = (id: string) =>
   post<{ ticket: TicketDTO; snapshot: QueueSnapshot }>(`/tickets/${encodeURIComponent(id)}/rotate-token`);
+
+// Events (admin)
+export type EventWithSummary = EventDTO & { summary: EventSummaryDTO };
+export const listEvents = () => get<{ events: EventWithSummary[] }>("/events");
+export const startEvent = (input: StartEventInput) => post<QueueSnapshot>("/events", input);
+export const renameEvent = (input: RenameEventInput) => patch<QueueSnapshot>("/events/current", input);
+export const endEvent = () => post<{ summary: EventSummaryDTO; snapshot: QueueSnapshot }>("/events/current/end");
 
 // Public
 export const getPublicTicket = (token: string) => get<PublicTicketView>(`/public/tickets/${encodeURIComponent(token)}`);
