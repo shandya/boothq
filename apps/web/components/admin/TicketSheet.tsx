@@ -1,10 +1,9 @@
 "use client";
 
 import type { TicketDTO } from "@boothq/shared";
-import { Camera, ImageIcon, Phone, QrCode, RefreshCw, Trash2 } from "lucide-react";
+import { Camera, Phone, QrCode, RefreshCw } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import {
-  useDeletePhoto,
   useNoShowTicket,
   usePickedUp,
   useRecallTicket,
@@ -16,8 +15,7 @@ import {
 import { formatClockTime } from "../../lib/format";
 import { ticketPhotoUrl } from "../../lib/photo";
 import { ConfirmSheet } from "../ui/ConfirmSheet";
-import { PhotoViewer } from "../ui/PhotoViewer";
-import { AddPhotoSheet } from "./AddPhotoSheet";
+import { PhotoThumb } from "../ui/PhotoViewer";
 import { ReadyWhatsAppButton } from "./ReadyForPickupSection";
 import { Sheet } from "../ui/Sheet";
 import { GroupedList, GroupedSeparator } from "../ui/GroupedList";
@@ -42,9 +40,6 @@ export function ordinal(n: number): string {
 export function TicketSheet({ ticket, positionLabel, onClose, onEdit, onShowQr, onToast }: TicketSheetProps) {
   const [notHere, setNotHere] = useState(false);
   const [confirmRemove, setConfirmRemove] = useState(false);
-  const [addPhoto, setAddPhoto] = useState(false);
-  const [viewPhoto, setViewPhoto] = useState(false);
-  const [confirmRemovePhoto, setConfirmRemovePhoto] = useState(false);
   // Cache-busts the photo URL when it's removed and a new one is added.
   const [photoVersion] = useState(() => Date.now());
 
@@ -54,12 +49,9 @@ export function TicketSheet({ ticket, positionLabel, onClose, onEdit, onShowQr, 
   const requeue = useRequeueTicket();
   const remove = useRemoveTicket();
   const rotateToken = useRotateTicketToken();
-  const deletePhoto = useDeletePhoto();
   const pickedUp = usePickedUp();
 
   const canRemove = ticket.status === "WAITING" || ticket.status === "CALLED" || ticket.status === "NO_SHOW";
-  // A photo can be added or removed until drawing starts (docs/PHOTO_TICKETS.md).
-  const photoEditable = ticket.status === "WAITING" || ticket.status === "CALLED";
 
   return (
     <>
@@ -92,6 +84,16 @@ export function TicketSheet({ ticket, positionLabel, onClose, onEdit, onShowQr, 
               ) : null}
             </div>
           </div>
+
+          {ticket.hasPhoto ? (
+            <GroupedList>
+              <PhotoThumb
+                src={ticketPhotoUrl(ticket.id, photoVersion)}
+                alt={`Photo of ${ticket.name}`}
+                className="max-h-56 w-full object-cover"
+              />
+            </GroupedList>
+          ) : null}
 
           <GroupedList>
             <div className="flex items-center justify-between gap-3 py-1.5 pl-4 pr-2">
@@ -135,35 +137,6 @@ export function TicketSheet({ ticket, positionLabel, onClose, onEdit, onShowQr, 
                 <GroupedSeparator inset={16} />
                 <ReadyWhatsAppButton ticket={ticket} row />
                 <GroupedSeparator inset={16} />
-              </>
-            ) : null}
-            {ticket.hasPhoto ? (
-              <>
-                <ActionRow
-                  icon={<ImageIcon className="h-5 w-5" strokeWidth={2} aria-hidden="true" />}
-                  label="View Photo"
-                  onClick={() => setViewPhoto(true)}
-                />
-                <GroupedSeparator inset={48} />
-                {photoEditable ? (
-                  <>
-                    <ActionRow
-                      icon={<Trash2 className="h-5 w-5" strokeWidth={2} aria-hidden="true" />}
-                      label="Remove Photo"
-                      onClick={() => setConfirmRemovePhoto(true)}
-                    />
-                    <GroupedSeparator inset={48} />
-                  </>
-                ) : null}
-              </>
-            ) : photoEditable ? (
-              <>
-                <ActionRow
-                  icon={<Camera className="h-5 w-5" strokeWidth={2} aria-hidden="true" />}
-                  label="Add Photo"
-                  onClick={() => setAddPhoto(true)}
-                />
-                <GroupedSeparator inset={48} />
               </>
             ) : null}
             {ticket.status === "CALLED" ? (
@@ -212,45 +185,6 @@ export function TicketSheet({ ticket, positionLabel, onClose, onEdit, onShowQr, 
             </GroupedList>
           ) : null}
       </Sheet>
-
-      {addPhoto ? (
-        <AddPhotoSheet
-          ticket={ticket}
-          onClose={() => setAddPhoto(false)}
-          onDone={() => {
-            setAddPhoto(false);
-            onToast("Photo added: this is now a virtual session");
-          }}
-        />
-      ) : null}
-
-      {viewPhoto ? (
-        <PhotoViewer
-          src={ticketPhotoUrl(ticket.id, photoVersion)}
-          alt={`Photo of ${ticket.name}`}
-          onClose={() => setViewPhoto(false)}
-        />
-      ) : null}
-
-      {confirmRemovePhoto ? (
-        <ConfirmSheet
-          title={`Remove the photo for #${ticket.number}?`}
-          description="The ticket goes back to being an in-person session."
-          destructive
-          confirmLabel="Remove Photo"
-          pending={deletePhoto.isPending}
-          onCancel={() => setConfirmRemovePhoto(false)}
-          onConfirm={() =>
-            deletePhoto.mutate(ticket.id, {
-              onSuccess: () => {
-                setConfirmRemovePhoto(false);
-                onToast("Photo removed");
-              },
-              onError: () => setConfirmRemovePhoto(false),
-            })
-          }
-        />
-      ) : null}
 
       {notHere ? (
         <NotHereSheet
