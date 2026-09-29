@@ -8,11 +8,18 @@ export const TicketStatus = {
   WAITING: "WAITING",
   CALLED: "CALLED",
   SERVING: "SERVING",
+  READY: "READY",
   DONE: "DONE",
   NO_SHOW: "NO_SHOW",
   CANCELLED: "CANCELLED",
 } as const;
 export type TicketStatus = (typeof TicketStatus)[keyof typeof TicketStatus];
+
+export const TicketMode = {
+  IN_PERSON: "IN_PERSON",
+  FROM_PHOTO: "FROM_PHOTO",
+} as const;
+export type TicketMode = (typeof TicketMode)[keyof typeof TicketMode];
 
 export const CancelReason = {
   CUSTOMER: "CUSTOMER",

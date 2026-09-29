@@ -4,6 +4,7 @@ import type { QueueSnapshot } from "@boothq/shared";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as api from "./api";
 import { ApiError } from "./api";
+import { uploadTicketPhoto } from "./photo";
 import { offerUndo } from "./undo-store";
 
 export const queueKey = ["queue"] as const;
@@ -180,6 +181,22 @@ export function useUpdateTicket() {
 
 export function useRemoveTicket() {
   return useQueueMutation((id: string) => api.removeTicket(id));
+}
+
+export function useDeletePhoto() {
+  return useTicketMutation((id: string) => api.deletePhoto(id));
+}
+
+export function usePickedUp() {
+  return useQueueMutation((id: string) => api.pickedUpTicket(id));
+}
+
+// Uploads a shrunk photo and writes the resulting snapshot into the cache.
+export function useUploadPhoto() {
+  return useTicketMutation(
+    ({ id, photo, onProgress }: { id: string; photo: Blob; onProgress?: (percent: number) => void }) =>
+      uploadTicketPhoto(id, photo, onProgress),
+  );
 }
 
 export function useRotateTicketToken() {

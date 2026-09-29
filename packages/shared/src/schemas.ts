@@ -89,3 +89,8 @@ export type StartEventInput = z.infer<typeof startEventSchema>;
 
 export const renameEventSchema = z.object({ name: nameSchema });
 export type RenameEventInput = z.infer<typeof renameEventSchema>;
+
+export const confirmPhotoSchema = z.object({
+  pathname: z.string().min(1).max(200),
+});
+export type ConfirmPhotoInput = z.infer<typeof confirmPhotoSchema>;

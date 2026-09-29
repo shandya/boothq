@@ -93,6 +93,7 @@ export function computeEta(input: EtaInput): EtaResult {
 export type HistoryTicket = {
   dayId: string;
   status: string;
+  mode?: string; // "FROM_PHOTO" tickets have no walk-up, so gaps before them don't count
   createdAt: Date;
   startedAt: Date | null;
   endedAt: Date | null;
@@ -109,7 +110,9 @@ export type RecentHistory = { sessionsSec: number[]; changeoversSec: number[] };
 // no break started in between, so idle time and breaks don't inflate it.
 export function recentHistory(input: { tickets: HistoryTicket[]; pauses: HistoryPause[] }): RecentHistory {
   const done = input.tickets
-    .filter((t): t is HistoryTicket & { endedAt: Date } => t.status === "DONE" && t.endedAt != null)
+    .filter(
+      (t): t is HistoryTicket & { endedAt: Date } => (t.status === "DONE" || t.status === "READY") && t.endedAt != null,
+    )
     .sort((a, b) => b.endedAt.getTime() - a.endedAt.getTime());
 
   const sessionsSec = validSessions(done.flatMap((t) => (t.durationSec != null ? [t.durationSec] : [])));
@@ -124,6 +127,7 @@ export function recentHistory(input: { tickets: HistoryTicket[]; pauses: History
       if (!next || t.startedAt.getTime() < next.startedAt.getTime()) next = t;
     }
     if (!next || next.createdAt.getTime() > finishedAt) continue;
+    if (next.mode === "FROM_PHOTO") continue;
 
     const nextStart = next.startedAt.getTime();
     const pausedBetween = input.pauses.some(

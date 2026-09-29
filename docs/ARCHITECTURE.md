@@ -155,6 +155,7 @@ Version pins that diverge from "latest" on purpose: `typescript` is pinned to th
 ```
 DATABASE_URL=postgresql://...          # pooled URL in production
 DIRECT_URL=postgresql://...            # direct URL for migrations
+BLOB_READ_WRITE_TOKEN=...              # private Vercel Blob store (draw-from-photo); created by linking the store to this project
 JWT_SECRET=<32+ random bytes>
 ADMIN_PIN_HASH=<bcrypt hash>
 ILLUSTRATOR_PIN_HASH=<bcrypt hash>

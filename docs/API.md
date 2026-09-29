@@ -1,6 +1,6 @@
 # API
 
-> Draw-from-photo endpoints (after MVP) are listed in `PHOTO_TICKETS.md`; Events endpoints (after MVP) in `EVENTS.md`.
+> Draw-from-photo endpoints (built in Phase 8) are listed in `PHOTO_TICKETS.md`; Events endpoints (after MVP) in `EVENTS.md`.
 
 Base path `/api`. JSON in, JSON out. All request schemas are zod schemas exported from `packages/shared/src/schemas.ts`; response types from `packages/shared/src/dto.ts`.
 
@@ -20,6 +20,7 @@ Base path `/api`. JSON in, JSON out. All request schemas are zod schemas exporte
 | 403 | `FORBIDDEN` | illustrator calling an admin endpoint; bad Origin |
 | 404 | `NOT_FOUND` | unknown ticket id or token (including rotated tokens) |
 | 409 | `DAY_NOT_OPEN`, `DAY_ALREADY_OPEN`, `DAY_PAUSED`, `NOT_ACCEPTING`, `DUPLICATE_ACTIVE_TICKET`, `INVALID_TRANSITION`, `CURRENT_ACTIVE`, `QUEUE_EMPTY`, `STALE_STATE`, `NO_ACTIVE_EVENT`, `DAY_OPEN`, `NOTHING_TO_UNDO` | see `BUSINESS_LOGIC.md` |
+| 503 | `STORAGE_UNAVAILABLE` | photo storage isn't configured (`BLOB_READ_WRITE_TOKEN` missing) |
 | 429 | `RATE_LIMITED` | too many requests |
 
 ## Shared types

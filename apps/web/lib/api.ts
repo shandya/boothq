@@ -105,6 +105,15 @@ export const removeTicket = (id: string) => del<QueueSnapshot>(`/tickets/${encod
 export const rotateTicketToken = (id: string) =>
   post<{ ticket: TicketDTO; snapshot: QueueSnapshot }>(`/tickets/${encodeURIComponent(id)}/rotate-token`);
 
+// Photo tickets (docs/PHOTO_TICKETS.md)
+export const createPhotoUploadToken = (id: string) =>
+  post<{ pathname: string; clientToken: string }>(`/tickets/${encodeURIComponent(id)}/photo/upload-token`);
+export const confirmPhoto = (id: string, pathname: string) =>
+  post<{ ticket: TicketDTO; snapshot: QueueSnapshot }>(`/tickets/${encodeURIComponent(id)}/photo`, { pathname });
+export const deletePhoto = (id: string) =>
+  del<{ ticket: TicketDTO; snapshot: QueueSnapshot }>(`/tickets/${encodeURIComponent(id)}/photo`);
+export const pickedUpTicket = (id: string) => post<QueueSnapshot>(`/tickets/${encodeURIComponent(id)}/picked-up`);
+
 // Day history (admin). The CSV export is a plain link: /api/days/:id/export.csv
 export const listDayHistory = () => get<{ days: DayHistoryItemDTO[] }>("/days");
 

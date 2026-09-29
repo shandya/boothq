@@ -209,6 +209,17 @@ describe("recentHistory", () => {
     expect(result.changeoversSec).toEqual([120]);
   });
 
+  it("counts finished photo drawings (READY) as sessions", () => {
+    const ready: HistoryTicket = { ...done("d1", 0, 0, 7), status: "READY", mode: "FROM_PHOTO" };
+    expect(recentHistory({ tickets: [ready], pauses: [] }).sessionsSec).toEqual([420]);
+  });
+
+  it("skips gaps whose next ticket is a photo ticket", () => {
+    const next: HistoryTicket = { ...done("d1", 1, 12, 22), mode: "FROM_PHOTO" };
+    const result = recentHistory({ tickets: [done("d1", 0, 0, 10), next], pauses: [] });
+    expect(result.changeoversSec).toEqual([]);
+  });
+
   it("counts a started-but-not-finished ticket as the next one", () => {
     const serving: HistoryTicket = {
       dayId: "d1",

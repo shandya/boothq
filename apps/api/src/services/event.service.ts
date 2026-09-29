@@ -47,7 +47,7 @@ export async function listEventsWithSummaries(): Promise<(EventDTO & { summary: 
   return events.map((event) => {
     const dayCount = dayCounts.find((d) => d.eventId === event.id)?._count._all ?? 0;
     const own = tickets.filter((t) => t.day.eventId === event.id);
-    const done = own.filter((t) => t.status === "DONE");
+    const done = own.filter((t) => (t.status === "DONE" || t.status === "READY"));
     const summary: EventSummaryDTO = {
       dayCount,
       servedCount: done.length,

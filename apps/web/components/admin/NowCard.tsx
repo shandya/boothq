@@ -1,5 +1,6 @@
 import type { TicketDTO } from "@boothq/shared";
 import clsx from "clsx";
+import { Camera } from "lucide-react";
 import { ElapsedTimer } from "../ui/ElapsedTimer";
 import { GroupedList, GroupedRow } from "../ui/GroupedList";
 import { formatClockTime } from "../../lib/format";
@@ -27,7 +28,12 @@ export function NowCard({ ticket, onOpen }: NowCardProps) {
               {ticket.number}
             </span>
             <span className="flex min-w-0 flex-grow flex-col gap-0.5">
-              <span className="truncate text-[17px] font-semibold">{ticket.name}</span>
+              <span className="flex items-center gap-1.5 truncate text-[17px] font-semibold">
+                {ticket.name}
+                {ticket.mode === "FROM_PHOTO" ? (
+                  <Camera className="h-[13px] w-[13px] shrink-0 text-label-2" strokeWidth={2} aria-label="Drawn from photo" />
+                ) : null}
+              </span>
               <span className="truncate text-[13px] text-label-2">
                 {serving && ticket.startedAt
                   ? `Started ${formatClockTime(ticket.startedAt)}`

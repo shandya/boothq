@@ -140,6 +140,16 @@ WhatsApp template (`packages/shared/src/messages.ts`):
 readyForPickup: "Hi {firstName}! Your portrait (#{number}) from {booth} is ready. Pick it up at the booth any time before we close."
 ```
 
+## Implementation notes (where the build differs from the plan above)
+
+- `readyForPickup` lists READY tickets from **every** Day, not just the open one, so a portrait finished on Saturday can still be handed over on Sunday and after the booth is closed (the closed-booth screen shows the list too). `picked-up` therefore doesn't need an open Day.
+- `servedCount` (stats, close summary, Event summary) counts `READY` as well as `DONE`, since the drawing is finished.
+- **Undo** is not offered for Finish on a FROM_PHOTO ticket: the photo is deleted then and can't be restored. Undoing the Call next / Start of a photo ticket works as usual.
+- The Ready screen doesn't show a closing time; the data model has no scheduled close time. It says "any time before we close" while the booth is open.
+- A FROM_PHOTO ticket that is already CALLED (photo added after the call) shows "You're up next" with a ready estimate of one drawing time; it never gets the "It's your turn" takeover.
+- The upload token endpoint returns `503 STORAGE_UNAVAILABLE` when `BLOB_READ_WRITE_TOKEN` is unset.
+- Staff photo requests use `/api/tickets/:id/photo?v=<timestamp>`; the `v` only busts the 5-minute private cache when a photo is replaced.
+
 ## Free-tier and cost notes
 
 - Vercel Blob has a free allowance on the Hobby plan. At ~300 KB per photo, deleted after drawing, storage stays tiny. Uploads count as Blob operations; check the current Hobby allowance in the Vercel dashboard.

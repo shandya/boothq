@@ -1,4 +1,5 @@
 import {
+  confirmPhotoSchema,
   createTicketSchema,
   finishTicketSchema,
   requeueTicketSchema,
@@ -7,6 +8,9 @@ import {
   updateTicketSchema,
 } from "@boothq/shared";
 import { Router } from "express";
+import { Readable } from "node:stream";
+import { AppError } from "../lib/errors.js";
+import { getPhotoStorage } from "../lib/photo-storage.js";
 import { requireRole } from "../middleware/auth.js";
 import { prisma } from "../lib/prisma.js";
 import * as queueService from "../services/queue.service.js";
@@ -134,5 +138,57 @@ ticketsRouter.post(
   staffHandler(async (req, res) => {
     const { ticket } = await queueService.rotateTicketToken(req.role!, paramString(req.params.id));
     res.json({ ticket: toTicketDTO(ticket, { etaSec: null }), snapshot: await buildQueueSnapshot() });
+  }),
+);
+
+ticketsRouter.post(
+  "/tickets/:id/photo/upload-token",
+  requireRole("ILLUSTRATOR"),
+  staffHandler(async (req, res) => {
+    res.json(await queueService.createPhotoUploadToken(paramString(req.params.id)));
+  }),
+);
+
+ticketsRouter.post(
+  "/tickets/:id/photo",
+  requireRole("ILLUSTRATOR"),
+  staffHandler(async (req, res) => {
+    const { pathname } = confirmPhotoSchema.parse(req.body);
+    const { ticket } = await queueService.confirmPhoto(req.role!, paramString(req.params.id), pathname);
+    res.json({ ticket: toTicketDTO(ticket, { etaSec: null }), snapshot: await buildQueueSnapshot() });
+  }),
+);
+
+// Streams the image through the API so customers never get a storage URL.
+ticketsRouter.get(
+  "/tickets/:id/photo",
+  requireRole("ILLUSTRATOR"),
+  staffHandler(async (req, res) => {
+    const ticket = await prisma.ticket.findUnique({ where: { id: paramString(req.params.id) } });
+    if (!ticket?.photoPath) throw new AppError(404, "NOT_FOUND", "This ticket has no photo.");
+    const photo = await getPhotoStorage().read(ticket.photoPath);
+    if (!photo) throw new AppError(404, "NOT_FOUND", "This ticket has no photo.");
+    res.setHeader("Content-Type", photo.contentType);
+    res.setHeader("Cache-Control", "private, max-age=300");
+    res.setHeader("Content-Disposition", "inline");
+    Readable.fromWeb(photo.body as import("node:stream/web").ReadableStream).pipe(res);
+  }),
+);
+
+ticketsRouter.delete(
+  "/tickets/:id/photo",
+  requireRole("ADMIN"),
+  staffHandler(async (req, res) => {
+    const { ticket } = await queueService.deletePhoto(req.role!, paramString(req.params.id));
+    res.json({ ticket: toTicketDTO(ticket, { etaSec: null }), snapshot: await buildQueueSnapshot() });
+  }),
+);
+
+ticketsRouter.post(
+  "/tickets/:id/picked-up",
+  requireRole("ILLUSTRATOR"),
+  staffHandler(async (req, res) => {
+    await queueService.pickedUpTicket(req.role!, paramString(req.params.id));
+    res.json(await buildQueueSnapshot());
   }),
 );

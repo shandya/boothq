@@ -23,6 +23,15 @@ export function CloseSummary({ summary, onDone }: { summary: StatsDTO; onDone: (
         </span>
       </div>
 
+      {summary.readyForPickupCount > 0 ? (
+        <div className="flex flex-col gap-1 shape-tile sticker bg-status-green-bg px-4 py-3.5 text-status-green-fg">
+          <span className="text-[17px] font-semibold">
+            {summary.readyForPickupCount} portrait{summary.readyForPickupCount === 1 ? "" : "s"} waiting for pickup
+          </span>
+          <span className="text-[13px]">They stay listed, so you can record pickups after closing.</span>
+        </div>
+      ) : null}
+
       <div className="flex-grow" />
       <CapsuleButton onClick={onDone}>Done</CapsuleButton>
     </div>

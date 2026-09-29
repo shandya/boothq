@@ -1,6 +1,6 @@
 # Data Model
 
-> The draw-from-photo feature (after MVP) adds a `mode`, photo fields, a `READY` status and extra transitions. See `PHOTO_TICKETS.md`; don't add them during MVP phases.
+> The draw-from-photo feature (Phase 8, built) adds a `mode`, photo fields, a `READY` status and extra transitions; they are in the schema, state machine and invariants below. Details in `PHOTO_TICKETS.md`.
 >
 > The Events feature (after MVP) adds an `Event` model that groups Days (`Day.eventId`). See `EVENTS.md`.
 
@@ -26,9 +26,15 @@ enum TicketStatus {
   WAITING   // in line
   CALLED    // illustrator called them, not seated yet
   SERVING   // being drawn
-  DONE      // finished
+  READY     // FROM_PHOTO drawing finished, waiting for pickup
+  DONE      // finished (for FROM_PHOTO: picked up)
   NO_SHOW   // called but didn't come
   CANCELLED // by customer, admin, or day close
+}
+
+enum TicketMode {
+  IN_PERSON
+  FROM_PHOTO // set by the service when a photo is confirmed, never by staff directly
 }
 
 enum CancelReason {
@@ -104,6 +110,11 @@ model Ticket {
   durationSec  Int?          // endedAt - startedAt, set on finish
   cancelledAt  DateTime?
   cancelReason CancelReason?
+  mode            TicketMode @default(IN_PERSON)
+  photoPath       String?    // storage pathname; null = no photo
+  photoUploadedAt DateTime?
+  readyAt         DateTime?  // FROM_PHOTO finish time
+  pickedUpAt      DateTime?
 
   @@unique([dayId, number])
   @@index([dayId, status, position])
@@ -163,7 +174,10 @@ The Events migration backfills existing installs: one ACTIVE "First event" (star
 | CALLED | WAITING | `requeue { afterCount }` (arrived but not ready, or late) | Illustrator, Admin |
 | CALLED | NO_SHOW | `no-show` | Illustrator, Admin |
 | NO_SHOW | WAITING | `requeue { afterCount }` (they showed up later) | Illustrator, Admin |
-| SERVING | DONE | `finish` | Illustrator, Admin |
+| SERVING | DONE | `finish` (in-person) | Illustrator, Admin |
+| WAITING (FROM_PHOTO) | SERVING | `call-next` (skips CALLED), or `start` out of order when no ticket is current | Illustrator, Admin |
+| SERVING (FROM_PHOTO) | READY | `finish`; sets `readyAt`, `durationSec`, deletes the photo | Illustrator, Admin |
+| READY | DONE | `picked-up`; sets `pickedUpAt`; allowed after the Day closes | Illustrator, Admin |
 | WAITING, CALLED | CANCELLED | customer `cancel` (CUSTOMER) | Customer |
 | WAITING, CALLED, NO_SHOW, CANCELLED | CANCELLED | admin `DELETE` (ADMIN_REMOVED); a no-op re-write if already CANCELLED | Admin |
 | WAITING, CALLED | CANCELLED | `close day` (DAY_CLOSED) | Admin |
@@ -176,10 +190,12 @@ Any other transition returns `409 INVALID_TRANSITION`. A SERVING or DONE ticket 
 2. At most one ticket per Day with status `CALLED` or `SERVING` (the "current ticket").
 3. WAITING tickets have positions exactly `1..n`, no gaps, no duplicates. Non-WAITING tickets have `position = null`.
 4. `number` is unique per Day and assigned from `Day.nextNumber` inside the day lock.
-5. `durationSec` is set if and only if `status = DONE`.
+5. `durationSec` is set if and only if `status` is `READY` or `DONE`.
 6. Tickets can only be created while the Day is OPEN.
 7. Pausing is only allowed when no ticket is SERVING.
 8. At most one Event with `status = ACTIVE`.
 9. An OPEN Day belongs to the ACTIVE Event.
 10. An Event can't end, and a new one can't start, while a Day is OPEN.
 11. `Event.endedAt` is set if and only if `status = ENDED`.
+12. While a ticket is WAITING, CALLED or SERVING, `mode = FROM_PHOTO` if and only if `photoPath` is non-null.
+13. READY tickets are never the current ticket and have no position.

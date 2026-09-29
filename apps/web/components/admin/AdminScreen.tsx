@@ -26,6 +26,7 @@ import { EditTicketSheet } from "./EditTicketSheet";
 import { FinishedSection } from "./FinishedSection";
 import { NewTicketSheet } from "./NewTicketSheet";
 import { NowCard } from "./NowCard";
+import { ReadyForPickupSection } from "./ReadyForPickupSection";
 import { OpenBoothSheet } from "./OpenBoothSheet";
 import { SettingsSheet } from "./SettingsSheet";
 import { ordinal, TicketSheet } from "./TicketSheet";
@@ -69,7 +70,12 @@ export function AdminScreen() {
 
   const allTickets = useMemo(() => {
     if (!snapshot) return [] as TicketDTO[];
-    return [...(snapshot.current ? [snapshot.current] : []), ...snapshot.waiting, ...snapshot.recent];
+    return [
+      ...(snapshot.current ? [snapshot.current] : []),
+      ...snapshot.waiting,
+      ...snapshot.readyForPickup,
+      ...snapshot.recent,
+    ];
   }, [snapshot]);
 
   const findTicket = (id: string): TicketDTO | undefined =>
@@ -142,6 +148,8 @@ export function AdminScreen() {
           onOpenBooth={() => setOverlay({ type: "openBooth" })}
           onStartEvent={() => setOverlay({ type: "eventName", mode: "start", from: "closed" })}
           onChangeEvent={() => setOverlay({ type: "events" })}
+          readyForPickup={snapshot.readyForPickup}
+          onToast={showToast}
         />
         {overlay.type === "openBooth" ? (
           <OpenBoothSheet
@@ -206,6 +214,12 @@ export function AdminScreen() {
           </GroupedList>
         ) : (
           <>
+            <ReadyForPickupSection
+              tickets={snapshot.readyForPickup}
+              onRowClick={(id) => setOverlay({ type: "ticket", ticketId: id })}
+              onToast={showToast}
+            />
+
             <NowCard ticket={snapshot.current} onOpen={(id) => setOverlay({ type: "ticket", ticketId: id })} />
 
             <WaitingSection

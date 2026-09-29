@@ -8,7 +8,7 @@ import { toDayDTO } from "./snapshot.service.js";
 type SummaryTicket = Pick<Ticket, "status" | "createdAt" | "calledAt" | "durationSec">;
 
 export function summarizeTickets(tickets: SummaryTicket[]): DaySummaryDTO {
-  const done = tickets.filter((t) => t.status === "DONE");
+  const done = tickets.filter((t) => t.status === "DONE" || t.status === "READY");
   const waits = tickets.flatMap((t) =>
     t.calledAt ? [Math.round((t.calledAt.getTime() - t.createdAt.getTime()) / 1000)] : [],
   );

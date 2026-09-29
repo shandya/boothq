@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import request from "supertest";
+import type { PhotoStorage } from "../src/lib/photo-storage.js";
 import { prisma } from "../src/lib/prisma.js";
 
 export const TEST_PINS = { ADMIN: "111111", ILLUSTRATOR: "222222" } as const;
@@ -75,9 +76,13 @@ export async function assertInvariants(dayId: string): Promise<void> {
   }
 
   for (const t of tickets) {
-    const shouldHaveDuration = t.status === "DONE";
+    const shouldHaveDuration = t.status === "DONE" || t.status === "READY";
     if (shouldHaveDuration !== (t.durationSec != null)) {
       throw new Error(`invariant violated: ticket ${t.id} status ${t.status} durationSec ${t.durationSec}`);
+    }
+    // docs/PHOTO_TICKETS.md → Invariant updates
+    if (["WAITING", "CALLED", "SERVING"].includes(t.status) && (t.mode === "FROM_PHOTO") !== (t.photoPath != null)) {
+      throw new Error(`invariant violated: ticket ${t.id} mode ${t.mode} photoPath ${t.photoPath}`);
     }
   }
 
@@ -124,4 +129,54 @@ export async function createTicketViaApi(
   input: { name: string; phone: string; notes?: string; force?: boolean },
 ): Promise<request.Response> {
   return json(request(app).post("/api/tickets").set("Cookie", cookie)).send(input);
+}
+
+// In-memory stand-in for the Vercel Blob store. `upload` plays the browser's
+// direct-to-storage upload; the API never sees the bytes.
+export function createFakePhotoStorage(): PhotoStorage & {
+  files: Map<string, Uint8Array>;
+  upload(pathname: string, bytes?: Uint8Array): void;
+  deleted: string[];
+  prefixesDeleted: string[];
+} {
+  const files = new Map<string, Uint8Array>();
+  const deleted: string[] = [];
+  const prefixesDeleted: string[] = [];
+  return {
+    files,
+    deleted,
+    prefixesDeleted,
+    upload(pathname, bytes = new Uint8Array([0xff, 0xd8, 0xff])) {
+      files.set(pathname, bytes);
+    },
+    async createUploadToken(pathname) {
+      return { clientToken: `token-for:${pathname}` };
+    },
+    async exists(pathname) {
+      return files.has(pathname);
+    },
+    async read(pathname) {
+      const bytes = files.get(pathname);
+      if (!bytes) return null;
+      return {
+        contentType: "image/jpeg",
+        body: new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(bytes);
+            controller.close();
+          },
+        }),
+      };
+    },
+    async delete(pathnames) {
+      for (const p of pathnames) {
+        files.delete(p);
+        deleted.push(p);
+      }
+    },
+    async deletePrefix(prefix) {
+      prefixesDeleted.push(prefix);
+      for (const key of [...files.keys()]) if (key.startsWith(prefix)) files.delete(key);
+    },
+  };
 }
