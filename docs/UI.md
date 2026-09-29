@@ -107,7 +107,7 @@ Polls `GET /api/public/tickets/:token` every 10 s.
 │  ~20–25 min · around 14:35   │
 │  (9) (10) (11) (12)          │
 │  Drawing  Next      You      │
-│  Based on today's average    │
+│  Based on the recent average │
 │  drawing time of 8 min       │
 │                              │
 │  Feel free to walk around —  │
@@ -147,7 +147,7 @@ Polls `GET /api/public/tickets/:token` every 10 s.
 
 Polls `GET /api/queue` every 5 s.
 
-**No open day**: centered card "Booth is closed" + **Open booth** button → sheet with "Typical drawing time" (minutes, default 10), "Time between customers" (minutes, default 1), and "Tell customers to head back when ___ people are ahead" (stepper, default 3, 0 = off).
+**No open day**: centered card "Booth is closed" + **Open booth** button → sheet with "Tell customers to head back when ___ people are ahead" (stepper, default 3, 0 = off). No timing inputs: drawing time and time between customers are measured automatically (`BUSINESS_LOGIC.md` §5). Once Events exist, this card also shows the current event (`EVENTS.md` → UI).
 
 **Open day layout**
 
@@ -181,7 +181,7 @@ Polls `GET /api/queue` every 5 s.
   - CALLED / NO_SHOW: the same staff actions as the illustrator (start, requeue, no-show).
   - CALLED: **Remove**.
 
-**Settings sheet**: typical drawing time, time between customers, heads-up threshold, accepting tickets toggle.
+**Settings sheet**: accepting tickets toggle; read-only "Typical drawing time" and "Time between customers" rows (measured values from `stats`) with the footnote "Measured automatically from the last 10 customers. Used for wait-time estimates."; heads-up threshold.
 
 **Close booth**: confirm sheet listing how many waiting tickets will be cancelled → Day summary screen (served, no-shows, cancelled, average session, longest wait) → "Booth is closed".
 
@@ -223,7 +223,7 @@ A floating **+ New Ticket** button (bottom-right, above the break bar) opens the
 | No current, queue has people | "Next up: #10 Budi" | **Call #10 Budi** | Start directly (small link) |
 | No current, queue empty | "No one waiting" | — | — |
 | CALLED | Number, name, notes, "called 2 min ago (×2)" | **Start drawing** | **Recall** (re-alerts the customer page only), **Not here** → sheet: *Put back 2 places* / *Mark no-show* |
-| SERVING | "Drawing for" + big plain timer (72px, tabular numbers) + "Usually takes 8 min today". No ring or chart. Timer text turns orange past the average and `--danger` past 1.5× | **Finish & call next** | **Finish** |
+| SERVING | "Drawing for" + big plain timer (72px, tabular numbers) + "Usually takes 8 min" (the measured drawing time). No ring or chart. Timer text turns orange past the average and `--danger` past 1.5× | **Finish & call next** | **Finish** |
 | On break | "On break until 15:10" / "On break" + elapsed | **Resume** | — |
 
 **Waiting list**: every WAITING ticket, in queue order (number, name, notes, waited time). No message buttons; customers are nudged by the heads-up banner on their own page. Tap a row for notes. Read-only: no drag handle and no Reorder action — reordering stays on the Admin's Waiting section (docs/UI.md → Admin: `/admin`).

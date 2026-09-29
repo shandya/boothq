@@ -78,7 +78,7 @@ export function json(req: request.Test): request.Test {
 
 export async function openDayViaApi(
   app: Express,
-  body: { defaultDurationSec?: number; changeoverSec?: number; headsUpAhead?: number } = {},
+  body: { headsUpAhead?: number } = {},
 ): Promise<{ adminCookie: string; illustratorCookie: string }> {
   const adminCookie = await loginCookie(app, "ADMIN");
   const illustratorCookie = await loginCookie(app, "ILLUSTRATOR");

@@ -185,7 +185,7 @@ export function CustomerScreen({ token }: { token: string }) {
               />
 
               <span className="text-[13px] text-label-2">
-                Based on today&apos;s average drawing time of {Math.round(view.avgSessionSec / 60)} min.
+                Based on the recent average drawing time of {Math.round(view.avgSessionSec / 60)} min.
               </span>
               {formatEtaConfidenceNote(view.eta.confidence) ? (
                 <span className="text-[12px] text-label-2">{formatEtaConfidenceNote(view.eta.confidence)}</span>

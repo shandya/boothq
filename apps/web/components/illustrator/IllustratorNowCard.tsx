@@ -213,7 +213,7 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
         avgSessionSec={avgSessionSec}
         className="text-[72px] leading-none"
       />
-      <span className="text-[13px] text-label-2">Usually takes {Math.round(avgSessionSec / 60)} min today</span>
+      <span className="text-[13px] text-label-2">Usually takes {Math.round(avgSessionSec / 60)} min</span>
       <CapsuleButton
         className="mt-2 w-full"
         pending={finish.isPending}

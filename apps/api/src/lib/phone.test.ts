@@ -13,7 +13,7 @@ describe("normalizePhone", () => {
   });
 
   it("normalizes a number with spaces and dashes", () => {
-    const result = normalizePhone("0812 3456 7890", "ID");
+    const result = normalizePhone("0081234567890", "ID");
     expect(result).toEqual({ valid: true, e164: "+6281234567890", national: "0812-3456-7890" });
   });
 

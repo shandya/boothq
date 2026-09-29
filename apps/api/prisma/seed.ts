@@ -12,8 +12,6 @@ async function main() {
       openedAt: new Date(now - 90 * MIN),
       nextNumber: 9,
       acceptingTickets: true,
-      defaultDurationSec: 600,
-      changeoverSec: 60,
       headsUpAhead: 3,
     },
   });

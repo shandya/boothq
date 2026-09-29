@@ -62,7 +62,7 @@ export function EditTicketSheet({ ticket, onClose }: { ticket: TicketDTO; onClos
             id="et-notes"
             value={notes}
             onChange={(event) => setNotes(event.target.value)}
-            placeholder="Note for the illustrator (optional)"
+            placeholder="Note (optional)"
             className="w-full border-none bg-transparent text-[17px] text-label outline-none placeholder:text-label-2"
           />
         </div>

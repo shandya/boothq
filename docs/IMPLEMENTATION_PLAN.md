@@ -183,5 +183,22 @@ Docs: `PHOTO_TICKETS.md`
 - [ ] Customer: photo waiting state and Ready screen
 - [ ] All tests listed in `PHOTO_TICKETS.md`
 
-**Acceptance**
+**Acceptance (Phase 8)**
 - On real phones: create a photo ticket with the camera and one from the library; draw one in line and convert one in-person ticket to virtual by adding a photo from the ticket sheet; the customer page moves to Ready; mark picked up. Confirm in the Blob dashboard that no photos remain after finishing and after closing the day.
+
+---
+
+## Phase 9 — Events (after MVP)
+
+Docs: `EVENTS.md`
+
+- [ ] Migration: `Event` model, `EventStatus`, one-ACTIVE partial unique index, `Day.eventId`, nullable `ActionLog.dayId` + `eventId`; backfill existing Days into an ACTIVE "First event"
+- [ ] Shared: `EventDTO`, `EventSummaryDTO`, `startEventSchema`, `renameEventSchema`; `QueueSnapshot.event`
+- [ ] Service: `startEvent`, `renameEvent`, `endEvent` (lock ACTIVE Event, `DAY_OPEN` guard); `openDay` sets `eventId` and fails `NO_ACTIVE_EVENT`
+- [ ] Scope `loadRecentHistory()` to the Day's Event
+- [ ] Endpoints: `GET /api/events`, `POST /api/events`, `PATCH /api/events/current`, `POST /api/events/current/end`
+- [ ] Web: event name on the closed card, Start event sheet, Events sheet in the admin menu, Settings footnote, Day history grouped by Event
+- [ ] All tests listed in `EVENTS.md`
+
+**Acceptance (Phase 9)**
+- Start Event A, run two Days with several customers, then start Event B: B's first customer gets the default estimate (10 min / 1 min) while Event A's history and summaries are unchanged. Reopening the booth inside Event B carries B's measured values over.

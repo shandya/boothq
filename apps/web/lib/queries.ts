@@ -147,8 +147,7 @@ export function useResumeDay() {
 
 export function usePatchDay() {
   return useQueueMutation(
-    (input: { acceptingTickets?: boolean; defaultDurationSec?: number; changeoverSec?: number; headsUpAhead?: number }) =>
-      api.patchDay(input),
+    (input: { acceptingTickets?: boolean; headsUpAhead?: number }) => api.patchDay(input),
   );
 }
 

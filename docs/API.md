@@ -1,6 +1,6 @@
 # API
 
-> Draw-from-photo endpoints (after MVP) are listed in `PHOTO_TICKETS.md`.
+> Draw-from-photo endpoints (after MVP) are listed in `PHOTO_TICKETS.md`; Events endpoints (after MVP) in `EVENTS.md`.
 
 Base path `/api`. JSON in, JSON out. All request schemas are zod schemas exported from `packages/shared/src/schemas.ts`; response types from `packages/shared/src/dto.ts`.
 
@@ -31,8 +31,6 @@ type DayDTO = {
   openedAt: string;
   closedAt: string | null;
   acceptingTickets: boolean;
-  defaultDurationSec: number;
-  changeoverSec: number;
   headsUpAhead: number;
   paused: boolean;
   pausedAt: string | null;    // when the break began; null unless paused
@@ -65,7 +63,8 @@ type StatsDTO = {
   noShowCount: number;
   cancelledCount: number;
   waitingCount: number;
-  avgSessionSec: number;
+  avgSessionSec: number;           // measured from the last 10 drawings (close summary: that Day's own average)
+  avgChangeoverSec: number;        // measured from the last 10 Finish → next Start gaps
   longestWaitSec: number | null;   // created → called, over called tickets
   projectedFinishAt: string | null; // null when queue empty
 };
@@ -144,9 +143,9 @@ All return `QueueSnapshot` unless stated.
 
 | Method | Path | Body | Response |
 |---|---|---|---|
-| POST | `/api/day/open` | `{ defaultDurationSec?: number, changeoverSec?: number, headsUpAhead?: number /*0–10*/ }` | `QueueSnapshot`. `DAY_ALREADY_OPEN` |
+| POST | `/api/day/open` | `{ headsUpAhead?: number /*0–10*/ }` | `QueueSnapshot`. `DAY_ALREADY_OPEN` |
 | POST | `/api/day/close` | — | `{ summary: StatsDTO, snapshot: QueueSnapshot }` |
-| PATCH | `/api/day` | `{ acceptingTickets?, defaultDurationSec?, changeoverSec?, headsUpAhead? }` | `QueueSnapshot` |
+| PATCH | `/api/day` | `{ acceptingTickets?, headsUpAhead? }` | `QueueSnapshot` |
 | GET | `/api/tickets` | query `search?`, `status?` (comma list) | `{ tickets: TicketDTO[] }` for the open Day, search matches name (case-insensitive contains), phone digits, or exact number |
 | PATCH | `/api/tickets/:id` | `{ name?, phone?, notes? }` | `{ ticket, snapshot }` |
 | DELETE | `/api/tickets/:id` | — | `QueueSnapshot`. Soft remove (CANCELLED/ADMIN_REMOVED) |

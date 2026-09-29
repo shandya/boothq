@@ -44,8 +44,8 @@ Always renumber the whole WAITING list in the transaction (a helper `renumberWai
 
 | Operation | Rules |
 |---|---|
-| `openDay` | Fails with `DAY_ALREADY_OPEN` if one exists. Accepts optional `defaultDurationSec` (60–7200) and `changeoverSec` (0–1800). |
-| `closeDay` | Fails if a ticket is SERVING (`CURRENT_ACTIVE`). All WAITING and CALLED tickets become CANCELLED/DAY_CLOSED. Sets `closedAt`, clears pause. Returns the day summary. |
+| `openDay` | Fails with `DAY_ALREADY_OPEN` if one exists. Accepts optional `headsUpAhead` (0–10). Drawing time and time between customers are measured, not set (§5). |
+| `closeDay` | Fails if a ticket is SERVING (`CURRENT_ACTIVE`). All WAITING and CALLED tickets become CANCELLED/DAY_CLOSED. Sets `closedAt`, clears pause. Returns the day summary, whose `avgSessionSec` is the plain average of that Day's valid drawings (not the rolling estimate). |
 | `createTicket` | Day must be OPEN. If `acceptingTickets` is false, requires `force: true`. Normalize phone with libphonenumber-js using `DEFAULT_COUNTRY`; invalid → `VALIDATION_ERROR`. If this phone has an active ticket (WAITING, CALLED, SERVING) in the open Day and `force` isn't set → `409 DUPLICATE_ACTIVE_TICKET` with that ticket in `details`. Generate token with nanoid(16). |
 | `callNext` | No current ticket allowed (`CURRENT_ACTIVE`). Queue must not be empty (`QUEUE_EMPTY`). Takes position 1 → CALLED, `calledAt = now`, `callCount += 1`. Rejected while paused (`DAY_PAUSED`). |
 | `start` | Ticket must be CALLED, or WAITING at position 1 with no current ticket. Sets `startedAt = now`, status SERVING. Rejected while paused. |
@@ -70,9 +70,8 @@ Lives in `packages/shared/src/eta.ts` as a **pure function** so it can be unit-t
 ```ts
 export type EtaInput = {
   now: Date;
-  defaultDurationSec: number;
-  changeoverSec: number;
-  completedDurationsSec: number[]; // durationSec of DONE tickets in this Day
+  recentSessionsSec: number[];     // newest first, from recentHistory()
+  recentChangeoversSec: number[];  // newest first, from recentHistory()
   current: { status: 'CALLED' | 'SERVING'; startedAt: Date | null } | null;
   waitingAhead: number;            // WAITING tickets ahead of this one
   pause: { until: Date | null } | null; // null = not paused
@@ -80,6 +79,7 @@ export type EtaInput = {
 
 export type EtaResult = {
   avgSessionSec: number;
+  avgChangeoverSec: number;
   etaSec: number;          // best estimate until this customer is called
   lowSec: number;
   highSec: number;
@@ -89,27 +89,39 @@ export type EtaResult = {
 };
 ```
 
-### Step 1: average session length
+Staff never type the drawing time or the time between customers: both are **measured from the last 10 customers**.
 
-Uses every finished session in the current Day, as specified by the booth owner, with outlier protection and a smooth start:
+### Step 0: collecting history (`recentHistory`)
+
+`recentHistory({ tickets, pauses })` in `eta.ts` is pure and scope-agnostic: it measures whatever tickets it is given. The API's `loadRecentHistory()` (`snapshot.service.ts`) is the **only** place that decides which Days count. It loads the 30 most recent tickets with a `startedAt`, plus the `PAUSE` actions since the oldest of them.
+
+- **History scope**: the Days of the current Event (see `EVENTS.md`). Until Events ship, that's every Day, so a new Day starts from the previous Day's measurements.
+- **Drawing times**: `durationSec` of DONE tickets, newest `endedAt` first.
+- **Time between customers**: for each DONE ticket P, the next ticket started in the **same Day** after P's Finish. The gap `next.startedAt − P.endedAt` counts only if the next customer was already in line at Finish (`next.createdAt <= P.endedAt`) and no break started in between. That keeps idle time (nobody waiting) and breaks out of it. The gap naturally includes calling, walking up, payment and any no-shows in between.
+
+### Step 1: averages
 
 ```
-MIN_VALID   = 60 s                      // shorter = accidental Start/Finish, ignore
-clamp each d to [0.25 × default, 3 × default]
-n    = number of valid durations
-PRIOR_WEIGHT = 3
-avg  = (sum(valid) + default × max(0, PRIOR_WEIGHT − n)) / max(PRIOR_WEIGHT, n)
+DEFAULT_SESSION    = 600 s              // used only while there's little or no history
+DEFAULT_CHANGEOVER = 60 s
+WINDOW             = 10                 // newest valid values only
+valid session      = 60 s ≤ d ≤ 7200 s  // shorter = accidental Start/Finish
+valid changeover   = 0 s ≤ g ≤ 1800 s
+PRIOR_WEIGHT       = 3
+avg(values, prior) = (sum + prior × max(0, PRIOR_WEIGHT − n)) / max(PRIOR_WEIGHT, n)
+avgSession   = avg(first WINDOW valid sessions, DEFAULT_SESSION)
+avgChangeover = avg(first WINDOW valid changeovers, DEFAULT_CHANGEOVER)
 ```
 
-With no data the average equals the default. Each finished session pulls it toward reality, and from the 3rd session on it's the plain (clamped) average of the day.
+Invalid values are dropped, not clamped. With no data the averages equal the defaults. Each measurement pulls them toward reality; from the 3rd one on it's the plain average of the last (up to) 10.
 
 ### Step 2: time until the current ticket frees the illustrator
 
 ```
-cycle = avg + changeoverSec
+cycle = avgSession + avgChangeover
 if current is null:                 remaining = 0
 if current.status == CALLED:        remaining = cycle
-if current.status == SERVING:       remaining = max(avg − elapsed, 60) + changeoverSec
+if current.status == SERVING:       remaining = max(avgSession − elapsed, 60) + avgChangeover
 ```
 
 ### Step 3: combine
@@ -119,7 +131,7 @@ pauseRemaining = pause && pause.until ? max(pause.until − now, 0) : 0
 etaSec  = remaining + waitingAhead × cycle + pauseRemaining
 lowSec  = round(etaSec × 0.8)
 highSec = round(etaSec × 1.3)
-confidence = n < 3 ? 'low' : n < 8 ? 'medium' : 'high'
+confidence = n < 3 ? 'low' : n < 8 ? 'medium' : 'high'   // n = valid sessions used
 pausedUntimed = pause != null && pause.until == null
 ```
 
@@ -149,19 +161,26 @@ Projected finish = `now + ETA of a hypothetical ticket behind the last WAITING t
 
 ### Required unit tests
 
-Defaults unless stated: `default = 600`, `changeover = 60`, `now = 12:00:00`.
+`now = 12:00:00`; "sessions" = `recentSessionsSec`, "gaps" = `recentChangeoversSec`, both empty unless stated.
 
 | # | Setup | Expected |
 |---|---|---|
-| 1 | no history, no current, waitingAhead 0 | avg 600, eta 0 |
+| 1 | no history, no current, waitingAhead 0 | avg 600, changeover 60, eta 0 |
 | 2 | no history, SERVING started 4 min ago, ahead 2 | remaining 600−240+60 = 420; eta 420 + 2×660 = **1740** |
-| 3 | history [300, 420, 360], CALLED, ahead 1 | avg 360, cycle 420, eta **840**, confidence medium |
-| 4 | history [30] | 30 ignored, avg **600**, confidence low |
-| 5 | history [5000] | clamped to 1800, avg (1800 + 1200)/3 = **1000** |
-| 6 | history [300, 420, 360], SERVING elapsed 900 | remaining max(360−900, 60) + 60 = **120** |
+| 3 | sessions [300, 420, 360], CALLED, ahead 1 | avg 360, cycle 420, eta **840**, confidence medium |
+| 4 | sessions [30] | 30 ignored, avg **600**, confidence low |
+| 5 | sessions [1800]; then [9000] | (1800 + 1200)/3 = **1000**; 9000 dropped → **600** |
+| 6 | sessions [300, 420, 360], SERVING elapsed 900 | remaining max(360−900, 60) + 60 = **120** |
 | 7 | no current, ahead 0, paused until 12:10 | eta **600** |
 | 8 | paused, `until` null, ahead 1, no history | eta 660, `pausedUntimed` true |
-| 9 | 8 valid history items | confidence high |
-| 10 | low/high | eta 1000 → low 800, high 1300 |
+| 9 | 8 valid sessions | confidence high |
+| 10 | sessions [1000 ×3], gaps [0 ×3], ahead 1 | eta 1000 → low 800, high 1300 |
+| 11 | sessions [600 ×10, 6000] | only the newest 10 count → avg **600** |
+| 12 | gaps [120] | changeover (120 + 120)/3 = **80** |
+| 13 | sessions [600 ×3], gaps [120 ×3], ahead 2 | eta 2 × 720 = **1440** |
+
+`recentHistory` tests: sessions newest first; gap measured Finish → next Start when the next customer was waiting; a started-but-unfinished ticket counts as "next"; idle gap (next created after Finish) ignored; gap with a break in between ignored; gap > 1800 s dropped; sessions from other Days included but gaps never paired across Days.
+
+API tests: snapshot `stats.avgSessionSec` / `avgChangeoverSec` reflect backdated tickets; closing and reopening a Day carries the measurements over; close summary `avgSessionSec` is that Day's own average.
 
 Heads-up tests (in the snapshot service, not `eta.ts`): threshold 3 with 4 ahead → `almostUp` false; 3 ahead → true; 0 ahead and nobody current → true; threshold 0 → always false; CALLED ticket → false (the takeover covers it).

@@ -62,7 +62,7 @@ model Ticket {
 
 ## Business logic changes
 
-- **ETA**: photo durations count toward the day's average like any other session (use READY and DONE durations). The customer ETA for a FROM_PHOTO ticket is the *ready* time: `etaSec + avgSessionSec`.
+- **ETA**: photo durations count toward the measured drawing time like any other session (`recentHistory` must accept READY as well as DONE). Photo tickets have no walk-up, so exclude gaps whose next ticket is FROM_PHOTO from the time between customers. The customer ETA for a FROM_PHOTO ticket is the *ready* time: `etaSec + avgSessionSec`.
 - **Heads-up**: `almostUp` is always false for FROM_PHOTO tickets.
 - **Close day**: READY tickets are **not** cancelled; they stay READY so pickups can be recorded later from Day history. The close-day summary shows "N portraits waiting for pickup". WAITING/CALLED photo tickets are cancelled like any other.
 - **Stats**: add `readyForPickupCount`.

@@ -1,4 +1,13 @@
-import { computeEta, type DayDTO, type PublicTicketView, type QueueSnapshot, type StatsDTO, type TicketDTO } from "@boothq/shared";
+import {
+  computeEta,
+  type DayDTO,
+  type PublicTicketView,
+  type QueueSnapshot,
+  type RecentHistory,
+  recentHistory,
+  type StatsDTO,
+  type TicketDTO,
+} from "@boothq/shared";
 import type { Day, Ticket } from "@prisma/client";
 import { AppError } from "../lib/errors.js";
 
@@ -23,22 +32,38 @@ function toCurrentInput(ticket: Ticket | null): CurrentInput {
   return { status: ticket.status, startedAt: ticket.startedAt };
 }
 
-function averageSessionSecFor(day: Day, completedDurationsSec: number[], now: Date): number {
-  return computeEta({
+const HISTORY_TICKET_LIMIT = 30; // enough to find 10 valid drawings and 10 gaps
+
+// The single place that decides which Days feed the measured drawing time and
+// time between customers. Today that's every Day; once Events exist
+// (docs/EVENTS.md) it must be limited to the Days of the current Event.
+export async function loadRecentHistory(): Promise<RecentHistory> {
+  const tickets = await prisma.ticket.findMany({
+    where: { startedAt: { not: null } },
+    orderBy: { startedAt: "desc" },
+    take: HISTORY_TICKET_LIMIT,
+    select: { dayId: true, status: true, createdAt: true, startedAt: true, endedAt: true, durationSec: true },
+  });
+  const oldest = tickets.at(-1)?.startedAt;
+  const pauses = oldest
+    ? await prisma.actionLog.findMany({
+        where: { action: "PAUSE", createdAt: { gte: oldest } },
+        select: { dayId: true, createdAt: true },
+      })
+    : [];
+  return recentHistory({ tickets, pauses: pauses.map((p) => ({ dayId: p.dayId, at: p.createdAt })) });
+}
+
+function measuredAverages(history: RecentHistory, now: Date): { avgSessionSec: number; avgChangeoverSec: number } {
+  const { avgSessionSec, avgChangeoverSec } = computeEta({
     now,
-    defaultDurationSec: day.defaultDurationSec,
-    changeoverSec: day.changeoverSec,
-    completedDurationsSec,
+    recentSessionsSec: history.sessionsSec,
+    recentChangeoversSec: history.changeoversSec,
     current: null,
     waitingAhead: 0,
     pause: null,
-  }).avgSessionSec;
-}
-
-function completedDurationsOf(tickets: Ticket[]): number[] {
-  return tickets
-    .filter((t) => t.status === "DONE" && t.durationSec != null)
-    .map((t) => t.durationSec as number);
+  });
+  return { avgSessionSec, avgChangeoverSec };
 }
 
 export function toDayDTO(day: Day): DayDTO {
@@ -48,8 +73,6 @@ export function toDayDTO(day: Day): DayDTO {
     openedAt: day.openedAt.toISOString(),
     closedAt: day.closedAt?.toISOString() ?? null,
     acceptingTickets: day.acceptingTickets,
-    defaultDurationSec: day.defaultDurationSec,
-    changeoverSec: day.changeoverSec,
     headsUpAhead: day.headsUpAhead,
     paused: day.pausedAt != null,
     pausedAt: day.pausedAt?.toISOString() ?? null,
@@ -85,19 +108,23 @@ export async function findCurrentTicket(dayId: string): Promise<Ticket | null> {
   return prisma.ticket.findFirst({ where: { dayId, status: { in: ["CALLED", "SERVING"] } } });
 }
 
-export async function buildStats(dayId: string, now: Date = new Date()): Promise<StatsDTO> {
+export async function buildStats(
+  dayId: string,
+  now: Date = new Date(),
+  history?: RecentHistory,
+): Promise<StatsDTO> {
   const day = await prisma.day.findUniqueOrThrow({ where: { id: dayId } });
   const tickets = await prisma.ticket.findMany({ where: { dayId } });
-  return statsFor(day, tickets, now);
+  const recent = history ?? (await loadRecentHistory());
+  return statsFor(day, tickets, recent, now);
 }
 
-function statsFor(day: Day, tickets: Ticket[], now: Date): StatsDTO {
+function statsFor(day: Day, tickets: Ticket[], recent: RecentHistory, now: Date): StatsDTO {
   const servedCount = tickets.filter((t) => t.status === "DONE").length;
   const noShowCount = tickets.filter((t) => t.status === "NO_SHOW").length;
   const cancelledCount = tickets.filter((t) => t.status === "CANCELLED").length;
   const waitingCount = tickets.filter((t) => t.status === "WAITING").length;
-  const completedDurationsSec = completedDurationsOf(tickets);
-  const avgSessionSec = averageSessionSecFor(day, completedDurationsSec, now);
+  const { avgSessionSec, avgChangeoverSec } = measuredAverages(recent, now);
 
   const calledTickets = tickets.filter((t) => t.calledAt != null);
   const longestWaitSec = calledTickets.length
@@ -111,9 +138,8 @@ function statsFor(day: Day, tickets: Ticket[], now: Date): StatsDTO {
   if (current || waitingCount > 0) {
     const eta = computeEta({
       now,
-      defaultDurationSec: day.defaultDurationSec,
-      changeoverSec: day.changeoverSec,
-      completedDurationsSec,
+      recentSessionsSec: recent.sessionsSec,
+      recentChangeoversSec: recent.changeoversSec,
       current: toCurrentInput(current),
       waitingAhead: waitingCount,
       pause: day.pausedAt ? { until: day.pauseUntil } : null,
@@ -121,7 +147,28 @@ function statsFor(day: Day, tickets: Ticket[], now: Date): StatsDTO {
     projectedFinishAt = eta.estimatedAt.toISOString();
   }
 
-  return { servedCount, noShowCount, cancelledCount, waitingCount, avgSessionSec, longestWaitSec, projectedFinishAt };
+  return {
+    servedCount,
+    noShowCount,
+    cancelledCount,
+    waitingCount,
+    avgSessionSec,
+    avgChangeoverSec,
+    longestWaitSec,
+    projectedFinishAt,
+  };
+}
+
+// Close summary: the average describes this Day alone, not the rolling window.
+export async function buildDaySummary(dayId: string): Promise<StatsDTO> {
+  const stats = await buildStats(dayId);
+  const durations = (
+    await prisma.ticket.findMany({ where: { dayId, status: "DONE" }, select: { durationSec: true } })
+  ).flatMap((t) => (t.durationSec != null && t.durationSec >= 60 ? [t.durationSec] : []));
+  const avgSessionSec = durations.length
+    ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
+    : 0;
+  return { ...stats, avgSessionSec };
 }
 
 export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueSnapshot> {
@@ -139,6 +186,7 @@ export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueS
         cancelledCount: 0,
         waitingCount: 0,
         avgSessionSec: 0,
+        avgChangeoverSec: 0,
         longestWaitSec: null,
         projectedFinishAt: null,
       },
@@ -155,16 +203,15 @@ export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueS
     .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
     .slice(0, 10);
 
-  const completedDurationsSec = completedDurationsOf(tickets);
+  const history = await loadRecentHistory();
   const currentInput = toCurrentInput(current);
   const pauseInput = day.pausedAt ? { until: day.pauseUntil } : null;
 
   const waitingDTOs = waiting.map((ticket, index) => {
     const eta = computeEta({
       now,
-      defaultDurationSec: day.defaultDurationSec,
-      changeoverSec: day.changeoverSec,
-      completedDurationsSec,
+      recentSessionsSec: history.sessionsSec,
+      recentChangeoversSec: history.changeoversSec,
       current: currentInput,
       waitingAhead: index,
       pause: pauseInput,
@@ -178,7 +225,7 @@ export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueS
     current: current ? toTicketDTO(current, { etaSec: null }) : null,
     waiting: waitingDTOs,
     recent: recent.map((t) => toTicketDTO(t, { etaSec: null })),
-    stats: statsFor(day, tickets, now),
+    stats: statsFor(day, tickets, history, now),
   };
 }
 
@@ -219,7 +266,7 @@ export async function buildPublicTicketView(token: string, now: Date = new Date(
 
   const { day } = ticket;
   const dayTickets = await prisma.ticket.findMany({ where: { dayId: day.id } });
-  const completedDurationsSec = completedDurationsOf(dayTickets);
+  const history = await loadRecentHistory();
   const current = dayTickets.find((t) => t.status === "CALLED" || t.status === "SERVING") ?? null;
   const currentInput = toCurrentInput(current);
   const pauseInput = day.pausedAt ? { until: day.pauseUntil } : null;
@@ -237,9 +284,8 @@ export async function buildPublicTicketView(token: string, now: Date = new Date(
   const eta = isWaiting
     ? computeEta({
         now,
-        defaultDurationSec: day.defaultDurationSec,
-        changeoverSec: day.changeoverSec,
-        completedDurationsSec,
+        recentSessionsSec: history.sessionsSec,
+        recentChangeoversSec: history.changeoversSec,
         current: currentInput,
         waitingAhead,
         pause: pauseInput,
@@ -270,7 +316,7 @@ export async function buildPublicTicketView(token: string, now: Date = new Date(
           pausedUntimed: eta.pausedUntimed,
         }
       : null,
-    avgSessionSec: averageSessionSecFor(day, completedDurationsSec, now),
+    avgSessionSec: measuredAverages(history, now).avgSessionSec,
     pause: { active: day.pausedAt != null, until: day.pauseUntil?.toISOString() ?? null, reason: day.pauseReason },
   };
 }

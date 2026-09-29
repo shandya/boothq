@@ -83,7 +83,7 @@ export function NewTicketSheet({ nextNumber, onClose, onCreated, onShowExisting 
             <input
               id="nt-phone"
               type="tel"
-              placeholder="812 3456 7890"
+              placeholder="081234567890"
               value={phone}
               onChange={(event) => setPhone(event.target.value)}
               className="min-w-0 flex-grow border-none bg-transparent text-[17px] text-label outline-none placeholder:text-label-2"
@@ -99,7 +99,7 @@ export function NewTicketSheet({ nextNumber, onClose, onCreated, onShowExisting 
             <input
               id="nt-notes"
               type="text"
-              placeholder="Note for the illustrator (optional)"
+              placeholder="Note (optional)"
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
               className="w-full border-none bg-transparent text-[17px] text-label outline-none placeholder:text-label-2"

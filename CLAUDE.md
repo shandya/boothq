@@ -29,6 +29,7 @@ The ADMIN role can do everything the ILLUSTRATOR role can do.
 | `docs/API.md` | Every endpoint with request/response shapes and error codes |
 | `docs/UI.md` | Every screen, per role |
 | `docs/PHOTO_TICKETS.md` | Draw-from-photo feature (after MVP): data, storage, API, UI |
+| `docs/EVENTS.md` | Events feature (after MVP): grouping Days per venue, scoped wait-time history |
 | `docs/IMPLEMENTATION_PLAN.md` | Ordered build phases with checkboxes and acceptance criteria |
 
 If two docs conflict, stop and ask. If the code must diverge from a doc, update the doc in the same change.
@@ -74,6 +75,7 @@ pnpm lint && pnpm typecheck
 
 - **Day**: one opening of the booth, from Open to Close. Ticket numbers restart at 1 each Day. A Day is not tied to a calendar date (an event can run past midnight).
 - **Ticket**: one customer in the queue.
-- **Session**: the drawing time for one ticket, from Start to Finish. Session durations drive the ETA.
+- **Event** (after MVP, `docs/EVENTS.md`): one run of the booth at a venue, e.g. a convention. Contains one or more Days and scopes the measured wait-time history. Ticket numbers still restart per Day.
+- **Session**: the drawing time for one ticket, from Start to Finish. The last 10 session durations (and the gaps between them) drive the ETA.
 - **Current ticket**: the single ticket that is `CALLED` or `SERVING`. At most one exists at a time.
 - **Break**: a pause of the whole queue (illustrator resting). Customers see a banner and ETAs include the break.

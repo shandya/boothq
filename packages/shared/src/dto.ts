@@ -6,8 +6,6 @@ export type DayDTO = {
   openedAt: string;
   closedAt: string | null;
   acceptingTickets: boolean;
-  defaultDurationSec: number;
-  changeoverSec: number;
   headsUpAhead: number;
   paused: boolean;
   pausedAt: string | null;
@@ -41,7 +39,8 @@ export type StatsDTO = {
   noShowCount: number;
   cancelledCount: number;
   waitingCount: number;
-  avgSessionSec: number;
+  avgSessionSec: number; // measured from the last 10 drawings (BUSINESS_LOGIC.md §5)
+  avgChangeoverSec: number; // measured from the last 10 Finish → next Start gaps
   longestWaitSec: number | null; // created → called, over called tickets
   projectedFinishAt: string | null; // null when queue empty
 };

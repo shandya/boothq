@@ -17,16 +17,12 @@ export const loginSchema = z.object({
 export type LoginInput = z.infer<typeof loginSchema>;
 
 export const openDaySchema = z.object({
-  defaultDurationSec: z.number().int().min(60).max(7200).optional(),
-  changeoverSec: z.number().int().min(0).max(1800).optional(),
   headsUpAhead: z.number().int().min(0).max(10).optional(),
 });
 export type OpenDayInput = z.infer<typeof openDaySchema>;
 
 export const patchDaySchema = z.object({
   acceptingTickets: z.boolean().optional(),
-  defaultDurationSec: z.number().int().min(60).max(7200).optional(),
-  changeoverSec: z.number().int().min(0).max(1800).optional(),
   headsUpAhead: z.number().int().min(0).max(10).optional(),
 });
 export type PatchDayInput = z.infer<typeof patchDaySchema>;
