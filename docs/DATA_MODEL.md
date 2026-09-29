@@ -118,6 +118,7 @@ model ActionLog {
   eventId   String?  // set for Event operations (START_EVENT, RENAME_EVENT, END_EVENT)
   event     Event?   @relation(fields: [eventId], references: [id], onDelete: Restrict)
   ticketId  String?
+  batchId   String?  // rows written by one request that Undo reverses together (Finish & call next)
   action    String   // e.g. "CALL_NEXT", "START", "FINISH", "NO_SHOW", "REQUEUE", "CANCEL", "PAUSE"
   actorRole Role
   before    Json?    // ticket/day fields before the change (enables Undo in P1)
@@ -167,7 +168,7 @@ The Events migration backfills existing installs: one ACTIVE "First event" (star
 | WAITING, CALLED, NO_SHOW, CANCELLED | CANCELLED | admin `DELETE` (ADMIN_REMOVED); a no-op re-write if already CANCELLED | Admin |
 | WAITING, CALLED | CANCELLED | `close day` (DAY_CLOSED) | Admin |
 
-Any other transition returns `409 INVALID_TRANSITION`. A SERVING or DONE ticket can't be removed; a SERVING ticket can't be cancelled by its customer either — finish it first. (P1 Undo can reverse the last action using `ActionLog.before`.)
+Any other transition returns `409 INVALID_TRANSITION`. A SERVING or DONE ticket can't be removed; a SERVING ticket can't be cancelled by its customer either — finish it first. (Undo can reverse the last Call next / Start / Finish / No-show using `ActionLog.before`; see `BUSINESS_LOGIC.md` → Undo.)
 
 ## Invariants (enforce in the service layer, test them)
 

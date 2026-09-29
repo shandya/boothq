@@ -61,6 +61,18 @@ Always renumber the whole WAITING list in the transaction (a helper `renumberWai
 
 Every operation writes an `ActionLog` row with `before` and `after` for the tickets and day fields it touched.
 
+### Undo
+
+`undo` reverses the Day's **most recent** ActionLog entry, restoring the ticket to its logged `before` state. It runs in the same day-locked transaction as every other operation.
+
+- **Undoable actions**: `CALL_NEXT`, `START`, `FINISH`, `NO_SHOW`. Anything else as the latest entry (new ticket, edit, recall, requeue, cancel, break, ...) means nothing can be undone.
+- **Single level**: undoing writes an `UNDO` entry, which is not itself undoable, so Undo can't be repeated or ping-pong. Because only the latest entry is reversed, the Day's state is exactly that entry's `after` state and the reversal can't collide with anything newer.
+- **10-minute window**: the entry must be under 10 minutes old (`UNDO_WINDOW_MS`). The web toast that offers Undo lasts 10 seconds; the longer window is a safety net for the API.
+- **Finish & call next** writes two entries (`FINISH`, then `CALL_NEXT`) that share a `batchId`. Undo reverses the whole batch, last-written first, so the customer who was called goes back in line and the finished ticket is being drawn again.
+- **Restoring a ticket**: `status`, `position`, `calledAt`, `callCount`, `startedAt`, `endedAt`, `durationSec`, `cancelledAt`, `cancelReason` come back from `before`. A ticket returning to WAITING is re-inserted at its old `position` and the WAITING list is renumbered to `1..n`. Undoing a Finish keeps the original `startedAt`, so the drawing timer resumes as if the tap never happened, and the ticket drops out of the measured drawing times again.
+- **Stale-tap protection**: the snapshot's `undo.actionId` identifies what Undo would reverse; the request sends it back as `expectedActionId`. If something newer happened (even from another phone), the API returns `409 STALE_STATE` instead of undoing the wrong action.
+- Fails `409 NOTHING_TO_UNDO`, `DAY_NOT_OPEN`, `STALE_STATE`, or `CURRENT_ACTIVE` (defensive: someone else is current).
+
 ## 5. ETA algorithm
 
 Lives in `packages/shared/src/eta.ts` as a **pure function** so it can be unit-tested and reused by the API (customer ETAs, projected finish time).

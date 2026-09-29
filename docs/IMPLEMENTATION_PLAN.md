@@ -158,7 +158,7 @@ Docs: `UI.md` (customer), `PRD.md` C1–C8
 
 ## Phase 7 — P1 features
 
-- [ ] Undo (`POST /api/queue/undo` from ActionLog + toast)
+- [x] Undo (`POST /api/queue/undo` from ActionLog + toast)
 - [ ] `/display` screen
 - [ ] Customer alerts (sound/vibration opt-in)
 - [ ] Bilingual customer page (simple dictionary, language toggle, remembers choice in localStorage)

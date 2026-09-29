@@ -234,7 +234,7 @@ A floating **+ New Ticket** button (bottom-right, above the break bar) opens the
 
 **Feedback**: every mutation button shows a pending state and is disabled until the response arrives; `navigator.vibrate(10)` on success where supported; on 409, toast "Already updated" and apply `details.snapshot`.
 
-**P1**: Undo toast for 10 s after Call next / Start / Finish / No-show.
+**Undo**: after Call next, Start, Finish (with or without "call next") or No-show, a pill floats above the New Ticket button for 10 s: "Called #12 · **Undo**" (also on the Admin screen). Tapping it reverses that action and shows "Undone". It only shows on the phone that tapped, and disappears early if anything newer happens. These actions no longer show their own success toast; the pill replaces it. If the queue changed underneath ("Can't undo — the queue changed") nothing is reverted.
 
 Admins see an extra "Admin" link in the header.
 

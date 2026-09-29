@@ -19,7 +19,7 @@ Base path `/api`. JSON in, JSON out. All request schemas are zod schemas exporte
 | 401 | `UNAUTHENTICATED` | no or expired session; wrong PIN returns `INVALID_PIN` |
 | 403 | `FORBIDDEN` | illustrator calling an admin endpoint; bad Origin |
 | 404 | `NOT_FOUND` | unknown ticket id or token (including rotated tokens) |
-| 409 | `DAY_NOT_OPEN`, `DAY_ALREADY_OPEN`, `DAY_PAUSED`, `NOT_ACCEPTING`, `DUPLICATE_ACTIVE_TICKET`, `INVALID_TRANSITION`, `CURRENT_ACTIVE`, `QUEUE_EMPTY`, `STALE_STATE`, `NO_ACTIVE_EVENT`, `DAY_OPEN` | see `BUSINESS_LOGIC.md` |
+| 409 | `DAY_NOT_OPEN`, `DAY_ALREADY_OPEN`, `DAY_PAUSED`, `NOT_ACCEPTING`, `DUPLICATE_ACTIVE_TICKET`, `INVALID_TRANSITION`, `CURRENT_ACTIVE`, `QUEUE_EMPTY`, `STALE_STATE`, `NO_ACTIVE_EVENT`, `DAY_OPEN`, `NOTHING_TO_UNDO` | see `BUSINESS_LOGIC.md` |
 | 429 | `RATE_LIMITED` | too many requests |
 
 ## Shared types
@@ -40,6 +40,13 @@ type EventSummaryDTO = {
   noShowCount: number;
   cancelledCount: number;
   avgSessionSec: number;      // plain average over the Event's valid drawings; 0 when none
+};
+
+type UndoDTO = {              // staff only
+  actionId: string;           // send back as `expectedActionId`
+  action: 'CALL_NEXT' | 'START' | 'FINISH' | 'NO_SHOW';
+  ticketNumber: number;
+  expiresAt: string;          // 10 minutes after the action
 };
 
 type DayDTO = {
@@ -94,6 +101,7 @@ type QueueSnapshot = {
   waiting: TicketDTO[];        // ordered by position
   recent: TicketDTO[];         // last 10 DONE / NO_SHOW / CANCELLED, newest first
   stats: StatsDTO;
+  undo: UndoDTO | null;        // the last action, if Undo can still reverse it
 };
 
 type PublicTicketView = {       // customer; NO phone, notes, ids, or other names
@@ -154,7 +162,7 @@ All return `QueueSnapshot` unless stated.
 | POST | `/api/day/pause` | `{ minutes?: number /* 1–240; omit = untimed */, reason?: string }` | `CURRENT_ACTIVE` if someone is SERVING |
 | POST | `/api/day/resume` | — | |
 | PATCH | `/api/day` | `{ acceptingTickets?: boolean }` | Illustrator may only toggle `acceptingTickets` |
-| POST | `/api/queue/undo` | — | **P1**. Reverts the most recent ActionLog entry of the Day if under 10 min old |
+| POST | `/api/queue/undo` | `{ expectedActionId?: string }` | Reverts the Day's most recent Call next / Start / Finish / No-show (Finish & call next is undone as one) if it is under 10 min old. `QueueSnapshot`. `NOTHING_TO_UNDO`, `STALE_STATE` (the `expectedActionId` is no longer the latest action). See `BUSINESS_LOGIC.md` → Undo |
 | POST | `/api/tickets` | `{ name: string /*1–60*/, phone: string, notes?: string /*≤280*/, force?: boolean }` | Illustrator or Admin (the one ticket-write route either role can call). Returns `{ ticket: TicketDTO, snapshot: QueueSnapshot }`, not bare `QueueSnapshot`. `DUPLICATE_ACTIVE_TICKET` returns `details.existing: TicketDTO` |
 
 ## Tickets and day (admin)
