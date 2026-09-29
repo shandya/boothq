@@ -14,31 +14,9 @@ import { nanoid } from "nanoid";
 import { AppError } from "../lib/errors.js";
 import { getDefaultCountry, normalizePhone } from "../lib/phone.js";
 import { prisma } from "../lib/prisma.js";
-import { renumberWaiting, withOpenDayLock } from "./day-lock.js";
+import { logAction } from "./action-log.js";
+import { lockEvents, renumberWaiting, withOpenDayLock } from "./day-lock.js";
 import { toTicketDTO } from "./snapshot.service.js";
-
-async function logAction(
-  tx: Prisma.TransactionClient,
-  params: {
-    dayId: string;
-    ticketId?: string;
-    action: string;
-    actorRole: Role;
-    before?: unknown;
-    after?: unknown;
-  },
-): Promise<void> {
-  await tx.actionLog.create({
-    data: {
-      dayId: params.dayId,
-      ticketId: params.ticketId,
-      action: params.action,
-      actorRole: params.actorRole,
-      before: params.before === undefined ? Prisma.JsonNull : (params.before as Prisma.InputJsonValue),
-      after: params.after === undefined ? Prisma.JsonNull : (params.after as Prisma.InputJsonValue),
-    },
-  });
-}
 
 async function renumberRemainingWaiting(tx: Prisma.TransactionClient, dayId: string): Promise<void> {
   const remaining = await tx.ticket.findMany({
@@ -80,8 +58,15 @@ async function callNextWithinLock(
 export async function openDay(actorRole: Role, input: OpenDayInput): Promise<{ day: Day }> {
   try {
     const day = await prisma.$transaction(async (tx) => {
+      await lockEvents(tx);
+      const event = await tx.event.findFirst({ where: { status: "ACTIVE" } });
+      if (!event) throw new AppError(409, "NO_ACTIVE_EVENT", "Start an event before opening the booth.");
+
       const created = await tx.day.create({
-        data: { headsUpAhead: input.headsUpAhead ?? 3 },
+        data: {
+          eventId: event.id,
+          headsUpAhead: input.headsUpAhead ?? 3,
+        },
       });
       await logAction(tx, { dayId: created.id, action: "OPEN_DAY", actorRole, after: created });
       return created;

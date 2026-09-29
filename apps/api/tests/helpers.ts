@@ -4,16 +4,45 @@ import { prisma } from "../src/lib/prisma.js";
 
 export const TEST_PINS = { ADMIN: "111111", ILLUSTRATOR: "222222" } as const;
 
+export const TEST_EVENT_NAME = "Test event";
+
+// Leaves one ACTIVE Event behind, because a Day can't be opened without one;
+// tests about "no event running" delete it themselves.
 export async function resetDb(): Promise<void> {
   await prisma.actionLog.deleteMany();
   await prisma.ticket.deleteMany();
   await prisma.day.deleteMany();
+  await prisma.event.deleteMany();
+  await prisma.event.create({ data: { name: TEST_EVENT_NAME } });
+}
+
+// docs/EVENTS.md → Invariants. (3, "no start/end while a Day is OPEN", is an
+// operation rule checked by the tests that attempt it.)
+export async function assertEventInvariants(): Promise<void> {
+  const active = await prisma.event.findMany({ where: { status: "ACTIVE" } });
+  if (active.length > 1) {
+    throw new Error(`invariant violated: ${active.length} Events are ACTIVE at once`);
+  }
+
+  const openDay = await prisma.day.findFirst({ where: { status: "OPEN" }, include: { event: true } });
+  if (openDay && openDay.event.status !== "ACTIVE") {
+    throw new Error("invariant violated: the OPEN Day belongs to an Event that is not ACTIVE");
+  }
+
+  const events = await prisma.event.findMany();
+  for (const e of events) {
+    if ((e.status === "ENDED") !== (e.endedAt != null)) {
+      throw new Error(`invariant violated: Event ${e.id} status ${e.status} endedAt ${e.endedAt}`);
+    }
+  }
 }
 
 // Checks the invariants in docs/DATA_MODEL.md that can be verified from
 // stored state alone (invariant 6, "created only while OPEN", is enforced
 // structurally by the service layer instead).
 export async function assertInvariants(dayId: string): Promise<void> {
+  await assertEventInvariants();
+
   const openDayCount = await prisma.day.count({ where: { status: "OPEN" } });
   if (openDayCount > 1) {
     throw new Error(`invariant violated: ${openDayCount} Days are OPEN at once`);

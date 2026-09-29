@@ -6,8 +6,13 @@ const MIN = 60_000;
 async function main() {
   const now = Date.now();
 
+  const event =
+    (await prisma.event.findFirst({ where: { status: "ACTIVE" } })) ??
+    (await prisma.event.create({ data: { name: "Sample event", startedAt: new Date(now - 90 * MIN) } }));
+
   const day = await prisma.day.create({
     data: {
+      eventId: event.id,
       status: "OPEN",
       openedAt: new Date(now - 90 * MIN),
       nextNumber: 9,

@@ -24,6 +24,7 @@ export async function attachSnapshotOn409(err: unknown): Promise<unknown> {
 import { nationalDisplay } from "../lib/phone.js";
 import { prisma } from "../lib/prisma.js";
 import { publicWebOrigin } from "../lib/public-web-url.js";
+import { getActiveEventDTO } from "./event.service.js";
 
 type CurrentInput = { status: "CALLED" | "SERVING"; startedAt: Date | null } | null;
 
@@ -34,12 +35,12 @@ function toCurrentInput(ticket: Ticket | null): CurrentInput {
 
 const HISTORY_TICKET_LIMIT = 30; // enough to find 10 valid drawings and 10 gaps
 
-// The single place that decides which Days feed the measured drawing time and
-// time between customers. Today that's every Day; once Events exist
-// (docs/EVENTS.md) it must be limited to the Days of the current Event.
-export async function loadRecentHistory(): Promise<RecentHistory> {
+// The single place that decides which tickets feed the measured drawing time
+// and time between customers: those from the Days of one Event, so a new venue
+// starts from the defaults (docs/EVENTS.md → ETA history scope).
+export async function loadRecentHistory(eventId: string): Promise<RecentHistory> {
   const tickets = await prisma.ticket.findMany({
-    where: { startedAt: { not: null } },
+    where: { startedAt: { not: null }, day: { eventId } },
     orderBy: { startedAt: "desc" },
     take: HISTORY_TICKET_LIMIT,
     select: { dayId: true, status: true, createdAt: true, startedAt: true, endedAt: true, durationSec: true },
@@ -47,11 +48,14 @@ export async function loadRecentHistory(): Promise<RecentHistory> {
   const oldest = tickets.at(-1)?.startedAt;
   const pauses = oldest
     ? await prisma.actionLog.findMany({
-        where: { action: "PAUSE", createdAt: { gte: oldest } },
+        where: { action: "PAUSE", createdAt: { gte: oldest }, day: { eventId } },
         select: { dayId: true, createdAt: true },
       })
     : [];
-  return recentHistory({ tickets, pauses: pauses.map((p) => ({ dayId: p.dayId, at: p.createdAt })) });
+  return recentHistory({
+    tickets,
+    pauses: pauses.flatMap((p) => (p.dayId ? [{ dayId: p.dayId, at: p.createdAt }] : [])),
+  });
 }
 
 function measuredAverages(history: RecentHistory, now: Date): { avgSessionSec: number; avgChangeoverSec: number } {
@@ -115,7 +119,7 @@ export async function buildStats(
 ): Promise<StatsDTO> {
   const day = await prisma.day.findUniqueOrThrow({ where: { id: dayId } });
   const tickets = await prisma.ticket.findMany({ where: { dayId } });
-  const recent = history ?? (await loadRecentHistory());
+  const recent = history ?? (await loadRecentHistory(day.eventId));
   return statsFor(day, tickets, recent, now);
 }
 
@@ -173,9 +177,11 @@ export async function buildDaySummary(dayId: string): Promise<StatsDTO> {
 
 export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueSnapshot> {
   const day = await prisma.day.findFirst({ where: { status: "OPEN" } });
+  const event = await getActiveEventDTO();
   if (!day) {
     return {
       serverTime: now.toISOString(),
+      event,
       day: null,
       current: null,
       waiting: [],
@@ -203,7 +209,7 @@ export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueS
     .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
     .slice(0, 10);
 
-  const history = await loadRecentHistory();
+  const history = await loadRecentHistory(day.eventId);
   const currentInput = toCurrentInput(current);
   const pauseInput = day.pausedAt ? { until: day.pauseUntil } : null;
 
@@ -221,6 +227,7 @@ export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueS
 
   return {
     serverTime: now.toISOString(),
+    event,
     day: toDayDTO(day),
     current: current ? toTicketDTO(current, { etaSec: null }) : null,
     waiting: waitingDTOs,
@@ -266,7 +273,7 @@ export async function buildPublicTicketView(token: string, now: Date = new Date(
 
   const { day } = ticket;
   const dayTickets = await prisma.ticket.findMany({ where: { dayId: day.id } });
-  const history = await loadRecentHistory();
+  const history = await loadRecentHistory(day.eventId);
   const current = dayTickets.find((t) => t.status === "CALLED" || t.status === "SERVING") ?? null;
   const currentInput = toCurrentInput(current);
   const pauseInput = day.pausedAt ? { until: day.pauseUntil } : null;
