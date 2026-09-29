@@ -16,6 +16,7 @@ import { OfflineBanner } from "../ui/OfflineBanner";
 import { QrFullscreen } from "../ui/QrFullscreen";
 import { Switch } from "../ui/Switch";
 import { Toast, useToast } from "../ui/Toast";
+import { UndoToast } from "../ui/UndoToast";
 import { BreakSheet } from "./BreakSheet";
 import { IllustratorHeader } from "./IllustratorHeader";
 import { IllustratorMenu } from "./IllustratorMenu";
@@ -181,6 +182,7 @@ export function IllustratorScreen() {
         />
       ) : null}
 
+      <UndoToast currentUndoId={snapshot.undo?.actionId} onToast={showToast} />
       <Toast message={toast} />
     </div>
   );

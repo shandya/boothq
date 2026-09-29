@@ -69,6 +69,8 @@ export const me = () => get<{ role: "ADMIN" | "ILLUSTRATOR" }>("/auth/me");
 // Queue (staff)
 export const getQueue = () => get<QueueSnapshot>("/queue");
 export const callNext = (expectedNextId?: string) => post<QueueSnapshot>("/queue/call-next", { expectedNextId });
+export const undoLastAction = (expectedActionId?: string) =>
+  post<QueueSnapshot>("/queue/undo", { expectedActionId });
 export const reorderQueue = (input: ReorderQueueInput) => post<QueueSnapshot>("/queue/reorder", input);
 
 export const startTicket = (id: string) => post<QueueSnapshot>(`/tickets/${encodeURIComponent(id)}/start`);
