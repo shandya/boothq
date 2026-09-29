@@ -11,7 +11,8 @@ import { ConfirmSheet } from "../ui/ConfirmSheet";
 import { GroupedList, GroupedSeparator } from "../ui/GroupedList";
 import { PhotoPickButtons } from "../ui/PhotoPickButtons";
 import { Sheet } from "../ui/Sheet";
-import { UploadProgress } from "./AddPhotoSheet";
+import { UploadProgress } from "../ui/UploadProgress";
+
 
 type NewTicketSheetProps = {
   nextNumber: number;
@@ -171,10 +172,7 @@ export function NewTicketSheet({ nextNumber, onClose, onCreated, onShowExisting 
               chooseLabel="Choose from Library"
             />
           </GroupedList>
-          <p className="m-0 px-4 text-[13px] text-label-2">
-            Adding a photo makes this a virtual session: we draw from the photo and they pick up the portrait later.
-            The photo is deleted once the drawing is done.
-          </p>
+          <p className="m-0 px-4 text-[13px] text-label-2">The photo is deleted once the drawing is done.</p>
           {photoError ? <p className="m-0 px-4 text-[15px] text-danger">{photoError}</p> : null}
         </div>
 

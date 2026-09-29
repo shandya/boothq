@@ -126,8 +126,8 @@ No new error codes.
 
 ## UI changes (`UI.md`)
 
-- **Admin → New ticket sheet**: Name, Phone, then a **Photo · optional** group (Take Photo / Choose from Library; after picking, a thumbnail with Retake / Choose from Library / Remove) with the footer "Adding a photo makes this a virtual session: we draw from the photo and they pick up the portrait later. The photo is deleted once the drawing is done." The **Note** field stays below it, as in the MVP sheet. If a photo was picked, Create waits for the upload to finish.
-- **Admin → Ticket sheet**: **Add Photo** (in-person tickets) or **View Photo** / **Remove Photo** (virtual tickets, before drawing starts).
+- **Admin → New ticket sheet**: Name, Phone, then a **Photo · optional** group (Take Photo / Choose from Library; after picking, a thumbnail with Retake / Choose from Library / Remove) with the footer "The photo is deleted once the drawing is done." The **Note** field stays below it, as in the MVP sheet. If a photo was picked, Create waits for the upload to finish.
+- **Admin → Ticket sheet**: shows the photo as a thumbnail (tap for full screen) when there is one. Adding and removing happens in **Edit Ticket**: a Photo group with Take Photo / Choose from Library (uploads immediately) or, when a photo exists, the thumbnail and **Remove Photo**; same footer text. Only while WAITING or CALLED.
 - **Admin → Queue**: a **Ready for pickup** section above Now, each row with a WhatsApp "it's ready" button and a **Picked Up** capsule. Photo tickets show a small camera icon next to the name.
 - **Illustrator → Now card (FROM_PHOTO)**: a "Drawing from photo" chip, the photo large (tap for full screen with pinch-zoom), notes, and a compact "Drawing for 4:05" line. Helper text under the buttons: "Finishing tells {name} their portrait is ready for pickup."
 - **Illustrator → Up next**: photo tickets show a camera icon; the primary button reads "Start #11 Ana (from photo)" instead of "Call".
