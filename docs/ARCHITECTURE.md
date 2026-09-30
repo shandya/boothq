@@ -159,6 +159,7 @@ No library: a typed dictionary in `apps/web/lib/i18n` (English and Bahasa Indone
 ```
 DATABASE_URL=postgresql://...          # pooled URL in production
 DIRECT_URL=postgresql://...            # direct URL for migrations
+CRON_SECRET=<random string>            # authorizes the daily retention job (Vercel Cron sends it as a Bearer token)
 BLOB_READ_WRITE_TOKEN=...              # private Vercel Blob store (draw-from-photo); created by linking the store to this project
 JWT_SECRET=<32+ random bytes>
 ADMIN_PIN_HASH=<bcrypt hash>
@@ -180,6 +181,10 @@ NEXT_PUBLIC_DEFAULT_COUNTRY=ID
 `NEXT_PUBLIC_BOOTH_NAME` is what customers see everywhere (ticket page, WhatsApp messages). The app itself is called **BoothQ**; that name appears only on staff-facing screens (login, PWA manifest, browser tab title) — see `CLAUDE.md` → Naming.
 
 Commit `.env.example` files for both. Never commit real `.env` files.
+
+## Scheduled jobs
+
+One daily job erases phone numbers 30 days after a Day closes (`PRD.md` A14). `apps/api/vercel.json` schedules a Vercel Cron call to `GET /api/cron/retention` at 03:17 UTC; Vercel sends `Authorization: Bearer $CRON_SECRET`, and the endpoint refuses every request when `CRON_SECRET` is unset. The same job runs from a shell with `pnpm --filter api purge-phones`. Cron jobs only run on production deployments.
 
 ## File storage (after MVP)
 
