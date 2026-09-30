@@ -96,7 +96,7 @@ model Ticket {
   day          Day           @relation(fields: [dayId], references: [id])
   number       Int           // 1, 2, 3... per Day, never reused
   name         String        // max 60 chars
-  phone        String?       // E.164; nulled by the retention job (P1)
+  phone        String?       // E.164; nulled by the retention job 30 days after the Day closes
   notes        String?       // max 280 chars, staff only
   token        String        @unique // nanoid(16), customer credential
   status       TicketStatus  @default(WAITING)

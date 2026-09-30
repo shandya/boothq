@@ -4,6 +4,7 @@ import { createRequire } from "node:module";
 import { csrfProtection } from "./middleware/csrf.js";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
 import { authRouter } from "./routes/auth.js";
+import { cronRouter } from "./routes/cron.js";
 import { dayRouter } from "./routes/day.js";
 import { daysRouter } from "./routes/days.js";
 import { eventsRouter } from "./routes/events.js";
@@ -32,6 +33,7 @@ export function createApp(): Express {
 
   app.use("/api", healthRouter);
   app.use("/api", authRouter);
+  app.use("/api", cronRouter);
   app.use("/api", publicRouter);
   app.use("/api", queueRouter);
   app.use("/api", ticketsRouter);

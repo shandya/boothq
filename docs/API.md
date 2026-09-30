@@ -142,6 +142,12 @@ type PublicTicketView = {       // customer; NO phone, notes, ids, or other name
 };
 ```
 
+## Scheduled job
+
+| Method | Path | Auth | Notes |
+|---|---|---|---|
+| GET | `/api/cron/retention` | `Authorization: Bearer $CRON_SECRET` | erases phone numbers on Days closed over 30 days ago; `{ phonesErased: number }`. `401` without the secret (or if `CRON_SECRET` is unset). Called by Vercel Cron, not the web app |
+
 ## Health
 
 `GET /api/health` → `{ ok: true }` (public)
