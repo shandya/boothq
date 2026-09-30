@@ -4,6 +4,7 @@ import type { DayDTO, TicketDTO } from "@boothq/shared";
 import { Camera } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { formatClockTime } from "../../lib/format";
+import { type TFunction, useT } from "../../lib/i18n";
 import {
   useCallNext,
   useFinishTicket,
@@ -35,24 +36,42 @@ function minutesSince(iso: string): number {
   return Math.max(0, Math.floor((getServerNow().getTime() - new Date(iso).getTime()) / 60_000));
 }
 
-function calledAgoLabel(calledAt: string, callCount: number): string {
+function calledAgoLabel(calledAt: string, callCount: number, t: TFunction): string {
   const minutes = minutesSince(calledAt);
-  const when = minutes < 1 ? "just now" : `${minutes} min ago`;
-  return callCount > 1 ? `Called ${when} (×${callCount})` : `Called ${when}`;
+  if (minutes < 1)
+    return callCount > 1
+      ? t("ill.now.calledJustNowTimes", { c: callCount })
+      : t("ill.now.calledJustNow");
+  return callCount > 1
+    ? t("ill.now.calledAgoTimes", { n: minutes, c: callCount })
+    : t("ill.now.calledAgo", { n: minutes });
 }
 
 const fromPhoto = (ticket: TicketDTO): boolean => ticket.mode === "FROM_PHOTO";
 
-function pauseLabel(day: DayDTO): string {
-  return day.pauseUntil ? `On break until ${formatClockTime(day.pauseUntil)}` : "On break";
+function pauseLabel(day: DayDTO, t: TFunction): string {
+  return day.pauseUntil
+    ? t("ill.now.onBreakUntil", { time: formatClockTime(day.pauseUntil) })
+    : t("ill.now.onBreak");
 }
 
 // Card wrapper: radius 28px (docs/UI.md → Components: Cards).
 function Card({ children }: { children: ReactNode }) {
-  return <div className="flex flex-col items-start gap-1.5 shape-card sticker bg-card p-5">{children}</div>;
+  return (
+    <div className="flex flex-col items-start gap-1.5 shape-card sticker bg-card p-5">
+      {children}
+    </div>
+  );
 }
 
-export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, onToast }: IllustratorNowCardProps) {
+export function IllustratorNowCard({
+  day,
+  current,
+  nextWaiting,
+  avgSessionSec,
+  onToast,
+}: IllustratorNowCardProps) {
+  const t = useT();
   const [notHere, setNotHere] = useState(false);
   const callNext = useCallNext();
   const start = useStartTicket();
@@ -66,13 +85,17 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
   if (day.paused) {
     return (
       <Card>
-        <span className="text-[22px] font-semibold">{pauseLabel(day)}</span>
+        <span className="text-[22px] font-semibold">{pauseLabel(day, t)}</span>
         {day.pausedAt ? (
           <span className="text-[15px] text-label-2">
-            {minutesSince(day.pausedAt) < 1 ? "Just started" : `${minutesSince(day.pausedAt)} min so far`}
+            {minutesSince(day.pausedAt) < 1
+              ? t("ill.now.justStarted")
+              : t("ill.now.minSoFar", { n: minutesSince(day.pausedAt) })}
           </span>
         ) : null}
-        {day.pauseReason ? <span className="text-[15px] text-label-2">{day.pauseReason}</span> : null}
+        {day.pauseReason ? (
+          <span className="text-[15px] text-label-2">{day.pauseReason}</span>
+        ) : null}
         <CapsuleButton
           className="mt-2 w-full"
           pending={resumeDay.isPending}
@@ -80,13 +103,13 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
             resumeDay.mutate(undefined, {
               onSuccess: () => {
                 vibrate();
-                onToast("Break ended");
+                onToast(t("ill.now.breakEnded"));
               },
-              onError: onStale(onToast),
+              onError: onStale(onToast, t),
             })
           }
         >
-          Resume
+          {t("ill.now.resume")}
         </CapsuleButton>
       </Card>
     );
@@ -96,17 +119,23 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
     if (!nextWaiting) {
       return (
         <Card>
-          <span className="text-[17px] text-label-2">No one waiting</span>
+          <span className="text-[17px] text-label-2">{t("ill.now.noOne")}</span>
         </Card>
       );
     }
     return (
       <Card>
-        <span className="text-[13px] font-semibold uppercase tracking-[0.02em] text-label-2">Next up</span>
+        <span className="text-[13px] font-semibold uppercase tracking-[0.02em] text-label-2">
+          {t("ill.now.nextUp")}
+        </span>
         <span className="flex items-center gap-2 text-[22px] font-semibold">
           <TicketNumber number={nextWaiting.number} size="md" /> {nextWaiting.name}
           {fromPhoto(nextWaiting) ? (
-            <Camera className="h-[18px] w-[18px] shrink-0 text-label-2" strokeWidth={2} aria-label="Drawn from photo" />
+            <Camera
+              className="h-[18px] w-[18px] shrink-0 text-label-2"
+              strokeWidth={2}
+              aria-label={t("admin.fromPhoto")}
+            />
           ) : null}
         </span>
         <CapsuleButton
@@ -115,27 +144,29 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
           onClick={() =>
             callNext.mutate(nextWaiting.id, {
               onSuccess: () => vibrate(),
-              onError: onStale(onToast),
+              onError: onStale(onToast, t),
             })
           }
         >
           {fromPhoto(nextWaiting)
-            ? `Start #${nextWaiting.number} ${nextWaiting.name} (from photo)`
-            : `Call #${nextWaiting.number} ${nextWaiting.name}`}
+            ? t("ill.now.startFromPhoto", { n: nextWaiting.number, name: nextWaiting.name })
+            : t("ill.now.call", { n: nextWaiting.number, name: nextWaiting.name })}
         </CapsuleButton>
-        {fromPhoto(nextWaiting) ? null : (<button
-          type="button"
-          onClick={() =>
-            start.mutate(nextWaiting.id, {
-              onSuccess: () => vibrate(),
-              onError: onStale(onToast),
-            })
-          }
-          disabled={start.isPending}
-          className="mt-4 h-11 w-full cursor-pointer bg-transparent px-4 py-2 text-center text-[15px] font-medium text-link disabled:cursor-default disabled:opacity-50"
-        >
-          Start directly
-        </button>)}
+        {fromPhoto(nextWaiting) ? null : (
+          <button
+            type="button"
+            onClick={() =>
+              start.mutate(nextWaiting.id, {
+                onSuccess: () => vibrate(),
+                onError: onStale(onToast, t),
+              })
+            }
+            disabled={start.isPending}
+            className="mt-4 h-11 w-full cursor-pointer bg-transparent px-4 py-2 text-center text-[15px] font-medium text-link disabled:cursor-default disabled:opacity-50"
+          >
+            {t("ill.now.startDirectly")}
+          </button>
+        )}
       </Card>
     );
   }
@@ -146,16 +177,22 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
         <Card>
           <TicketNumber number={current.number} size="lg" />
           <span className="text-[22px] font-semibold">{current.name}</span>
-          {current.notes ? <span className="text-[15px] text-label-2">&ldquo;{current.notes}&rdquo;</span> : null}
+          {current.notes ? (
+            <span className="text-[15px] text-label-2">&ldquo;{current.notes}&rdquo;</span>
+          ) : null}
           {current.calledAt ? (
-            <span className="text-[13px] text-label-2">{calledAgoLabel(current.calledAt, current.callCount)}</span>
+            <span className="text-[13px] text-label-2">
+              {calledAgoLabel(current.calledAt, current.callCount, t)}
+            </span>
           ) : null}
           <CapsuleButton
             className="mt-2 w-full"
             pending={start.isPending}
-            onClick={() => start.mutate(current.id, { onSuccess: () => vibrate(), onError: onStale(onToast) })}
+            onClick={() =>
+              start.mutate(current.id, { onSuccess: () => vibrate(), onError: onStale(onToast, t) })
+            }
           >
-            Start Drawing
+            {t("ill.now.startDrawing")}
           </CapsuleButton>
           <div className="mt-3 flex w-full gap-3">
             <CapsuleButton
@@ -167,16 +204,21 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
                 recall.mutate(current.id, {
                   onSuccess: () => {
                     vibrate();
-                    onToast("Customer re-alerted");
+                    onToast(t("ill.now.recalled"));
                   },
-                  onError: onStale(onToast),
+                  onError: onStale(onToast, t),
                 })
               }
             >
-              Recall
+              {t("ill.now.recall")}
             </CapsuleButton>
-            <CapsuleButton className="flex-1" variant="secondary" size="md" onClick={() => setNotHere(true)}>
-              Not Here
+            <CapsuleButton
+              className="flex-1"
+              variant="secondary"
+              size="md"
+              onClick={() => setNotHere(true)}
+            >
+              {t("ill.now.notHere")}
             </CapsuleButton>
           </div>
         </Card>
@@ -189,9 +231,9 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
                 {
                   onSuccess: () => {
                     vibrate();
-                    onToast("Back in the queue");
+                    onToast(t("ill.now.backInQueue"));
                   },
-                  onError: onStale(onToast),
+                  onError: onStale(onToast, t),
                 },
               );
             }}
@@ -199,7 +241,7 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
               setNotHere(false);
               noShow.mutate(current.id, {
                 onSuccess: () => vibrate(),
-                onError: onStale(onToast),
+                onError: onStale(onToast, t),
               });
             }}
             onCancel={() => setNotHere(false)}
@@ -214,7 +256,8 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
     return (
       <Card>
         <span className="flex items-center gap-1.5 shape-sq bg-status-blue-bg px-2.5 py-1 text-[13px] font-semibold text-status-blue-fg">
-          <Camera className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" /> Drawing from photo
+          <Camera className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />{" "}
+          {t("ill.now.drawingFromPhoto")}
         </span>
         <span className="mt-1 flex items-center gap-2 text-[22px] font-semibold">
           <TicketNumber number={current.number} size="md" /> {current.name}
@@ -222,35 +265,44 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
         {current.hasPhoto ? (
           <PhotoThumb
             src={ticketPhotoUrl(current.id, photoVersion)}
-            alt={`Photo of ${current.name}`}
+            alt={t("ill.photoAlt", { name: current.name })}
             className="max-h-[52dvh] w-full shape-tile object-contain"
           />
         ) : null}
-        {current.notes ? <span className="text-[15px] text-label-2">&ldquo;{current.notes}&rdquo;</span> : null}
+        {current.notes ? (
+          <span className="text-[15px] text-label-2">&ldquo;{current.notes}&rdquo;</span>
+        ) : null}
         <span className="text-[13px] text-label-2">
-          Drawing for <ElapsedTimer since={current.startedAt ?? current.createdAt} />
+          {t("ill.now.drawingFor")}
+          <ElapsedTimer since={current.startedAt ?? current.createdAt} />
         </span>
         <CapsuleButton
           className="mt-2 w-full"
           pending={finish.isPending}
           onClick={() =>
-            finish.mutate({ id: current.id, callNext: true }, { onSuccess: () => vibrate(), onError: onStale(onToast) })
+            finish.mutate(
+              { id: current.id, callNext: true },
+              { onSuccess: () => vibrate(), onError: onStale(onToast, t) },
+            )
           }
         >
-          Finish &amp; Start Next
+          {t("ill.now.finishStartNext")}
         </CapsuleButton>
         <CapsuleButton
           className="w-full"
           variant="secondary"
           pending={finish.isPending}
           onClick={() =>
-            finish.mutate({ id: current.id, callNext: false }, { onSuccess: () => vibrate(), onError: onStale(onToast) })
+            finish.mutate(
+              { id: current.id, callNext: false },
+              { onSuccess: () => vibrate(), onError: onStale(onToast, t) },
+            )
           }
         >
-          Finish
+          {t("ill.now.finish")}
         </CapsuleButton>
         <span className="text-[13px] text-label-2">
-          Finishing tells {current.name} their portrait is ready for pickup.
+          {t("ill.now.finishTells", { name: current.name })}
         </span>
       </Card>
     );
@@ -259,14 +311,16 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
   // SERVING
   return (
     <Card>
-      <span className="text-[15px] text-label-2">Drawing for</span>
+      <span className="text-[15px] text-label-2">{t("ill.now.drawingForLabel")}</span>
       <span className="text-[22px] font-semibold">{current.name}</span>
       <SessionTimer
         since={current.startedAt ?? current.createdAt}
         avgSessionSec={avgSessionSec}
         className="text-[72px] leading-none"
       />
-      <span className="text-[13px] text-label-2">Usually takes {Math.round(avgSessionSec / 60)} min</span>
+      <span className="text-[13px] text-label-2">
+        {t("ill.now.usually", { n: Math.round(avgSessionSec / 60) })}
+      </span>
       <CapsuleButton
         className="mt-2 w-full"
         pending={finish.isPending}
@@ -275,12 +329,12 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
             { id: current.id, callNext: true },
             {
               onSuccess: () => vibrate(),
-              onError: onStale(onToast),
+              onError: onStale(onToast, t),
             },
           )
         }
       >
-        Finish &amp; Call Next
+        {t("ill.now.finishCallNext")}
       </CapsuleButton>
       <CapsuleButton
         className="w-full"
@@ -291,12 +345,12 @@ export function IllustratorNowCard({ day, current, nextWaiting, avgSessionSec, o
             { id: current.id, callNext: false },
             {
               onSuccess: () => vibrate(),
-              onError: onStale(onToast),
+              onError: onStale(onToast, t),
             },
           )
         }
       >
-        Finish
+        {t("ill.now.finish")}
       </CapsuleButton>
     </Card>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useT } from "../../lib/i18n";
 
 export function useOnlineStatus(): boolean {
   const [online, setOnline] = useState(() => (typeof navigator === "undefined" ? true : navigator.onLine));
@@ -25,6 +26,7 @@ type OfflineBannerProps = {
 
 // "Offline — showing info from 14:32" (docs/UI.md → Design principles).
 export function OfflineBanner({ lastUpdated }: OfflineBannerProps) {
+  const t = useT();
   const online = useOnlineStatus();
   if (online) return null;
 
@@ -37,7 +39,7 @@ export function OfflineBanner({ lastUpdated }: OfflineBannerProps) {
       role="status"
       className="flex h-9 items-center justify-center bg-status-orange-bg px-4 text-[13px] font-medium text-status-orange-fg"
     >
-      {time ? `Offline — showing info from ${time}` : "Offline"}
+      {time ? t("ui.offline.since", { time }) : t("ui.offline")}
     </div>
   );
 }

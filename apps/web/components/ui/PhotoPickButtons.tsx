@@ -2,6 +2,7 @@
 
 import { Camera, ImageIcon } from "lucide-react";
 import { useRef } from "react";
+import { useT } from "../../lib/i18n";
 import { GroupedSeparator } from "./GroupedList";
 
 type PhotoPickButtonsProps = {
@@ -15,9 +16,10 @@ type PhotoPickButtonsProps = {
 export function PhotoPickButtons({
   onFile,
   disabled,
-  takeLabel = "Take Photo",
-  chooseLabel = "Choose from Library",
+  takeLabel,
+  chooseLabel,
 }: PhotoPickButtonsProps) {
+  const t = useT();
   const cameraRef = useRef<HTMLInputElement>(null);
   const libraryRef = useRef<HTMLInputElement>(null);
 
@@ -36,12 +38,12 @@ export function PhotoPickButtons({
       <input ref={libraryRef} type="file" accept="image/*" className="hidden" onChange={handleChange} />
       <button type="button" disabled={disabled} onClick={() => cameraRef.current?.click()} className={rowClass}>
         <Camera className="h-5 w-5" strokeWidth={2} aria-hidden="true" />
-        {takeLabel}
+        {takeLabel ?? t("ui.photo.take")}
       </button>
       <GroupedSeparator inset={48} />
       <button type="button" disabled={disabled} onClick={() => libraryRef.current?.click()} className={rowClass}>
         <ImageIcon className="h-5 w-5" strokeWidth={2} aria-hidden="true" />
-        {chooseLabel}
+        {chooseLabel ?? t("ui.photo.choose")}
       </button>
     </>
   );

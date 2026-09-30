@@ -1,5 +1,6 @@
 import type { TicketStatus } from "@boothq/shared";
 import type { ReactNode } from "react";
+import { useT } from "../../lib/i18n";
 import clsx from "clsx";
 
 const STATUS_CLASSES: Record<TicketStatus, string> = {
@@ -12,16 +13,6 @@ const STATUS_CLASSES: Record<TicketStatus, string> = {
   DONE: "bg-status-green-bg text-status-green-fg",
 };
 
-const STATUS_LABELS: Record<TicketStatus, string> = {
-  WAITING: "Waiting",
-  CALLED: "Called",
-  SERVING: "Drawing",
-  READY: "Ready",
-  DONE: "Done",
-  NO_SHOW: "No-show",
-  CANCELLED: "Cancelled",
-};
-
 type StatusChipProps = {
   status: TicketStatus;
   children?: ReactNode;
@@ -29,6 +20,7 @@ type StatusChipProps = {
 };
 
 export function StatusChip({ status, children, className }: StatusChipProps) {
+  const t = useT();
   return (
     <span
       className={clsx(
@@ -37,7 +29,7 @@ export function StatusChip({ status, children, className }: StatusChipProps) {
         className,
       )}
     >
-      {children ?? STATUS_LABELS[status]}
+      {children ?? t(`ui.status.${status}`)}
     </span>
   );
 }

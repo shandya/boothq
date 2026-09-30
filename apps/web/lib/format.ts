@@ -6,7 +6,7 @@ export function formatClockTime(iso: string | Date): string {
 }
 
 // e.g. "12 Sep"
-export function formatShortDate(iso: string | Date): string {
+export function formatShortDate(iso: string | Date, locale?: string): string {
   const date = typeof iso === "string" ? new Date(iso) : iso;
-  return date.toLocaleDateString([], { day: "numeric", month: "short" });
+  return date.toLocaleDateString(locale ?? [], { day: "numeric", month: "short" });
 }

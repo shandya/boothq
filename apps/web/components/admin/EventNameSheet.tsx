@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ApiError } from "../../lib/api";
+import { useT } from "../../lib/i18n";
+import { errorText } from "../../lib/i18n/errors";
 import { useRenameEvent, useStartEvent } from "../../lib/queries";
 import { CapsuleButton } from "../ui/CapsuleButton";
 import { ConfirmSheet } from "../ui/ConfirmSheet";
@@ -19,6 +20,7 @@ type EventNameSheetProps = {
 const NAME_MAX = 60;
 
 export function EventNameSheet({ mode, currentName, onClose, onDone }: EventNameSheetProps) {
+  const t = useT();
   const [name, setName] = useState(mode === "rename" ? (currentName ?? "") : "");
   const [error, setError] = useState<string | null>(null);
   const [confirmEnd, setConfirmEnd] = useState(false);
@@ -32,16 +34,22 @@ export function EventNameSheet({ mode, currentName, onClose, onDone }: EventName
 
   function fail(err: unknown) {
     setConfirmEnd(false);
-    setError(err instanceof ApiError ? err.message : "Something went wrong.");
+    setError(errorText(err, t));
   }
 
   function submit() {
     setError(null);
     if (mode === "rename") {
-      rename.mutate({ name: trimmed }, { onSuccess: () => onDone("Event renamed"), onError: fail });
+      rename.mutate(
+        { name: trimmed },
+        { onSuccess: () => onDone(t("admin.event.renamed")), onError: fail },
+      );
       return;
     }
-    start.mutate({ name: trimmed }, { onSuccess: () => onDone("Event started"), onError: fail });
+    start.mutate(
+      { name: trimmed },
+      { onSuccess: () => onDone(t("admin.event.started")), onError: fail },
+    );
   }
 
   // Starting over an ACTIVE event ends it, so it asks first.
@@ -55,11 +63,15 @@ export function EventNameSheet({ mode, currentName, onClose, onDone }: EventName
 
   return (
     <>
-      <Sheet title={mode === "start" ? "Start Event" : "Rename Event"} onClose={onClose}>
+      <Sheet
+        title={mode === "start" ? t("admin.event.startTitle") : t("admin.event.renameTitle")}
+        onClose={onClose}
+      >
         <GroupedList>
           <div className="flex h-[52px] items-center gap-3 px-4">
             <label htmlFor="ev-name" className="w-16 text-[17px]">
-              Name
+              {" "}
+              {t("common.name")}{" "}
             </label>
             <input
               id="ev-name"
@@ -67,7 +79,7 @@ export function EventNameSheet({ mode, currentName, onClose, onDone }: EventName
               autoFocus
               autoCapitalize="words"
               maxLength={NAME_MAX}
-              placeholder="Comic Con Jakarta 2026"
+              placeholder={t("admin.event.placeholder")}
               value={name}
               onChange={(event) => setName(event.target.value)}
               onKeyDown={(event) => {
@@ -80,23 +92,23 @@ export function EventNameSheet({ mode, currentName, onClose, onDone }: EventName
 
         {mode === "start" ? (
           <p className="m-0 px-4 text-[13px] text-label-2">
-            Wait-time estimates will start fresh for this event.
-            {currentName ? ` This ends ${currentName}.` : ""}
+            {t("admin.event.fresh")}
+            {currentName ? t("admin.event.thisEnds", { name: currentName }) : ""}
           </p>
         ) : null}
 
         {error ? <p className="m-0 px-1 text-[15px] text-danger">{error}</p> : null}
 
         <CapsuleButton onClick={handlePrimary} disabled={!canSubmit} pending={pending}>
-          {mode === "start" ? "Start Event" : "Save"}
+          {mode === "start" ? t("admin.event.startTitle") : t("common.save")}
         </CapsuleButton>
       </Sheet>
 
       {confirmEnd ? (
         <ConfirmSheet
-          title={`End ${currentName} and start ${trimmed}?`}
-          description="Wait-time estimates will start fresh."
-          confirmLabel="Start Event"
+          title={t("admin.event.confirmTitle", { current: currentName ?? "", next: trimmed })}
+          description={t("admin.event.confirmDesc")}
+          confirmLabel={t("admin.event.startTitle")}
           pending={pending}
           onCancel={() => setConfirmEnd(false)}
           onConfirm={submit}

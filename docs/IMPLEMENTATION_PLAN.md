@@ -144,7 +144,7 @@ Docs: `UI.md` (customer), `PRD.md` C1–C8
 - [x] Empty, loading, error states on every screen
 - [x] Contrast check in both schemes, font scaling check, Reduce Transparency / Increase Contrast check
 - [x] Favicon and `manifest.json` (`name`/`short_name`: "BoothQ", the app's own name) so staff can "Add to Home Screen"; browser tab `<title>` combines both, e.g. "BoothQ · {NEXT_PUBLIC_BOOTH_NAME}"
-- [ ] Deploy per `ARCHITECTURE.md` → Deployment checklist — **needs a human**: requires a Vercel/Neon account, see README.md → Deploying for the exact steps
+- [x] Deploy per `ARCHITECTURE.md` → Deployment checklist (deployed on Vercel + Neon)
 - [x] README: local setup, env vars, deploy steps, how to change PINs
 
 **Acceptance: real-phone rehearsal**
@@ -161,7 +161,7 @@ Docs: `UI.md` (customer), `PRD.md` C1–C8
 - [x] Undo (`POST /api/queue/undo` from ActionLog + toast)
 - [ ] `/display` screen
 - [ ] Customer alerts (sound/vibration opt-in)
-- [ ] Bilingual customer page (simple dictionary, language toggle, remembers choice in localStorage)
+- [x] Bilingual site: English + Bahasa Indonesia across customer, illustrator, admin and login (dictionary in `apps/web/lib/i18n`, EN/ID toggle, choice remembered per device and per role area in localStorage)
 - [x] Day history + CSV export
 - [ ] Phone retention clean-up (script + scheduled job, e.g. Vercel Cron, nulls `phone` 30 days after `closedAt`)
 - [ ] Playwright e2e happy path on a mobile viewport

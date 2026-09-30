@@ -146,7 +146,7 @@ Polls `GET /api/public/tickets/:token` every 10 s.
 
 **Tab title**: `#12 · 5 ahead`, `#12 · Head back now`, `#12 · Your turn!`, etc.
 
-**P1**: "Turn on alerts" button that unlocks an audio chime and (Android) vibration for the CALLED transition. Language toggle.
+**P1**: "Turn on alerts" button that unlocks an audio chime and (Android) vibration for the CALLED transition.
 
 ---
 
@@ -252,3 +252,14 @@ Admins see an extra "Admin" link in the header.
 ## Display (P1): `/display`
 
 Landscape, full-screen, no auth. Polls `GET /api/public/now-serving` every 5 s. Huge "Now serving #9", smaller "Next: 10 · 11 · 12", break banner, booth name. Shows no names.
+
+## Language
+
+The whole site is available in **English** and **Bahasa Indonesia** (customer page, illustrator console, admin, login).
+
+- **Toggle**: an `EN | ID` control. Customer: top right of the ticket page. Login and landing page: in the header / below the link. Illustrator and Admin: at the top of the ⋯ menu; Admin also has it in Settings.
+- **Remembered per device and per part of the site.** The choice is stored in `localStorage` under `boothq.lang.<scope>` where scope is `customer` (`/t/*`), `illustrator`, `admin`, or `guest` (login and landing). A customer, an illustrator and an admin therefore each keep their own language, even on the same phone.
+- **First visit** follows the phone's language (`id*` → Bahasa Indonesia, otherwise English). The server always renders English first, so an Indonesian reader may see English for a split second before the page switches.
+- **Where the text lives**: `apps/web/lib/i18n/en.ts` is the source of truth; `id.ts` must define every key (the type checker enforces it). Use `useT()` and `t("key", { param })`. Durations and wait estimates go through `useFormat()` (`lib/i18n/format.ts`), not the English-only `@boothq/shared/format`. Server error messages are shown through `errorText()` (`lib/i18n/errors.ts`), which maps error codes to dictionary entries.
+- **WhatsApp "it's ready" message** is sent in the admin's chosen language (`messages.readyForPickup(vars, lang)` in `packages/shared`).
+- **Not translated**: ticket names, notes and the booth's own name (`NEXT_PUBLIC_BOOTH_NAME`), the PWA manifest, and the CSV export headers.

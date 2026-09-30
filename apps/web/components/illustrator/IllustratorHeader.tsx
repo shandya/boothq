@@ -1,12 +1,13 @@
 import type { DayDTO, StatsDTO } from "@boothq/shared";
 import { Lock, LockOpen, MoreHorizontal } from "lucide-react";
 import { formatClockTime } from "../../lib/format";
+import { type TFunction, useT } from "../../lib/i18n";
 import { GlassIconButton } from "../ui/GlassIconButton";
 
-function statusDotAndLabel(day: DayDTO): { dot: string; label: string } {
-  if (day.paused) return { dot: "bg-status-orange-fg", label: "On Break" };
-  if (!day.acceptingTickets) return { dot: "bg-label-2", label: "Not Accepting" };
-  return { dot: "bg-switch-on", label: "Open" };
+function statusDotAndLabel(day: DayDTO, t: TFunction): { dot: string; label: string } {
+  if (day.paused) return { dot: "bg-status-orange-fg", label: t("ill.status.onBreak") };
+  if (!day.acceptingTickets) return { dot: "bg-label-2", label: t("ill.status.notAccepting") };
+  return { dot: "bg-switch-on", label: t("ill.status.open") };
 }
 
 type IllustratorHeaderProps = {
@@ -19,8 +20,15 @@ type IllustratorHeaderProps = {
 
 // Compact status strip for one-handed use between drawings
 // (docs/UI.md → Illustrator: /illustrator).
-export function IllustratorHeader({ day, stats, wakeLockActive, onRequestWakeLock, onMenu }: IllustratorHeaderProps) {
-  const status = statusDotAndLabel(day);
+export function IllustratorHeader({
+  day,
+  stats,
+  wakeLockActive,
+  onRequestWakeLock,
+  onMenu,
+}: IllustratorHeaderProps) {
+  const t = useT();
+  const status = statusDotAndLabel(day, t);
   const avgMin = Math.round(stats.avgSessionSec / 60);
   const doneBy = stats.projectedFinishAt ? formatClockTime(stats.projectedFinishAt) : "—";
 
@@ -28,14 +36,17 @@ export function IllustratorHeader({ day, stats, wakeLockActive, onRequestWakeLoc
     <header className="flex items-start justify-between gap-2 px-1 pt-1">
       <div className="flex min-w-0 flex-col gap-0.5">
         <span className="flex items-center gap-1.5 text-[17px] font-semibold">
-          <span className={`h-[9px] w-[9px] shrink-0 rounded-[3px] ${status.dot}`} aria-hidden="true" />
+          <span
+            className={`h-[9px] w-[9px] shrink-0 rounded-[3px] ${status.dot}`}
+            aria-hidden="true"
+          />
           {status.label}
           <span className="truncate font-normal text-label-2">
-            · Served {stats.servedCount} · Avg {avgMin}m
+            {t("ill.header.stats", { served: stats.servedCount, avg: avgMin })}
           </span>
         </span>
         <span className="truncate text-[13px] text-label-2">
-          {stats.waitingCount} waiting · Done by ~{doneBy}
+          {t("ill.header.waitingDone", { n: stats.waitingCount, time: doneBy })}
         </span>
         <button
           type="button"
@@ -48,13 +59,13 @@ export function IllustratorHeader({ day, stats, wakeLockActive, onRequestWakeLoc
           ) : (
             <LockOpen className="h-3 w-3" strokeWidth={2} aria-hidden="true" />
           )}
-          {wakeLockActive ? "Screen stays on" : "Tap to keep screen on"}
+          {wakeLockActive ? t("ill.header.screenOn") : t("ill.header.keepOn")}
         </button>
       </div>
       <GlassIconButton
         icon={<MoreHorizontal className="h-[22px] w-[22px]" strokeWidth={2} aria-hidden="true" />}
         onClick={onMenu}
-        aria-label="More"
+        aria-label={t("common.more")}
       />
     </header>
   );
