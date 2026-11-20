@@ -40,6 +40,7 @@ script creates a "Sample event" for you.
 
 ```bash
 pnpm test                            # all workspaces
+pnpm --filter web e2e                   # Playwright happy path (needs Postgres + apps/api/.env.test)
 pnpm lint
 pnpm typecheck
 pnpm build

@@ -26,3 +26,7 @@ apps/api/prisma/dev.db
 .turbo/
 .vercel/
 .claude/trash/
+
+# Playwright
+test-results/
+playwright-report/

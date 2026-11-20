@@ -146,7 +146,7 @@ On serverless the default memory store is per instance, so limits are best-effor
 **dev**: typescript, tsx, vitest, supertest, eslint, prettier, concurrently.
 
 Version pins that diverge from "latest" on purpose: `typescript` is pinned to the 5.x line (`typescript-eslint` doesn't yet support TypeScript 7's new CLI). `prisma`/`@prisma/client` are pinned to the 6.x line — Prisma 7+ removed `datasource.url`/`directUrl` from `schema.prisma` in favor of a `prisma.config.ts`, which would break the schema and `prisma migrate dev` workflow documented in `DATA_MODEL.md`. Revisit both pins periodically.
-**e2e (P1)**: @playwright/test.
+**e2e (P1)**: @playwright/test (in `apps/web`, specs in `apps/web/e2e`). `pnpm --filter web e2e` starts the API (port 4100) and web (port 3100) on their own ports against the test database from `apps/api/.env.test`, resets it, and drives the happy path on an iPhone SE (375px) viewport with three browser contexts (Admin, Illustrator, customer). It is not part of `pnpm test`.
 
 ## Internationalization
 
