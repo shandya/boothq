@@ -1,12 +1,13 @@
 "use client";
 
-import { Camera, Copy, MapPin } from "lucide-react";
+import { Bell, BellOff, Camera, Copy, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ApiError } from "../../lib/api";
 import { formatClockTime } from "../../lib/format";
 import { type TFunction, useT } from "../../lib/i18n";
 import { useFormat } from "../../lib/i18n/format";
 import { useCancelTicket, usePublicTicket } from "../../lib/queries";
+import { useCustomerAlerts } from "../../lib/useCustomerAlerts";
 import { getServerNow } from "../../lib/server-time";
 import { ConfirmSheet } from "../ui/ConfirmSheet";
 import { LanguageSwitch } from "../ui/LanguageSwitch";
@@ -63,6 +64,7 @@ export function CustomerScreen({ token }: { token: string }) {
   const { message: toast, showToast } = useToast();
 
   const view = query.data;
+  const alerts = useCustomerAlerts(view);
 
   useEffect(() => {
     if (!view) return;
@@ -361,6 +363,30 @@ export function CustomerScreen({ token }: { token: string }) {
             <Copy className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
             {t("cust.copyLink")}
           </button>
+          {!fromPhoto ? (
+            <div className="flex flex-col items-center gap-1">
+              <button
+                type="button"
+                onClick={alerts.toggle}
+                aria-pressed={alerts.enabled}
+                className="flex h-11 cursor-pointer items-center gap-2 shape-sq bg-fill px-5 text-[15px] font-semibold text-link"
+              >
+                {alerts.enabled ? (
+                  <BellOff className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+                ) : (
+                  <Bell className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+                )}
+                {alerts.enabled ? t("cust.alerts.off") : t("cust.alerts.on")}
+              </button>
+              <span className="text-center text-[13px] text-label-2">
+                {alerts.enabled
+                  ? t("cust.alerts.enabledHint")
+                  : alerts.vibrationSupported
+                    ? t("cust.alerts.hint")
+                    : t("cust.alerts.hintNoVibrate")}
+              </span>
+            </div>
+          ) : null}
           <UpdatedAgo at={query.dataUpdatedAt} />
           <button
             type="button"

@@ -160,7 +160,7 @@ Docs: `UI.md` (customer), `PRD.md` C1–C8
 
 - [x] Undo (`POST /api/queue/undo` from ActionLog + toast)
 - [x] `/display` screen
-- [ ] Customer alerts (sound/vibration opt-in)
+- [x] Customer alerts (sound/vibration opt-in)
 - [x] Bilingual site: English + Bahasa Indonesia across customer, illustrator, admin and login (dictionary in `apps/web/lib/i18n`, EN/ID toggle, choice remembered per device and per role area in localStorage)
 - [x] Day history + CSV export
 - [x] Phone retention clean-up (`purgeExpiredPhones`, `pnpm --filter api purge-phones`, and a daily Vercel Cron on `GET /api/cron/retention` guarded by `CRON_SECRET`; nulls `phone` 30 days after `closedAt`)

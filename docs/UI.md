@@ -146,7 +146,7 @@ Polls `GET /api/public/tickets/:token` every 10 s.
 
 **Tab title**: `#12 · 5 ahead`, `#12 · Head back now`, `#12 · Your turn!`, etc.
 
-**P1**: "Turn on alerts" button that unlocks an audio chime and (Android) vibration for the CALLED transition.
+**Alerts (P1, PRD C9)**: a "Turn on alerts" button under Copy link (hidden for photo tickets and once the ticket is finished). The tap unlocks audio and plays a test chime. While on, the page plays a two-note chime and vibrates when the heads-up banner first appears (`almostUp` goes false → true) and a three-note chime and longer vibration when the customer is called, including each recall (`calledAt` changes). It never alerts for what was already showing when the page loaded. The chime is synthesized with Web Audio (no audio file). The choice is stored per device in `localStorage` (`boothq.alerts`); after a reload the first tap anywhere re-unlocks audio. Vibration isn't supported on iPhone, so the hint text there mentions sound only. Alerts only work while the page is open.
 
 ---
 
