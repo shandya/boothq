@@ -2,6 +2,7 @@ import {
   averageValidSessionSec,
   computeEta,
   type DayDTO,
+  type NowServingView,
   type PublicTicketView,
   type QueueSnapshot,
   type RecentHistory,
@@ -258,15 +259,6 @@ export async function buildQueueSnapshot(now: Date = new Date()): Promise<QueueS
     undo: await currentUndo(day.id, now),
   };
 }
-
-export type NowServingView = {
-  serverTime: string;
-  boothOpen: boolean;
-  paused: boolean;
-  nowServing: number | null;
-  next: number[]; // up to 3
-  waitingCount: number;
-};
 
 export async function buildNowServingView(now: Date = new Date()): Promise<NowServingView> {
   const day = await prisma.day.findFirst({ where: { status: "OPEN" } });

@@ -129,3 +129,13 @@ export type PublicTicketView = {
   avgSessionSec: number;
   pause: { active: boolean; until: string | null; reason: string | null };
 };
+
+// Public booth display (`/display`): numbers only, no names.
+export type NowServingView = {
+  serverTime: string;
+  boothOpen: boolean;
+  paused: boolean;
+  nowServing: number | null;
+  next: number[]; // up to 3
+  waitingCount: number;
+};

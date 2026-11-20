@@ -5,6 +5,7 @@ import type {
   EventSummaryDTO,
   FinishTicketInput,
   LoginInput,
+  NowServingView,
   OpenDayInput,
   PatchDayInput,
   PauseDayInput,
@@ -126,4 +127,5 @@ export const endEvent = () => post<{ summary: EventSummaryDTO; snapshot: QueueSn
 
 // Public
 export const getPublicTicket = (token: string) => get<PublicTicketView>(`/public/tickets/${encodeURIComponent(token)}`);
+export const getNowServing = () => get<NowServingView>("/public/now-serving");
 export const cancelPublicTicket = (token: string) => post<PublicTicketView>(`/public/tickets/${encodeURIComponent(token)}/cancel`);

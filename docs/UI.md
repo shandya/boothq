@@ -251,7 +251,7 @@ Admins see an extra "Admin" link in the header.
 
 ## Display (P1): `/display`
 
-Landscape, full-screen, no auth. Polls `GET /api/public/now-serving` every 5 s. Huge "Now serving #9", smaller "Next: 10 · 11 · 12", break banner, booth name. Shows no names.
+Landscape, full-screen, no auth. Polls `GET /api/public/now-serving` every 5 s. Huge "Now serving #9", smaller "Next: 10 · 11 · 12", break banner, booth name. Shows no names. Booth open/closed: a closed booth shows "The booth is closed". A "Waiting for the next customer" line replaces the number when nobody is current; "N people waiting" sits under the next numbers. Keeps polling while unfocused and shows "Reconnecting…" if offline. Has the EN | ID toggle top right; the language is stored under the `guest` scope.
 
 ## Language
 
