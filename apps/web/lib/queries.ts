@@ -38,6 +38,15 @@ export function usePublicTicket(token: string) {
   });
 }
 
+export function useNowServing() {
+  return useQuery({
+    queryKey: ["now-serving"],
+    queryFn: () => api.getNowServing(),
+    refetchInterval: 5_000,
+    refetchIntervalInBackground: true, // a wall display must keep updating even when unfocused
+  });
+}
+
 export function useCancelTicket(token: string) {
   const queryClient = useQueryClient();
   return useMutation({

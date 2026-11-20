@@ -159,7 +159,7 @@ Docs: `UI.md` (customer), `PRD.md` C1–C8
 ## Phase 7 — P1 features
 
 - [x] Undo (`POST /api/queue/undo` from ActionLog + toast)
-- [ ] `/display` screen
+- [x] `/display` screen
 - [ ] Customer alerts (sound/vibration opt-in)
 - [x] Bilingual site: English + Bahasa Indonesia across customer, illustrator, admin and login (dictionary in `apps/web/lib/i18n`, EN/ID toggle, choice remembered per device and per role area in localStorage)
 - [x] Day history + CSV export
