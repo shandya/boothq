@@ -164,7 +164,7 @@ Docs: `UI.md` (customer), `PRD.md` C1–C8
 - [x] Bilingual site: English + Bahasa Indonesia across customer, illustrator, admin and login (dictionary in `apps/web/lib/i18n`, EN/ID toggle, choice remembered per device and per role area in localStorage)
 - [x] Day history + CSV export
 - [x] Phone retention clean-up (`purgeExpiredPhones`, `pnpm --filter api purge-phones`, and a daily Vercel Cron on `GET /api/cron/retention` guarded by `CRON_SECRET`; nulls `phone` 30 days after `closedAt`)
-- [ ] Playwright e2e happy path on a mobile viewport
+- [x] Playwright e2e happy path on a mobile viewport
 
 ---
 

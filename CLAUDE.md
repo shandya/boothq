@@ -53,6 +53,7 @@ pnpm --filter api db:migrate         # prisma migrate dev
 pnpm --filter api db:seed            # sample day + tickets
 pnpm --filter api hash-pin 123456    # prints a bcrypt hash for .env
 pnpm test                            # all workspaces
+pnpm --filter web e2e                   # Playwright happy path (needs Postgres + apps/api/.env.test)
 pnpm lint && pnpm typecheck
 ```
 
